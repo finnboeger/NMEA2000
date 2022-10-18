@@ -1,0 +1,38 @@
+[project]
+name = "n2k"
+version = "0.1.0"
+description = "Library to communicate with NMEA2000 devices."
+authors = [
+    {name = "Finn Böger", email="finnboeger@googlemail.com"},
+]
+license = {file = "LICENSE.txt"}
+readme = "README.md"
+requires-python = ">=3.7"
+
+keywords = ["NMEA2000", "CAN"]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License"
+]
+
+dependencies = [
+    "python-can"
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=18.3-alpha.0",
+]
+
+[project.urls]
+homepage = "https://github.com/finnboeger/NMEA2000"
+documentation = "https://github.com/finnboeger/NMEA2000"
+repository = "https://github.com/finnboeger/NMEA2000"
+
+[build-system]
+requires = [
+    "setuptools >= 35.0.2",
+    "setuptools_scm >= 2.0.0, <3"
+]
+build-backend = "setuptools.build_meta"
