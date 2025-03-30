@@ -1,5 +1,6 @@
 python-can
 uptime
+setuptools
 
 sphinx
 sphinx-autodoc-typehints
