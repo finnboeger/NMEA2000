@@ -2567,10 +2567,11 @@ def set_n2k_ais_class_a_static_data(message_id: int, repeat: N2kAISRepeat, user_
         0-3; 0 = default; 3 = do not repeat anymore
     :param user_id: MMSI Number
     :param imo_number: Ship identification number by IMO. [1 .. 999999999]; 0: not available = default
-    :param callsign: Call Sign. 7 * 6bit ASCII characters
+    :param callsign: Call Sign. Max. 7 chars will be used. Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     :param name: Name of the vessel\n
         Maximum 20 * 6bit ASCII characters.\n
-        For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.
+        For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.\n
+        Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     :param vessel_type: Vessek Type.\n
         0: not available or no ship = default\n
         1-99: as defined in § 3.3.2\n
@@ -2584,7 +2585,8 @@ def set_n2k_ais_class_a_static_data(message_id: int, repeat: N2kAISRepeat, user_
     :param eta_date: Date part of Estimated Time at Arrival in Days since 1.1.1970 UTC
     :param eta_time: Time part of Estimated Time at Arrival in seconds since midnight
     :param draught: Maximum present static draught
-    :param destination: Destination. Maximum of 20 6bit ASCII Characters
+    :param destination: Destination. Maximum of 20 6bit ASCII Characters.\n
+        Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     :param ais_version: AIS Version, see type
     :param gnss_type: Type of GNSS, see type
     :param dte: Data terminal equipment (DTE) ready.\n
@@ -2599,8 +2601,8 @@ def set_n2k_ais_class_a_static_data(message_id: int, repeat: N2kAISRepeat, user_
     msg.add_byte_uint((repeat & 0x03) << 6 | (message_id & 0x3f))
     msg.add_4_byte_uint(user_id)
     msg.add_4_byte_uint(imo_number)
-    msg.add_str(callsign, 7)
-    msg.add_str(name, 20)
+    msg.add_ais_str(callsign, 7)
+    msg.add_ais_str(name, 20)
     msg.add_byte_uint(vessel_type)
     msg.add_2_byte_double(length, 0.1)
     msg.add_2_byte_double(beam, 0.1)
@@ -2609,7 +2611,7 @@ def set_n2k_ais_class_a_static_data(message_id: int, repeat: N2kAISRepeat, user_
     msg.add_2_byte_uint(eta_date)
     msg.add_4_byte_udouble(eta_time, 1e-4)
     msg.add_2_byte_double(draught, 0.01)
-    msg.add_str(destination, 20)
+    msg.add_ais_str(destination, 20)
     msg.add_byte_uint((dte & 0x01) << 6 | (gnss_type & 0x0f) << 2 | (ais_version & 0x03))
     msg.add_byte_uint(0xe0 | (ais_info & 0x1f))
     msg.add_byte_uint(0xff)
@@ -2696,8 +2698,9 @@ def set_n2k_ais_class_b_static_data_part_a(message_id: int, repeat: N2kAISRepeat
         0-3; 0 = default; 3 = do not repeat anymore
     :param user_id: MMSI Number
     :param name: Name of the vessel\n
-        Maximum 20 * 6bit ASCII characters.\n
-        For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.
+        Maximum 20 characters.\n
+        For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.\n
+        Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -2705,7 +2708,7 @@ def set_n2k_ais_class_b_static_data_part_a(message_id: int, repeat: N2kAISRepeat
     msg.priority = 6
     msg.add_byte_uint((repeat & 0x03) << 6 | (message_id & 0x3f))
     msg.add_4_byte_uint(user_id)
-    msg.add_str(name, 20)
+    msg.add_ais_str(name, 20)
 
     return msg
 
@@ -2748,8 +2751,9 @@ def set_n2k_ais_class_b_static_data_part_b(message_id: int, repeat: N2kAISRepeat
         100-199: reserved, for regional use\n
         200-255: reserved, for regional use\n
         Not applicable to SAR aircraft
-    :param vendor: Unique identification of the Unit by a number as defined by the manufacturer
-    :param callsign: Call Sign. 7 * 6bit ASCII characters
+    :param vendor: Unique identification of the Unit by a number as defined by the manufacturer.\n
+        Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
+    :param callsign: Call Sign.  Max. 7 chars will be used. Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     :param length: Length/Diameter in meters
     :param beam: Beam/Diameter in meters
     :param pos_ref_stbd: Position Reference Point from Starboard
@@ -2763,8 +2767,8 @@ def set_n2k_ais_class_b_static_data_part_b(message_id: int, repeat: N2kAISRepeat
     msg.add_byte_uint((repeat & 0x03) << 6 | (message_id & 0x3f))
     msg.add_4_byte_uint(user_id)
     msg.add_byte_uint(vessel_type)
-    msg.add_str(vendor, 7)
-    msg.add_str(callsign, 7)
+    msg.add_ais_str(vendor, 7)
+    msg.add_ais_str(callsign, 7)
     msg.add_2_byte_udouble(length, 0.1)
     msg.add_2_byte_udouble(beam, 0.1)
     msg.add_2_byte_udouble(pos_ref_stbd, 0.1)

@@ -185,6 +185,16 @@ class Message:
         self.add_byte_uint(1)
         self.add_str(v, len(v))
 
+    # make sure characters fall into range defined in table 14: 32-95 in ASCII
+    # https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1371-1-200108-S!!PDF-E.pdf (Page 42)
+    def add_ais_str(self, v: str, length: int) -> None:
+        encoded = v.upper().encode("ascii")[:length]
+        validated = [c if 32 <= c <= 95 else '?'.encode("ascii") for c in encoded]
+        for b in validated:
+            self.add_byte_uint(b)
+        for b in range(length - len(validated)):
+            self.add_byte_uint(b'@') # '@' is the AIS null character
+
     def add_buf(self, v: bytearray) -> None:
         v = bytearray[:self.get_available_data_length()]
         for b in v:
