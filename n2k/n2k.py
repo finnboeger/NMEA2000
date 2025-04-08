@@ -32,8 +32,11 @@ class PGN(IntEnum):
     Attitude = 127257  # prio: 3, period: 1000
     EngineParametersRapid = 127488  # prio: 2, period: 100, rapid update
     TransmissionParameters = 127493  # prio: 2, period: 100, dynamic
+    LoadControllerConnectionStateControl = 127500 # TODO: find prio and control
     BinaryStatusReport = 127501  # prio: 3, period: NA
+    SwitchBankControl = 127502 # TODO: find prio and period
     FluidLevel = 127505  # prio: 6, period: 2500
+    ConverterStatus = 127750  # prio: 6, period: 1500
     BatteryStatus = 127508  # prio: 6, period: 1500
     MagneticVariation = 127258  # prio: 6, period: NA
     Leeway = 128000  # prio: 4, period: NA
@@ -64,6 +67,10 @@ class PGN(IntEnum):
     ManOverBoard = 127233  # prio: 3, period: NA
     HeadingTrackControl = 127237  # prio: 2, period: 250
     EngineParametersDynamic = 127489  # prio: 2, period: 500
+    ElectricDriveStatusDynamic = 127490 # prio: 1, period: 1500
+    ElectricEnergyStorageStatusDynamic = 127491 # prio: 7, period: 1500
+    ElectricDriveInformation = 127494 # prio: 4, period: NA
+    ElectricEnergyStorageInformation = 127495 # prio: 6, period: NA
     TripFuelConsumptionVessel = 127496  # prio: 5, period: 1000
     TripFuelConsumptionEngine = 127497  # prio: 5, period: 1000
     EngineParametersStatic = 127498  # prio: 5, period: NA
@@ -79,6 +86,7 @@ class PGN(IntEnum):
     AGSStatus = 127514  # prio: 6, period: 1500
     DistanceLog = 128275  # prio: 6, period: 1000
     TrackedTargetData = 128520  # prio: 2, period: 1000
+    ElevatorCarStatus = 128538 # prio: 6, period: 100
     GNSSPositionData = 129029  # prio: 3, period: 1000
     AISClassAPositionReport = 129038  # prio: 4, period: NA
     AISClassBPositionReport = 129039  # prio: 4, period: NA
@@ -143,9 +151,28 @@ class PGN(IntEnum):
     CurrentStationData = 130322  # prio: 6, period: 1000
     MeteorologicalStationData = 130323  # prio: 6, period: 1000
     MooredBuoyStationData = 130324  # prio: 6, period: 1000
-    WatermakerInputSettingAndStatus = 130567  # prio: 6, period: 2500
-    DirectionDataPGN = 130577  # prio: 3, period: 1000
-    VesselSpeedComponents = 130578  # prio: 2, period: 250
+    LightingSystemSettings = 130330 # prio: 7, period: NA
+    LightingZone = 130561 # prio: 7, period: NA
+    LightingScene = 130562 # prio: 7, period: NA
+    LightingDevice = 130563 # prio: 7, period: NA
+    LightingDeviceEnumeration = 130564 # prio: 7, period: NA
+    LightingColorSequence = 130565 # prio: 7, period: NA
+    LightingProgram = 130566 # prio: 7, period: NA
+    WatermakerInputSettingAndStatus = 130567 # prio: 6, period: 2500
+    DirectionDataPGN = 130577 # prio: 3, period: 1000
+    VesselSpeedComponents = 130578 # prio: 2, period: 250
+    EntertainmentCurrentFileAndStatus = 130569 # prio: 6, period: 500
+    EntertainmentLibraryDataFile = 130570 # prio: 6, period: NA
+    EntertainmentLibraryDataGroup = 130571 # prio: 6, period: NA
+    EntertainmentLibraryDataSearch = 130572 # prio: 6, period: NA
+    EntertainmentSupportedSourceData = 130573 # prio: 6, period: NA
+    EntertainmentSupportedZoneData = 130574 # prio: 6, period: NA
+    EntertainmentSystemConfigurationStatus = 130580 # prio: 6, period: NA
+    EntertainmentZoneConfigurationStatusDEPRECATED = 130581 # prio: 6, period: NA
+    EntertainmentAvailableAudioEQPresets = 130583 # prio: 6, period: NA
+    EntertainmentBluetoothDevices = 130584 # prio: 6, period: NA
+    EntertainmentZoneConfigurationStatus = 130586 # prio: 6, period: NA
+
 
 
 DefaultTransmitMessages = [
@@ -182,9 +209,9 @@ def is_fast_packet_system_message(pgn: int) -> bool:
 
 
 def is_default_single_frame_message(pgn: int) -> bool:
-    return pgn in [PGN.SystemDateTime, PGN.Heartbeat, PGN.Rudder, PGN.VesselHeading, PGN.RateOfTurn, PGN.Attitude,
+    return pgn in [PGN.SystemDateTime, PGN.Heartbeat, PGN.Rudder, PGN.VesselHeading, PGN.RateOfTurn, PGN.Heave, PGN.Attitude,
                    PGN.EngineParametersRapid, PGN.TransmissionParameters, PGN.BinaryStatusReport, PGN.FluidLevel,
-                   PGN.BatteryStatus, PGN.BoatSpeed, PGN.WaterDepth, PGN.LatLonRapid, PGN.CogSogRapid,
+                   PGN.BatteryStatus, PGN.ConverterStatus, PGN.BoatSpeed, PGN.WaterDepth, PGN.LatLonRapid, PGN.CogSogRapid,
                    PGN.CrossTrackError, PGN.WindSpeed, PGN.OutsideEnvironmentalParameters, PGN.Temperature,
                    PGN.Humidity, PGN.Pressure, PGN.TemperatureExtendedRange, PGN.SmallCraftStatusTrimTabPosition]
 
@@ -196,10 +223,12 @@ def is_mandatory_fast_packet_message(pgn: int) -> bool:
 def is_default_fast_packet_message(pgn: int) -> bool:
     return pgn in [PGN.Alert, PGN.AlertResponse, PGN.AlertText, PGN.AlertConfiguration, PGN.AlertThreshold,
                    PGN.AlertValue, PGN.ManOverBoard, PGN.HeadingTrackControl, PGN.EngineParametersDynamic,
+                   PGN.ElectricDriveStatusDynamic, PGN.ElectricEnergyStorageStatusDynamic,
+                   PGN.ElectricDriveInformation, PGN.ElectricEnergyStorageInformation,
                    PGN.TripFuelConsumptionVessel, PGN.TripFuelConsumptionEngine, PGN.EngineParametersStatic,
                    PGN.ACInputStatus, PGN.ACOutputStatus, PGN.DCDetailedstatus, PGN.ChargerStatus, PGN.InverterStatus,
                    PGN.ChargerConfigurationStatus, PGN.InverterConfigurationStatus, PGN.AGSConfigurationstatus,
-                   PGN.BatteryConfigurationStatus, PGN.AGSStatus, PGN.DistanceLog, PGN.TrackedTargetData,
+                   PGN.BatteryConfigurationStatus, PGN.AGSStatus, PGN.DistanceLog, PGN.TrackedTargetData, PGN.ElevatorCarStatus,
                    PGN.GNSSPositionData, PGN.AISClassAPositionReport, PGN.AISClassBPositionReport,
                    PGN.AISClassBExtendedPositionReport, PGN.AISAidstoNavigationReport, PGN.Datum, PGN.UserDatumSettings,
                    PGN.NavigationInfo, PGN.WaypointList, PGN.TimeToMark, PGN.BearingAndDistanceBetweenTwoMarks,
@@ -221,8 +250,14 @@ def is_default_fast_packet_message(pgn: int) -> bool:
                    PGN.RouteAndWaypointServiceRouteComment, PGN.RouteAndWaypointServiceDatabaseComment,
                    PGN.RouteAndWaypointServiceRadiusOfTurn, PGN.RouteAndWaypointServiceWPListWPNameAndPosition,
                    PGN.TideStationData, PGN.SalinityStationData, PGN.CurrentStationData, PGN.MeteorologicalStationData,
-                   PGN.MooredBuoyStationData, PGN.WatermakerInputSettingAndStatus, PGN.DirectionDataPGN,
-                   PGN.VesselSpeedComponents]
+                   PGN.MooredBuoyStationData, PGN.LightingSystemSettings, PGN.LightingZone, PGN.LightingScene,
+                   PGN.LightingDevice, PGN.LightingDeviceEnumeration, PGN.LightingColorSequence, PGN.LightingProgram,
+                   PGN.WatermakerInputSettingAndStatus, PGN.DirectionData, PGN.VesselSpeedComponents,
+                   PGN.EntertainmentCurrentFileAndStatus, PGN.EntertainmentLibraryDataFile,
+                   PGN.EntertainmentLibraryDataGroup, PGN.EntertainmentLibraryDataSearch, PGN.EntertainmentSupportedSourceData,
+                   PGN.EntertainmentSupportedZoneData, PGN.EntertainmentSystemConfigurationStatus,
+                   PGN.EntertainmentZoneConfigurationStatusDEPRECATED, PGN.EntertainmentAvailableAudioEQPresets,
+                   PGN.EntertainmentBluetoothDevices, PGN.EntertainmentZoneConfigurationStatus]
 
 
 def is_proprietary_fast_packet_message(pgn: int) -> bool:
