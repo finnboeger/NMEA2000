@@ -127,9 +127,12 @@ class PGN(IntEnum):
     DSCCallInformation = 129808  # prio: 8, period: NA
     AISClassBStaticDataPartA = 129809  # prio: 6, period: NA
     AISClassBStaticDataPartB = 129810  # prio: 6, period: NA
-    AISSingleSlotBinaryMessage = 129811  # prio: 5, period: NA
-    AISMultiSlotBinaryMessage = 129812  # prio: 5, period: NA
+    AISSingleSlotBinaryMessageDEPRECATED = 129811  # prio: 5, period: NA
+    AISMultiSlotBinaryMessageDEPRECATED = 129812  # prio: 5, period: NA
     AISLongRangeBroadcastMessage = 129813  # prio: 5, period: NA
+    AISSingleSlotBinaryMessage = 129814 # prio: 5, period: NA
+    AISMultiSlotBinaryMessage = 129815 # prio: 5, period: NA
+    AISAcknowledge2 = 129816 # prio: 7, period: NA
     LoranCTDData = 130052  # prio: 3, period: 1000
     LoranCRangeData = 130053  # prio: 3, period: 1000
     LoranCSignalData = 130054  # prio: 3, period: 1000
@@ -241,8 +244,9 @@ def is_default_fast_packet_message(pgn: int) -> bool:
                    PGN.AISAddressedSafetyRelatedMessage, PGN.AISSafetyRelatedBroadcastMessage, PGN.AISInterrogationPGN,
                    PGN.AISAssignmentModeCommand, PGN.AISDataLinkManagementMessage, PGN.AISChannelManagement,
                    PGN.AISGroupAssignment, PGN.DSCCallInformation, PGN.AISClassBStaticDataPartA,
-                   PGN.AISClassBStaticDataPartB, PGN.AISSingleSlotBinaryMessage, PGN.AISMultiSlotBinaryMessage,
-                   PGN.AISLongRangeBroadcastMessage, PGN.LoranCTDData, PGN.LoranCRangeData, PGN.LoranCSignalData,
+                   PGN.AISClassBStaticDataPartB, PGN.AISSingleSlotBinaryMessageDEPRECATED, PGN.AISMultiSlotBinaryMessageDEPRECATED,
+                   PGN.AISLongRangeBroadcastMessage, PGN.AISSingleSlotBinaryMessage, PGN.AISMultiSlotBinaryMessage,
+                   PGN.AISAcknowledge2, PGN.LoranCTDData, PGN.LoranCRangeData, PGN.LoranCSignalData,
                    PGN.Label, PGN.ChannelSourceConfiguration, PGN.RouteAndWaypointServiceDatabaseList,
                    PGN.RouteAndWaypointServiceRouteList, PGN.RouteAndWaypointServiceRouteWPListAttributes,
                    PGN.RouteAndWaypointServiceRouteWPNameAndPosition, PGN.RouteAndWaypointServiceRouteWPName,
