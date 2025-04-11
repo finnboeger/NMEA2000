@@ -5,7 +5,7 @@ import time
 import n2k
 import logging
 
-bus = can.Bus('can0', interface='socketcan')
+bus = can.Bus("can0", interface="socketcan")
 notifier = can.Notifier(bus, [])
 device_information = n2k.DeviceInformation()
 device_information.unique_number = 1
@@ -18,6 +18,7 @@ n2k_node.set_product_information("Test", "0.0.1", "Dev", "00000000001", 2)
 n2k_node.set_configuration_information()
 
 # n2k.set_log_level(logging.DEBUG)
+
 
 class Handler(n2k.MessageHandler):
     def __init__(self, node: n2k_node):
@@ -33,6 +34,7 @@ class Handler(n2k.MessageHandler):
         else:
             print(n2k.messages.parse_n2k_heading(msg))
 
+
 handler = Handler(n2k_node)
 n2k_node.attach_msg_handler(handler)
 
@@ -41,5 +43,7 @@ notifier.add_listener(n2k_node)
 
 while True:
     time.sleep(0.2)
-    msg = n2k.messages.set_n2k_wind_speed(0, 10, radians(340), n2k.types.N2kWindReference.TrueNorth)
+    msg = n2k.messages.set_n2k_wind_speed(
+        0, 10, radians(340), n2k.types.N2kWindReference.TrueNorth
+    )
     n2k_node.send_msg(msg)

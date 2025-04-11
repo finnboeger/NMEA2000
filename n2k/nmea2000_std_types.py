@@ -23,16 +23,16 @@ class N2kDD025(IntEnum):
     Estimated = 2
     Simulator = 3
     Manual = 4
-    Error = 0xe
-    Unavailable = 0xf
-    
-    
+    Error = 0xE
+    Unavailable = 0xF
+
+
 class N2kDD072(IntEnum):
     RangeResidualsWereUsedToCalculateData = 0
     RangeResidualsWereCalculatedAfterPosition = 1
     Error = 2
     Unavailable = 3
-                
+
 
 class N2kDD124(IntEnum):
     NotTracked = 0
@@ -43,7 +43,7 @@ class N2kDD124(IntEnum):
     UsedWithDifferentialCorrections = 5
     Error = 14
     Unavailable = 15
-                
+
 
 class N2kDD206:
     check_engine: int = 0
@@ -68,22 +68,24 @@ class N2kDD206:
 
     @property
     def status(self):
-        return self.check_engine << 0 | \
-               self.over_temperature << 1 | \
-               self.low_oil_pressure << 2 | \
-               self.low_oil_level << 3 | \
-               self.low_fuel_pressure << 4 | \
-               self.low_system_voltage << 5 | \
-               self.low_coolant_level << 6 | \
-               self.water_flow << 7 | \
-               self.water_in_fuel << 8 | \
-               self.charge_indicator << 9 | \
-               self.preheat_indicator << 10 | \
-               self.high_boost_pressure << 11 | \
-               self.rev_limit_exceeded << 12 | \
-               self.egr_system << 13 | \
-               self.throttle_position_sensor << 14 | \
-               self.engine_emergency_stop_mode << 15
+        return (
+            self.check_engine << 0
+            | self.over_temperature << 1
+            | self.low_oil_pressure << 2
+            | self.low_oil_level << 3
+            | self.low_fuel_pressure << 4
+            | self.low_system_voltage << 5
+            | self.low_coolant_level << 6
+            | self.water_flow << 7
+            | self.water_in_fuel << 8
+            | self.charge_indicator << 9
+            | self.preheat_indicator << 10
+            | self.high_boost_pressure << 11
+            | self.rev_limit_exceeded << 12
+            | self.egr_system << 13
+            | self.throttle_position_sensor << 14
+            | self.engine_emergency_stop_mode << 15
+        )
 
     @status.setter
     def status(self, value):
@@ -128,22 +130,24 @@ class N2kDD223:
 
     @property
     def status(self):
-        return self.warning_level1 << 0 | \
-               self.warning_level2 << 1 | \
-               self.power_reduction << 2 | \
-               self.maintenance_needed << 3 | \
-               self.engine_comm_error << 4 | \
-               self.sub_or_secondary_throttle << 5 | \
-               self.neutral_start_protect << 6 | \
-               self.engine_shutting_down << 7 | \
-               self.manufacturer1 << 8 | \
-               self.manufacturer2 << 9 | \
-               self.manufacturer3 << 10 | \
-               self.manufacturer4 << 11 | \
-               self.manufacturer5 << 12 | \
-               self.manufacturer6 << 13 | \
-               self.manufacturer7 << 14 | \
-               self.manufacturer8 << 15
+        return (
+            self.warning_level1 << 0
+            | self.warning_level2 << 1
+            | self.power_reduction << 2
+            | self.maintenance_needed << 3
+            | self.engine_comm_error << 4
+            | self.sub_or_secondary_throttle << 5
+            | self.neutral_start_protect << 6
+            | self.engine_shutting_down << 7
+            | self.manufacturer1 << 8
+            | self.manufacturer2 << 9
+            | self.manufacturer3 << 10
+            | self.manufacturer4 << 11
+            | self.manufacturer5 << 12
+            | self.manufacturer6 << 13
+            | self.manufacturer7 << 14
+            | self.manufacturer8 << 15
+        )
 
     @status.setter
     def status(self, value):
@@ -166,9 +170,9 @@ class N2kDD223:
 
     def __eq__(self, other):
         if isinstance(other, N2kDD223):
-            return self.status == other.status & 0x00ff
+            return self.status == other.status & 0x00FF
         if isinstance(other, int):
-            return self.status == other & 0x00ff
+            return self.status == other & 0x00FF
         return False
 
 
@@ -232,14 +236,16 @@ class N2kDD471(IntEnum):
 
     @property
     def events(self):
-        return self.motor_over_temperature_cutout << 0 | \
-               self.motor_over_current_cutout << 1 | \
-               self.low_oil_level_warning << 2 | \
-               self.oil_over_temperature_warning << 3 | \
-               self.controller_under_voltage_cutout << 4 | \
-               self.manufacturer_defined << 5 | \
-               self.reserved << 6 | \
-               self.data_not_available << 7
+        return (
+            self.motor_over_temperature_cutout << 0
+            | self.motor_over_current_cutout << 1
+            | self.low_oil_level_warning << 2
+            | self.oil_over_temperature_warning << 3
+            | self.controller_under_voltage_cutout << 4
+            | self.manufacturer_defined << 5
+            | self.reserved << 6
+            | self.data_not_available << 7
+        )
 
     @events.setter
     def events(self, value):
@@ -278,7 +284,9 @@ class N2kDD475:
 
     @property
     def events(self):
-        return self.another_device_controlling_thruster << 0 | self.boat_speed_to_fast << 1
+        return (
+            self.another_device_controlling_thruster << 0 | self.boat_speed_to_fast << 1
+        )
 
     @events.setter
     def events(self, value):
@@ -297,16 +305,18 @@ class N2kDD477:
 
     @property
     def events(self):
-        return self.controller_under_voltage_cutout << 0 | \
-               self.controller_over_current_cutout << 1 | \
-               self.controller_over_temperature_cutout << 2
+        return (
+            self.controller_under_voltage_cutout << 0
+            | self.controller_over_current_cutout << 1
+            | self.controller_over_temperature_cutout << 2
+        )
 
     @events.setter
     def events(self, value):
         self.controller_under_voltage_cutout = (value >> 0) & 0b1
         self.controller_over_current_cutout = (value >> 1) & 0b1
         self.controller_over_temperature_cutout = (value >> 2) & 0b1
-        
+
 
 # DD478 - Windlass Control Events
 class N2kDD478:
@@ -330,7 +340,7 @@ class N2kDD480(IntEnum):
     DeploymentOccurring = 1
     RetrievalOccurring = 2
     Unavailable = 3
-              
+
 
 #  DD481 - Rode Type States
 class N2kDD481(IntEnum):
@@ -338,7 +348,7 @@ class N2kDD481(IntEnum):
     RopePresentlyDetected = 1
     Error = 2
     Unavailable = 3
-              
+
 
 # DD482 - Anchor Docking States
 class N2kDD482(IntEnum):
@@ -346,7 +356,7 @@ class N2kDD482(IntEnum):
     FullyDocked = 1
     Error = 2
     DataNotAvailable = 3
-              
+
 
 # DD483 - Windlass Operating Events
 class N2kDD483:
@@ -361,11 +371,13 @@ class N2kDD483:
 
     @property
     def event(self):
-        return self.system_error << 0 | \
-               self.sensor_error << 1 | \
-               self.no_windlass_motion_detected << 2 | \
-               self.retrieval_docking_distance_reached << 3 | \
-               self.end_of_rode_reached << 4
+        return (
+            self.system_error << 0
+            | self.sensor_error << 1
+            | self.no_windlass_motion_detected << 2
+            | self.retrieval_docking_distance_reached << 3
+            | self.end_of_rode_reached << 4
+        )
 
     @event.setter
     def event(self, value):
@@ -374,15 +386,15 @@ class N2kDD483:
         self.no_windlass_motion_detected = (value >> 2) & 0b1
         self.retrieval_docking_distance_reached = (value >> 3) & 0b1
         self.end_of_rode_reached = (value >> 4) & 0b1
-                                 
+
 
 # DD484 - Windlass Direction Control
 class N2kDD484(IntEnum):
-    Off = 0             # Status only / cannot command
+    Off = 0  # Status only / cannot command
     Down = 1
     Up = 2
     Reserved = 3
-                          
+
 
 # DD487 - Motor Power Type
 class N2kDD487(IntEnum):

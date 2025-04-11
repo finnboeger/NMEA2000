@@ -22,7 +22,9 @@ N2K_BROADCAST_CAN_BUS_ADDRESS: int = 255
 N2K_ADDRESS_CLAIM_TIMEOUT = 250
 MAX_HEARTBEAT_INTERVAL = 655320
 
-TP_MAX_FRAMES = 5  # Maximum amount of Frames that can be received at a single time # TODO: why?
+TP_MAX_FRAMES = (
+    5  # Maximum amount of Frames that can be received at a single time # TODO: why?
+)
 TP_CM_BAM = 32
 TP_CM_RTS = 16
 TP_CM_CTS = 17
@@ -36,42 +38,46 @@ TP_CM_AbortTimeout = 3
 
 # Messages
 N2K_DOUBLE_NA = -1e9
-N2K_FLOAT_NA  = -1e9
-N2K_UINT8_NA   = 0xff
-N2K_INT8_NA    = 0x7f
-N2K_UINT16_NA  = 0xffff
-N2K_INT16_NA   = 0x7fff
-N2K_UINT24_NA  = 0xffffff
-N2K_INT24_NA   = 0x7fffff
-N2K_UINT32_NA  = 0xffffffff
-N2K_INT32_NA   = 0x7fffffff
-N2K_UINT64_NA  = 0xffffffffffffffff
-N2K_INT64_NA   = 0x7fffffffffffffff
+N2K_FLOAT_NA = -1e9
+N2K_UINT8_NA = 0xFF
+N2K_INT8_NA = 0x7F
+N2K_UINT16_NA = 0xFFFF
+N2K_INT16_NA = 0x7FFF
+N2K_UINT24_NA = 0xFFFFFF
+N2K_INT24_NA = 0x7FFFFF
+N2K_UINT32_NA = 0xFFFFFFFF
+N2K_INT32_NA = 0x7FFFFFFF
+N2K_UINT64_NA = 0xFFFFFFFFFFFFFFFF
+N2K_INT64_NA = 0x7FFFFFFFFFFFFFFF
 
 
 # Message
-N2K_INT8_OR    = 0x7e
-N2K_UINT8_OR   = 0xfe
-N2K_INT16_OR   = 0x7ffe
-N2K_UINT16_OR  = 0xfffe
-N2K_INT24_OR   = 0x7ffffe
-N2K_UINT24_OR  = 0xfffffe
-N2K_INT32_OR   = 0x7ffffffe
-N2K_UINT32_OR  = 0xfffffffe
+N2K_INT8_OR = 0x7E
+N2K_UINT8_OR = 0xFE
+N2K_INT16_OR = 0x7FFE
+N2K_UINT16_OR = 0xFFFE
+N2K_INT24_OR = 0x7FFFFE
+N2K_UINT24_OR = 0xFFFFFE
+N2K_INT32_OR = 0x7FFFFFFE
+N2K_UINT32_OR = 0xFFFFFFFE
 
-N2K_INT32_MIN  = -2147483648
-N2K_INT24_MIN  = -8388608
-N2K_INT16_MIN  = -32768
-N2K_INT8_MIN   = -128
+N2K_INT32_MIN = -2147483648
+N2K_INT24_MIN = -8388608
+N2K_INT16_MIN = -32768
+N2K_INT8_MIN = -128
 
 
 # Device List
 
 N2K_MAX_BUS_DEVICES = 254
 
-N2K_DL_TIME_FOR_FIRST_REQUEST = 1000  # Time in ms for first request after device has been noticed on the bus
+N2K_DL_TIME_FOR_FIRST_REQUEST = (
+    1000  # Time in ms for first request after device has been noticed on the bus
+)
 N2K_DL_TIME_BETWEEN_PI_REQUEST = 1000  # Time in ms between product information requests
-N2K_DL_TIME_BETWEEN_CI_REQUEST = 1000  # Time in ms between configuration information requests
+N2K_DL_TIME_BETWEEN_CI_REQUEST = (
+    1000  # Time in ms between configuration information requests
+)
 
 
 # Can Message Buffer

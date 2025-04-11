@@ -3,11 +3,11 @@ from enum import IntEnum
 
 
 def is_broadcast(source: int) -> bool:
-    return source == 0xff
+    return source == 0xFF
 
 
 def is_fast_packet_first_frame(byte: int):
-    return byte & 0x1f == 0
+    return byte & 0x1F == 0
 
 
 class PGN(IntEnum):
@@ -32,9 +32,9 @@ class PGN(IntEnum):
     Attitude = 127257  # prio: 3, period: 1000
     EngineParametersRapid = 127488  # prio: 2, period: 100, rapid update
     TransmissionParameters = 127493  # prio: 2, period: 100, dynamic
-    LoadControllerConnectionStateControl = 127500 # TODO: find prio and control
+    LoadControllerConnectionStateControl = 127500  # TODO: find prio and control
     BinaryStatusReport = 127501  # prio: 3, period: NA
-    SwitchBankControl = 127502 # TODO: find prio and period
+    SwitchBankControl = 127502  # TODO: find prio and period
     FluidLevel = 127505  # prio: 6, period: 2500
     ConverterStatus = 127750  # prio: 6, period: 1500
     BatteryStatus = 127508  # prio: 6, period: 1500
@@ -56,7 +56,7 @@ class PGN(IntEnum):
     Pressure = 130314  # prio: 5, period: 2000
     TemperatureExtendedRange = 130316  # prio: 5, period: 2000
     SmallCraftStatusTrimTabPosition = 130576  # prio: 2, period: 200
-    
+
     # Default Messages
     Alert = 126983  # prio: 2, period: 1000
     AlertResponse = 126984  # prio: 2, period: NA
@@ -67,10 +67,10 @@ class PGN(IntEnum):
     ManOverBoard = 127233  # prio: 3, period: NA
     HeadingTrackControl = 127237  # prio: 2, period: 250
     EngineParametersDynamic = 127489  # prio: 2, period: 500
-    ElectricDriveStatusDynamic = 127490 # prio: 1, period: 1500
-    ElectricEnergyStorageStatusDynamic = 127491 # prio: 7, period: 1500
-    ElectricDriveInformation = 127494 # prio: 4, period: NA
-    ElectricEnergyStorageInformation = 127495 # prio: 6, period: NA
+    ElectricDriveStatusDynamic = 127490  # prio: 1, period: 1500
+    ElectricEnergyStorageStatusDynamic = 127491  # prio: 7, period: 1500
+    ElectricDriveInformation = 127494  # prio: 4, period: NA
+    ElectricEnergyStorageInformation = 127495  # prio: 6, period: NA
     TripFuelConsumptionVessel = 127496  # prio: 5, period: 1000
     TripFuelConsumptionEngine = 127497  # prio: 5, period: 1000
     EngineParametersStatic = 127498  # prio: 5, period: NA
@@ -86,7 +86,7 @@ class PGN(IntEnum):
     AGSStatus = 127514  # prio: 6, period: 1500
     DistanceLog = 128275  # prio: 6, period: 1000
     TrackedTargetData = 128520  # prio: 2, period: 1000
-    ElevatorCarStatus = 128538 # prio: 6, period: 100
+    ElevatorCarStatus = 128538  # prio: 6, period: 100
     GNSSPositionData = 129029  # prio: 3, period: 1000
     AISClassAPositionReport = 129038  # prio: 4, period: NA
     AISClassBPositionReport = 129039  # prio: 4, period: NA
@@ -130,9 +130,9 @@ class PGN(IntEnum):
     AISSingleSlotBinaryMessageDEPRECATED = 129811  # prio: 5, period: NA
     AISMultiSlotBinaryMessageDEPRECATED = 129812  # prio: 5, period: NA
     AISLongRangeBroadcastMessage = 129813  # prio: 5, period: NA
-    AISSingleSlotBinaryMessage = 129814 # prio: 5, period: NA
-    AISMultiSlotBinaryMessage = 129815 # prio: 5, period: NA
-    AISAcknowledge2 = 129816 # prio: 7, period: NA
+    AISSingleSlotBinaryMessage = 129814  # prio: 5, period: NA
+    AISMultiSlotBinaryMessage = 129815  # prio: 5, period: NA
+    AISAcknowledge2 = 129816  # prio: 7, period: NA
     LoranCTDData = 130052  # prio: 3, period: 1000
     LoranCRangeData = 130053  # prio: 3, period: 1000
     LoranCSignalData = 130054  # prio: 3, period: 1000
@@ -154,28 +154,27 @@ class PGN(IntEnum):
     CurrentStationData = 130322  # prio: 6, period: 1000
     MeteorologicalStationData = 130323  # prio: 6, period: 1000
     MooredBuoyStationData = 130324  # prio: 6, period: 1000
-    LightingSystemSettings = 130330 # prio: 7, period: NA
-    LightingZone = 130561 # prio: 7, period: NA
-    LightingScene = 130562 # prio: 7, period: NA
-    LightingDevice = 130563 # prio: 7, period: NA
-    LightingDeviceEnumeration = 130564 # prio: 7, period: NA
-    LightingColorSequence = 130565 # prio: 7, period: NA
-    LightingProgram = 130566 # prio: 7, period: NA
-    WatermakerInputSettingAndStatus = 130567 # prio: 6, period: 2500
-    DirectionData = 130577 # prio: 3, period: 1000
-    VesselSpeedComponents = 130578 # prio: 2, period: 250
-    EntertainmentCurrentFileAndStatus = 130569 # prio: 6, period: 500
-    EntertainmentLibraryDataFile = 130570 # prio: 6, period: NA
-    EntertainmentLibraryDataGroup = 130571 # prio: 6, period: NA
-    EntertainmentLibraryDataSearch = 130572 # prio: 6, period: NA
-    EntertainmentSupportedSourceData = 130573 # prio: 6, period: NA
-    EntertainmentSupportedZoneData = 130574 # prio: 6, period: NA
-    EntertainmentSystemConfigurationStatus = 130580 # prio: 6, period: NA
-    EntertainmentZoneConfigurationStatusDEPRECATED = 130581 # prio: 6, period: NA
-    EntertainmentAvailableAudioEQPresets = 130583 # prio: 6, period: NA
-    EntertainmentBluetoothDevices = 130584 # prio: 6, period: NA
-    EntertainmentZoneConfigurationStatus = 130586 # prio: 6, period: NA
-
+    LightingSystemSettings = 130330  # prio: 7, period: NA
+    LightingZone = 130561  # prio: 7, period: NA
+    LightingScene = 130562  # prio: 7, period: NA
+    LightingDevice = 130563  # prio: 7, period: NA
+    LightingDeviceEnumeration = 130564  # prio: 7, period: NA
+    LightingColorSequence = 130565  # prio: 7, period: NA
+    LightingProgram = 130566  # prio: 7, period: NA
+    WatermakerInputSettingAndStatus = 130567  # prio: 6, period: 2500
+    DirectionData = 130577  # prio: 3, period: 1000
+    VesselSpeedComponents = 130578  # prio: 2, period: 250
+    EntertainmentCurrentFileAndStatus = 130569  # prio: 6, period: 500
+    EntertainmentLibraryDataFile = 130570  # prio: 6, period: NA
+    EntertainmentLibraryDataGroup = 130571  # prio: 6, period: NA
+    EntertainmentLibraryDataSearch = 130572  # prio: 6, period: NA
+    EntertainmentSupportedSourceData = 130573  # prio: 6, period: NA
+    EntertainmentSupportedZoneData = 130574  # prio: 6, period: NA
+    EntertainmentSystemConfigurationStatus = 130580  # prio: 6, period: NA
+    EntertainmentZoneConfigurationStatusDEPRECATED = 130581  # prio: 6, period: NA
+    EntertainmentAvailableAudioEQPresets = 130583  # prio: 6, period: NA
+    EntertainmentBluetoothDevices = 130584  # prio: 6, period: NA
+    EntertainmentZoneConfigurationStatus = 130586  # prio: 6, period: NA
 
 
 DefaultTransmitMessages = [
@@ -203,65 +202,176 @@ DefaultReceiveMessages = [
 
 
 def is_single_frame_system_message(pgn: int) -> bool:
-    return pgn in [PGN.IsoAcknowledgement, PGN.TransportProtocolDataTransfer,
-                   PGN.TransportProtocolConnectionManagement, PGN.IsoRequest, PGN.IsoAddressClaim]
-        
+    return pgn in [
+        PGN.IsoAcknowledgement,
+        PGN.TransportProtocolDataTransfer,
+        PGN.TransportProtocolConnectionManagement,
+        PGN.IsoRequest,
+        PGN.IsoAddressClaim,
+    ]
+
 
 def is_fast_packet_system_message(pgn: int) -> bool:
     return pgn == PGN.CommandedAddress or pgn == PGN.RequestGroupFunction
 
 
 def is_default_single_frame_message(pgn: int) -> bool:
-    return pgn in [PGN.SystemDateTime, PGN.Heartbeat, PGN.Rudder, PGN.VesselHeading, PGN.RateOfTurn, PGN.Heave, PGN.Attitude,
-                   PGN.EngineParametersRapid, PGN.TransmissionParameters, PGN.BinaryStatusReport, PGN.FluidLevel,
-                   PGN.BatteryStatus, PGN.ConverterStatus, PGN.BoatSpeed, PGN.WaterDepth, PGN.LatLonRapid, PGN.CogSogRapid,
-                   PGN.CrossTrackError, PGN.WindSpeed, PGN.OutsideEnvironmentalParameters, PGN.Temperature,
-                   PGN.Humidity, PGN.Pressure, PGN.TemperatureExtendedRange, PGN.SmallCraftStatusTrimTabPosition]
+    return pgn in [
+        PGN.SystemDateTime,
+        PGN.Heartbeat,
+        PGN.Rudder,
+        PGN.VesselHeading,
+        PGN.RateOfTurn,
+        PGN.Heave,
+        PGN.Attitude,
+        PGN.EngineParametersRapid,
+        PGN.TransmissionParameters,
+        PGN.BinaryStatusReport,
+        PGN.FluidLevel,
+        PGN.BatteryStatus,
+        PGN.ConverterStatus,
+        PGN.BoatSpeed,
+        PGN.WaterDepth,
+        PGN.LatLonRapid,
+        PGN.CogSogRapid,
+        PGN.CrossTrackError,
+        PGN.WindSpeed,
+        PGN.OutsideEnvironmentalParameters,
+        PGN.Temperature,
+        PGN.Humidity,
+        PGN.Pressure,
+        PGN.TemperatureExtendedRange,
+        PGN.SmallCraftStatusTrimTabPosition,
+    ]
 
 
 def is_mandatory_fast_packet_message(pgn: int) -> bool:
-    return pgn in [PGN.SupportedPGNList, PGN.ProductInformation, PGN.ConfigurationInformation]
+    return pgn in [
+        PGN.SupportedPGNList,
+        PGN.ProductInformation,
+        PGN.ConfigurationInformation,
+    ]
 
 
 def is_default_fast_packet_message(pgn: int) -> bool:
-    return pgn in [PGN.Alert, PGN.AlertResponse, PGN.AlertText, PGN.AlertConfiguration, PGN.AlertThreshold,
-                   PGN.AlertValue, PGN.ManOverBoard, PGN.HeadingTrackControl, PGN.EngineParametersDynamic,
-                   PGN.ElectricDriveStatusDynamic, PGN.ElectricEnergyStorageStatusDynamic,
-                   PGN.ElectricDriveInformation, PGN.ElectricEnergyStorageInformation,
-                   PGN.TripFuelConsumptionVessel, PGN.TripFuelConsumptionEngine, PGN.EngineParametersStatic,
-                   PGN.ACInputStatus, PGN.ACOutputStatus, PGN.DCDetailedstatus, PGN.ChargerStatus, PGN.InverterStatus,
-                   PGN.ChargerConfigurationStatus, PGN.InverterConfigurationStatus, PGN.AGSConfigurationstatus,
-                   PGN.BatteryConfigurationStatus, PGN.AGSStatus, PGN.DistanceLog, PGN.TrackedTargetData, PGN.ElevatorCarStatus,
-                   PGN.GNSSPositionData, PGN.AISClassAPositionReport, PGN.AISClassBPositionReport,
-                   PGN.AISClassBExtendedPositionReport, PGN.AISAidstoNavigationReport, PGN.Datum, PGN.UserDatumSettings,
-                   PGN.NavigationInfo, PGN.WaypointList, PGN.TimeToMark, PGN.BearingAndDistanceBetweenTwoMarks,
-                   PGN.GNSSControlStatus, PGN.GNSSSatellitesInView, PGN.GPSAlmanacData,
-                   PGN.GNSSPseudorangeNoiseStatistics, PGN.GNSS_RAIM_Output, PGN.GNSSPseudorangeErrorStatistics,
-                   PGN.DGNSSCorrections, PGN.GNSSDifferentialCorrectionReceiverSignal, PGN.GLONASSAlmanacData,
-                   PGN.AIS_DGNSS_Broadcast_Binary_Message, PGN.AIS_UTC_And_Date_Report, PGN.AISClassAStaticData,
-                   PGN.AISAddressedBinaryMessage, PGN.AISAcknowledge, PGN.AISBinaryBroadcastMessage,
-                   PGN.AIS_SAR_Aircraft_Position_Report, PGN.RadioFrequencyModePower, PGN.AIS_UTC_Date_Inquiry,
-                   PGN.AISAddressedSafetyRelatedMessage, PGN.AISSafetyRelatedBroadcastMessage, PGN.AISInterrogationPGN,
-                   PGN.AISAssignmentModeCommand, PGN.AISDataLinkManagementMessage, PGN.AISChannelManagement,
-                   PGN.AISGroupAssignment, PGN.DSCCallInformation, PGN.AISClassBStaticDataPartA,
-                   PGN.AISClassBStaticDataPartB, PGN.AISSingleSlotBinaryMessageDEPRECATED, PGN.AISMultiSlotBinaryMessageDEPRECATED,
-                   PGN.AISLongRangeBroadcastMessage, PGN.AISSingleSlotBinaryMessage, PGN.AISMultiSlotBinaryMessage,
-                   PGN.AISAcknowledge2, PGN.LoranCTDData, PGN.LoranCRangeData, PGN.LoranCSignalData,
-                   PGN.Label, PGN.ChannelSourceConfiguration, PGN.RouteAndWaypointServiceDatabaseList,
-                   PGN.RouteAndWaypointServiceRouteList, PGN.RouteAndWaypointServiceRouteWPListAttributes,
-                   PGN.RouteAndWaypointServiceRouteWPNameAndPosition, PGN.RouteAndWaypointServiceRouteWPName,
-                   PGN.RouteAndWaypointServiceXTELimitAndNavigationMethod, PGN.RouteAndWaypointServiceWPComment,
-                   PGN.RouteAndWaypointServiceRouteComment, PGN.RouteAndWaypointServiceDatabaseComment,
-                   PGN.RouteAndWaypointServiceRadiusOfTurn, PGN.RouteAndWaypointServiceWPListWPNameAndPosition,
-                   PGN.TideStationData, PGN.SalinityStationData, PGN.CurrentStationData, PGN.MeteorologicalStationData,
-                   PGN.MooredBuoyStationData, PGN.LightingSystemSettings, PGN.LightingZone, PGN.LightingScene,
-                   PGN.LightingDevice, PGN.LightingDeviceEnumeration, PGN.LightingColorSequence, PGN.LightingProgram,
-                   PGN.WatermakerInputSettingAndStatus, PGN.DirectionData, PGN.VesselSpeedComponents,
-                   PGN.EntertainmentCurrentFileAndStatus, PGN.EntertainmentLibraryDataFile,
-                   PGN.EntertainmentLibraryDataGroup, PGN.EntertainmentLibraryDataSearch, PGN.EntertainmentSupportedSourceData,
-                   PGN.EntertainmentSupportedZoneData, PGN.EntertainmentSystemConfigurationStatus,
-                   PGN.EntertainmentZoneConfigurationStatusDEPRECATED, PGN.EntertainmentAvailableAudioEQPresets,
-                   PGN.EntertainmentBluetoothDevices, PGN.EntertainmentZoneConfigurationStatus]
+    return pgn in [
+        PGN.Alert,
+        PGN.AlertResponse,
+        PGN.AlertText,
+        PGN.AlertConfiguration,
+        PGN.AlertThreshold,
+        PGN.AlertValue,
+        PGN.ManOverBoard,
+        PGN.HeadingTrackControl,
+        PGN.EngineParametersDynamic,
+        PGN.ElectricDriveStatusDynamic,
+        PGN.ElectricEnergyStorageStatusDynamic,
+        PGN.ElectricDriveInformation,
+        PGN.ElectricEnergyStorageInformation,
+        PGN.TripFuelConsumptionVessel,
+        PGN.TripFuelConsumptionEngine,
+        PGN.EngineParametersStatic,
+        PGN.ACInputStatus,
+        PGN.ACOutputStatus,
+        PGN.DCDetailedstatus,
+        PGN.ChargerStatus,
+        PGN.InverterStatus,
+        PGN.ChargerConfigurationStatus,
+        PGN.InverterConfigurationStatus,
+        PGN.AGSConfigurationstatus,
+        PGN.BatteryConfigurationStatus,
+        PGN.AGSStatus,
+        PGN.DistanceLog,
+        PGN.TrackedTargetData,
+        PGN.ElevatorCarStatus,
+        PGN.GNSSPositionData,
+        PGN.AISClassAPositionReport,
+        PGN.AISClassBPositionReport,
+        PGN.AISClassBExtendedPositionReport,
+        PGN.AISAidstoNavigationReport,
+        PGN.Datum,
+        PGN.UserDatumSettings,
+        PGN.NavigationInfo,
+        PGN.WaypointList,
+        PGN.TimeToMark,
+        PGN.BearingAndDistanceBetweenTwoMarks,
+        PGN.GNSSControlStatus,
+        PGN.GNSSSatellitesInView,
+        PGN.GPSAlmanacData,
+        PGN.GNSSPseudorangeNoiseStatistics,
+        PGN.GNSS_RAIM_Output,
+        PGN.GNSSPseudorangeErrorStatistics,
+        PGN.DGNSSCorrections,
+        PGN.GNSSDifferentialCorrectionReceiverSignal,
+        PGN.GLONASSAlmanacData,
+        PGN.AIS_DGNSS_Broadcast_Binary_Message,
+        PGN.AIS_UTC_And_Date_Report,
+        PGN.AISClassAStaticData,
+        PGN.AISAddressedBinaryMessage,
+        PGN.AISAcknowledge,
+        PGN.AISBinaryBroadcastMessage,
+        PGN.AIS_SAR_Aircraft_Position_Report,
+        PGN.RadioFrequencyModePower,
+        PGN.AIS_UTC_Date_Inquiry,
+        PGN.AISAddressedSafetyRelatedMessage,
+        PGN.AISSafetyRelatedBroadcastMessage,
+        PGN.AISInterrogationPGN,
+        PGN.AISAssignmentModeCommand,
+        PGN.AISDataLinkManagementMessage,
+        PGN.AISChannelManagement,
+        PGN.AISGroupAssignment,
+        PGN.DSCCallInformation,
+        PGN.AISClassBStaticDataPartA,
+        PGN.AISClassBStaticDataPartB,
+        PGN.AISSingleSlotBinaryMessageDEPRECATED,
+        PGN.AISMultiSlotBinaryMessageDEPRECATED,
+        PGN.AISLongRangeBroadcastMessage,
+        PGN.AISSingleSlotBinaryMessage,
+        PGN.AISMultiSlotBinaryMessage,
+        PGN.AISAcknowledge2,
+        PGN.LoranCTDData,
+        PGN.LoranCRangeData,
+        PGN.LoranCSignalData,
+        PGN.Label,
+        PGN.ChannelSourceConfiguration,
+        PGN.RouteAndWaypointServiceDatabaseList,
+        PGN.RouteAndWaypointServiceRouteList,
+        PGN.RouteAndWaypointServiceRouteWPListAttributes,
+        PGN.RouteAndWaypointServiceRouteWPNameAndPosition,
+        PGN.RouteAndWaypointServiceRouteWPName,
+        PGN.RouteAndWaypointServiceXTELimitAndNavigationMethod,
+        PGN.RouteAndWaypointServiceWPComment,
+        PGN.RouteAndWaypointServiceRouteComment,
+        PGN.RouteAndWaypointServiceDatabaseComment,
+        PGN.RouteAndWaypointServiceRadiusOfTurn,
+        PGN.RouteAndWaypointServiceWPListWPNameAndPosition,
+        PGN.TideStationData,
+        PGN.SalinityStationData,
+        PGN.CurrentStationData,
+        PGN.MeteorologicalStationData,
+        PGN.MooredBuoyStationData,
+        PGN.LightingSystemSettings,
+        PGN.LightingZone,
+        PGN.LightingScene,
+        PGN.LightingDevice,
+        PGN.LightingDeviceEnumeration,
+        PGN.LightingColorSequence,
+        PGN.LightingProgram,
+        PGN.WatermakerInputSettingAndStatus,
+        PGN.DirectionData,
+        PGN.VesselSpeedComponents,
+        PGN.EntertainmentCurrentFileAndStatus,
+        PGN.EntertainmentLibraryDataFile,
+        PGN.EntertainmentLibraryDataGroup,
+        PGN.EntertainmentLibraryDataSearch,
+        PGN.EntertainmentSupportedSourceData,
+        PGN.EntertainmentSupportedZoneData,
+        PGN.EntertainmentSystemConfigurationStatus,
+        PGN.EntertainmentZoneConfigurationStatusDEPRECATED,
+        PGN.EntertainmentAvailableAudioEQPresets,
+        PGN.EntertainmentBluetoothDevices,
+        PGN.EntertainmentZoneConfigurationStatus,
+    ]
 
 
 def is_proprietary_fast_packet_message(pgn: int) -> bool:
@@ -271,10 +381,10 @@ def is_proprietary_fast_packet_message(pgn: int) -> bool:
 def is_proprietary_message(pgn: int) -> bool:
     """
     Test if a message is part of the NMEA2000 specifications or proprietary
-    
+
     :param pgn: PGN to be tested
     :return: Whether the message is part of the NMEA2000 spec
     """
-    return is_proprietary_fast_packet_message(pgn) or pgn == 61184 or 65280 <= pgn <= 65535
-
-
+    return (
+        is_proprietary_fast_packet_message(pgn) or pgn == 61184 or 65280 <= pgn <= 65535
+    )

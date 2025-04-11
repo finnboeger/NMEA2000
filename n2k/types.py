@@ -114,8 +114,8 @@ class N2kTempSource(IntEnum):
 class N2kHumiditySource(IntEnum):
     InsideHumidity = 0
     OutsideHumidity = 1
-    Undef = 0xff
-                          
+    Undef = 0xFF
+
 
 class N2kPressureSource(IntEnum):
     Atmospheric = 0
@@ -130,7 +130,7 @@ class N2kPressureSource(IntEnum):
     Reserved = 253
     Error = 254
     Unavailable = 255
-                          
+
 
 class N2kTimeSource(IntEnum):
     GPS = 0
@@ -139,7 +139,7 @@ class N2kTimeSource(IntEnum):
     LocalCesiumClock = 3
     LocalRubidiumClock = 4
     LocalCrystalClock = 5
-                          
+
 
 class N2kFluidType(IntEnum):
     Fuel = 0
@@ -151,7 +151,7 @@ class N2kFluidType(IntEnum):
     FuelGasoline = 6
     Error = 14
     Unavailable = 15
-                          
+
 
 class N2kWindReference(IntEnum):
     # Details found on page 12 of https://www.rocktheboatmarinestereo.com/specs/MSNRX200I.pdf
@@ -168,7 +168,7 @@ class N2kWindReference(IntEnum):
     TrueWater = 4
     Error = 6
     Unavailable = 7
-                          
+
 
 class N2kSpeedWaterReferenceType(IntEnum):
     PaddleWheel = 0
@@ -178,14 +178,14 @@ class N2kSpeedWaterReferenceType(IntEnum):
     Electromagnetic = 4
     Error = 254
     Unavailable = 255
-                          
+
 
 class N2kRudderDirectionOrder(IntEnum):
     NoDirectionOrder = 0
     MoveToStarboard = 1
     MoveToPort = 2
     Unavailable = 7
-                          
+
 
 class N2kDCType(IntEnum):
     Battery = 0
@@ -193,20 +193,20 @@ class N2kDCType(IntEnum):
     Converter = 2
     SolarCell = 3
     WindGenerator = 4
-                          
+
 
 class N2kBatType(IntEnum):
     Flooded = 0
     Gel = 1
     AGM = 2
-                          
+
 
 class N2kBatEqSupport(IntEnum):
     No = 0  # No, Off, Disabled
     Yes = 1  # Yes, On, Enabled
     Error = 2  # Error
     Unavailable = 3  # Unavailable
-                          
+
 
 class N2kBatChem(IntEnum):
     LeadAcid = 0
@@ -214,7 +214,7 @@ class N2kBatChem(IntEnum):
     NiCad = 2
     Zn0 = 3
     NiMh = 4
-                          
+
 
 class N2kBatNomVolt(IntEnum):
     _6v = 0
@@ -224,26 +224,26 @@ class N2kBatNomVolt(IntEnum):
     _62v = 4
     _42v = 5
     _48v = 6
-                          
+
 
 class N2kTransmissionGear(IntEnum):
     Forward = 0
     Neutral = 1
     Reverse = 2
     Unknown = 3
-                          
+
 
 class N2kAISRepeat(IntEnum):
     Initial = 0
     First = 1
     Second = 2
     Final = 3
-                          
+
 
 class N2kAISVersion(IntEnum):
     ITU_R_M_1371_1 = 0
     ITU_R_M_1371_3 = 1
-                          
+
 
 class N2kAISNavStatus(IntEnum):
     Under_Way_Motoring = 0
@@ -258,17 +258,17 @@ class N2kAISNavStatus(IntEnum):
     Hazardous_Material_High_Speed = 9
     Hazardous_Material_Wing_In_Ground = 10
     AIS_SART = 14
-                          
+
 
 class N2kAISDTE(IntEnum):
     Ready = 0
     NotReady = 1
-                          
+
 
 class N2kAISUnit(IntEnum):
     ClassB_SOTDMA = 0
     ClassB_CS = 1
-                          
+
 
 class N2kAISMode(IntEnum):
     Autonomous = 0
@@ -285,23 +285,23 @@ class N2kAISTransceiverInformation(IntEnum):
 
 
 class N2kMagneticVariation(IntEnum):
-    Manual=0
-    Chart=1
-    Table=2
-    Calc=3
-    WMM2000=4
-    WMM2005=5
-    WMM2010=6
-    WMM2015=7
-    WMM2020=8
-                          
+    Manual = 0
+    Chart = 1
+    Table = 2
+    Calc = 3
+    WMM2000 = 4
+    WMM2005 = 5
+    WMM2010 = 6
+    WMM2015 = 7
+    WMM2020 = 8
+
 
 class N2kOnOff(IntEnum):
     Off = 0  # No, Off, Disabled
     On = 1  # Yes, On, Enabled
     Error = 2  # Error
     Unavailable = 3  # Unavailable
-                          
+
 
 class N2kChargeState(IntEnum):
     Not_Charging = 0
@@ -316,7 +316,7 @@ class N2kChargeState(IntEnum):
     Fault = 9
     Error = 14
     Unavailable = 15
-                          
+
 
 class N2kChargerMode(IntEnum):
     Standalone = 0
@@ -324,11 +324,11 @@ class N2kChargerMode(IntEnum):
     Secondary = 2
     Echo = 3
     Unavailable = 15
-                          
+
 
 class N2kConvMode(IntEnum):
     Off = 0
-    LP_Mode = 1 # Low Power Mode
+    LP_Mode = 1  # Low Power Mode
     Fault = 2
     Bulk = 3
     Absorption = 4
@@ -339,21 +339,21 @@ class N2kConvMode(IntEnum):
     Inverting = 9
     Assisting = 10
     PSU_Mode = 11
-    Hub1 = 0xFC # In slave/DDC mode
+    Hub1 = 0xFC  # In slave/DDC mode
     NotAvailable = 0xFF
 
 
 class N2kRippleState(IntEnum):
     OK = 0
     Warning = 1
-    High = 2 # Ripple too high
+    High = 2  # Ripple too high
     NotAvailable = 3
 
 
 class N2kDCVoltageState(IntEnum):
     OK = 0
     Warning = 1
-    Low = 2 # DC Voltage too low
+    Low = 2  # DC Voltage too low
     NotAvailable = 3
 
 
@@ -367,15 +367,15 @@ class N2kOverloadState(IntEnum):
 class N2kTemperatureState(IntEnum):
     OK = 0
     Warning = 1
-    High = 2 # Over Temperature
+    High = 2  # Over Temperature
     NotAvailable = 3
 
 
 class N2kChargingAlgorithm(IntEnum):
     Trickle = 0
-    CVCC = 1 # Constant Voltage Constant Current
-    TwoStage = 2 # 2 Stage (no Float)
-    ThreeStage = 3 # 3 Stage (Bulk, Absorption, Float?)
+    CVCC = 1  # Constant Voltage Constant Current
+    TwoStage = 2  # 2 Stage (no Float)
+    ThreeStage = 3  # 3 Stage (Bulk, Absorption, Float?)
     Error = 14
     NotAvailable = 15
 
@@ -397,26 +397,26 @@ class N2kSteeringMode(IntEnum):
     HeadingControl = 4
     TrackControl = 5
     Unavailable = 7
-                          
-                          
+
+
 class N2kTurnMode(IntEnum):
     RudderLimitControlled = 0
     TurnRateControlled = 1
     RadiusControlled = 2
     Unavailable = 7
-                          
+
 
 class N2kMOBStatus(IntEnum):
     MOBEmitterActivated = 0
     ManualOnBoardMOBButtonActivation = 1
     TestMode = 2
     MOBNotActive = 3
-                          
+
 
 class N2kMOBPositionSource(IntEnum):
     PositionEstimatedByVessel = 0
     PositionReportedByMOBEmitter = 1
-                          
+
 
 class N2kMOBEmitterBatteryStatus(IntEnum):
     Good = 0
@@ -439,12 +439,14 @@ class N2kTransmissionDiscreteStatus1:
         self.status = value
 
     @property
-    def status (self) -> int:
-        return self.check_temperature << 0 | \
-               self.over_temperature << 1 | \
-               self.low_oil_pressure << 2 | \
-               self.low_oil_level << 3 | \
-               self.sail_drive << 4
+    def status(self) -> int:
+        return (
+            self.check_temperature << 0
+            | self.over_temperature << 1
+            | self.low_oil_pressure << 2
+            | self.low_oil_level << 3
+            | self.sail_drive << 4
+        )
 
     @status.setter
     def status(self, value):

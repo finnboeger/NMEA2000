@@ -10,7 +10,9 @@ class N2kCANMessage:
     # ISO Multi Packet Support
     # tp_required_cts: int = False  # =0 no, n=after each n frames
     # tp_max_packets: int = 0  # =0 not TP message. >0 number of packets can be received.
-    last_frame: int  # Last received frame sequence number on fast packets or multi packet
+    last_frame: (
+        int  # Last received frame sequence number on fast packets or multi packet
+    )
     copied_len: int
 
     def __init__(self):
