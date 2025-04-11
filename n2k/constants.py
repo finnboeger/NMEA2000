@@ -55,6 +55,7 @@ N2K_UINT8_OR   = 0xfe
 N2K_INT16_OR   = 0x7ffe
 N2K_UINT16_OR  = 0xfffe
 N2K_INT24_OR   = 0x7ffffe
+N2K_UINT24_OR  = 0xfffffe
 N2K_INT32_OR   = 0x7ffffffe
 N2K_UINT32_OR  = 0xfffffffe
 

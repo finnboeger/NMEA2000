@@ -113,6 +113,14 @@ class Message:
             self.data.extend(struct.pack("<h", N2K_INT16_NA))
         self.data_len += 2
 
+    def add_3_byte_udouble(self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA) -> None:
+        if v != undef_val:
+            v = clamp_int(0, round(v / precision), N2K_UINT24_OR)
+            self.data.extend(struct.pack("<I", v)[:3])
+        else:
+            self.data.extend(struct.pack("<I", N2K_UINT24_NA)[:3])
+        self.data_len += 3
+
     def add_3_byte_double(self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA) -> None:
         if v != undef_val:
             v = clamp_int(N2K_INT24_MIN, round(v / precision), N2K_INT24_OR)
@@ -233,6 +241,12 @@ class Message:
     def get_2_byte_double(self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA) -> float:
         v = self.get_2_byte_int(index)
         if v == N2K_INT16_NA:
+            return default
+        return v * precision
+    
+    def get_3_byte_udouble(self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA) -> float:
+        v = self.get_3_byte_uint(index)
+        if v == N2K_UINT24_NA:
             return default
         return v * precision
 
