@@ -1700,6 +1700,11 @@ class GNSSPositionData(NamedTuple):
 
 
 def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
+    """ 
+    The parameters passed to ReferenceStationType, ReferenceStationID and AgeOfCorrection are set to 
+    :py:class:`n2k.constants.N2kGNSSType.GPS`, :py:const:`n2k.constants.N2K_INT16_NA` and :py:const:`n2k.constants.N2K_DOUBLE_NA` respectively,
+    when there are no reference stations present in the message.
+    """
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
@@ -1726,6 +1731,10 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
         reference_station_type = N2kGNSSType(vi & 0x0f)
         reference_station_id = vi >> 4
         age_of_correction = msg.get_2_byte_udouble(0.01, index)
+    else:
+        reference_station_type = N2kGNSSType.GPS
+        reference_station_id = N2K_INT16_NA
+        age_of_correction = N2K_DOUBLE_NA
 
     return GNSSPositionData(
         sid,
