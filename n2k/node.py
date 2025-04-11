@@ -414,6 +414,13 @@ class Node(can.Listener):
         return False
     
     def _respond_iso_request(self, msg: Message, requested_pgn: int) -> None:
+        def ignore_broadcast_iso_request(pgn: int) -> bool:
+            return pgn in [PGN.LoadControllerConnectionStateControl, PGN.Label, 
+                           PGN.ChannelSourceConfiguration, PGN.LightingSystemSettings, 
+                           PGN.LightingZone, PGN.LightingScene, PGN.LightingDevice, 
+                           PGN.LightingDeviceEnumeration, PGN.LightingColorSequence, 
+                           PGN.LightingProgram]
+
         if self._is_address_claim_started():
             # We don't respond to any queries during address claiming
             return
@@ -428,10 +435,21 @@ class Node(can.Listener):
         elif requested_pgn == PGN.ConfigurationInformation:
             self.send_configuration_information()
         else:
-            if self._request_handler is not None and self._request_handler(requested_pgn, msg.source):
+            if self._request_handler is not None:
+                # Do not respond to broadcast request for some messages
+                if is_broadcast(msg.destination) and ignore_broadcast_iso_request(msg.pgn):
+                    return
+                if self._request_handler(requested_pgn, msg.source):
+                    return
+            
+            if is_broadcast(msg.destination):
+                # Respond Negative Acknowledgment only for addressed messages
                 return
+
             ack_msg = Message()
+            # No user handler or user handler returned false. Send Negative Acknowledgment
             set_n2k_pgn_iso_acknowledgement(msg, 1, 0xff, requested_pgn)
+            # Direct the response to the original requester
             ack_msg.destination = msg.source
             self.send_msg(ack_msg)
     
