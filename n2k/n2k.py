@@ -54,7 +54,7 @@ class PGN(IntEnum):
     Temperature = 130312  # prio: 5, period: 2000
     Humidity = 130313  # prio: 5, period: 2000
     Pressure = 130314  # prio: 5, period: 2000
-    TemperatureExtendedRange = 130316  # prio: 5, period: NA
+    TemperatureExtendedRange = 130316  # prio: 5, period: 2000
     SmallCraftStatusTrimTabPosition = 130576  # prio: 2, period: 200
     
     # Default Messages
@@ -159,7 +159,7 @@ class PGN(IntEnum):
     LightingColorSequence = 130565 # prio: 7, period: NA
     LightingProgram = 130566 # prio: 7, period: NA
     WatermakerInputSettingAndStatus = 130567 # prio: 6, period: 2500
-    DirectionDataPGN = 130577 # prio: 3, period: 1000
+    DirectionData = 130577 # prio: 3, period: 1000
     VesselSpeedComponents = 130578 # prio: 2, period: 250
     EntertainmentCurrentFileAndStatus = 130569 # prio: 6, period: 500
     EntertainmentLibraryDataFile = 130570 # prio: 6, period: NA
