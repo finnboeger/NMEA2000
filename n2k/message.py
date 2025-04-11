@@ -359,6 +359,8 @@ class Message:
     
     def get_var_str(self, index: IntRef) -> Optional[str]:
         length = self.get_byte_uint(index) - 2
+        if (length < 0):
+            return None # invalid length
         str_type = self.get_byte_uint(index)
         if str_type != 0x01:
             return None
