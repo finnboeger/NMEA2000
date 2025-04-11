@@ -108,6 +108,7 @@ class N2kTempSource(IntEnum):
     HeatIndexTemperature = 12
     FreezerTemperature = 13
     ExhaustGasTemperature = 14
+    ShaftSealTemperature = 15
 
 
 class N2kHumiditySource(IntEnum):
