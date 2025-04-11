@@ -1289,6 +1289,71 @@ def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfiguration
     )
 
 
+# Converter (Inverter/Charger) Status (PGN 127750)
+def set_n2k_converter_status(sid: int, connection_number: int, operating_state: N2kConvMode,
+                            temperature_state: N2kTemperatureState, overload_state: N2kOverloadState,
+                            low_dc_voltage_state: N2kDCVoltageState, ripple_state: N2kRippleState) -> Message:
+    """
+    Converter (Inverter/Charger) Status (PGN 127750)
+
+    Replaces PGN 127507
+
+    Provides state and status information about charger/inverters
+
+    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+        different messages to indicate that they are measured at same time
+    :param connection_number: Connection number
+    :param operating_state: See :py:class:`n2k.types.N2kConvMode`
+    :param temperature_state: See :py:class:`n2k.types.N2kTemperatureState`
+    :param overload_state: See :py:class:`n2k.types.N2kOverloadState`
+    :param low_dc_voltage_state: See :py:class:`n2k.types.N2kDCVoltageStat`
+    :param ripple_state: See :py:class:`n2k.types.N2kRippleState`
+    :return: NMEA2000 Message, ready to be sent
+    """
+    msg = Message()
+    msg.pgn = PGN.ConverterStatus
+    msg.priority = 6
+    msg.add_byte_uint(sid)
+    msg.add_byte_uint(connection_number)
+    msg.add_byte_uint(operating_state) # note: might be N2kChargeState
+    msg.add_byte_uint((ripple_state & 0x03) << 6 | (low_dc_voltage_state & 0x03) << 4 | (overload_state & 0x03) << 2 | (temperature_state & 0x03))
+    msg.add_4_byte_uint(0xffffffff)  # Reserved
+    return msg
+
+
+class ConverterStatus(NamedTuple):
+    sid: int
+    connection_number: int
+    operating_state: N2kConvMode
+    temperature_state: N2kTemperatureState
+    overload_state: N2kOverloadState
+    low_dc_voltage_state: N2kDCVoltageState
+    ripple_state: N2kRippleState
+
+
+def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
+    index = IntRef(0)
+
+    sid = msg.get_byte_uint(index)
+    connection_number = msg.get_byte_uint(index)
+    operating_state = N2kConvMode(msg.get_byte_uint(index)) # might be N2kChargeState
+    vb = msg.get_byte_uint(index)
+    ripple_state = N2kRippleState((vb >> 6) & 0x03)
+    low_dc_voltage_state = N2kDCVoltageState((vb >> 4) & 0x03)
+    overload_state = N2kOverloadState((vb >> 2) & 0x03)
+    temperature_state = N2kTemperatureState(vb & 0x03)
+
+    return ConverterStatus(
+        sid=sid,
+        connection_number=connection_number,
+        operating_state=operating_state,
+        temperature_state=temperature_state,
+        overload_state=overload_state,
+        low_dc_voltage_state=low_dc_voltage_state,
+        ripple_state=ripple_state
+    )
+
+
 # Leeway (PGN 128000)
 def set_n2k_leeway(sid: int, leeway: float) -> Message:
     """

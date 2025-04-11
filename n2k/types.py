@@ -326,6 +326,51 @@ class N2kChargerMode(IntEnum):
     Unavailable = 15
                           
 
+class N2kConvMode(IntEnum):
+    Off = 0
+    LP_Mode = 1 # Low Power Mode
+    Fault = 2
+    Bulk = 3
+    Absorption = 4
+    Float = 5
+    Storage = 6
+    Equalize = 7
+    Passthrough = 8
+    Inverting = 9
+    Assisting = 10
+    PSU_Mode = 11
+    Hub1 = 0xFC # In slave/DDC mode
+    NotAvailable = 0xFF
+
+
+class N2kRippleState(IntEnum):
+    OK = 0
+    Warning = 1
+    High = 2 # Ripple too high
+    NotAvailable = 3
+
+
+class N2kDCVoltageState(IntEnum):
+    OK = 0
+    Warning = 1
+    Low = 2 # DC Voltage too low
+    NotAvailable = 3
+
+
+class N2kOverloadState(IntEnum):
+    OK = 0
+    Warning = 1
+    Overload = 2
+    NotAvailable = 3
+
+
+class N2kTemperatureState(IntEnum):
+    OK = 0
+    Warning = 1
+    High = 2 # Over Temperature
+    NotAvailable = 3
+
+
 class N2kChargingAlgorithm(IntEnum):
     Trickle = 0
     CVCC = 1 # Constant Voltage Constant Current
