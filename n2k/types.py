@@ -211,7 +211,8 @@ class N2kBatChem(IntEnum):
     LeadAcid = 0
     LiIon = 1
     NiCad = 2
-    NiMh = 3
+    Zn0 = 3
+    NiMh = 4
                           
 
 class N2kBatNomVolt(IntEnum):
@@ -312,6 +313,7 @@ class N2kChargeState(IntEnum):
     Constant_VI = 7
     Disabled = 8
     Fault = 9
+    Error = 14
     Unavailable = 15
                           
 
