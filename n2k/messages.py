@@ -1972,6 +1972,7 @@ class DateTimeLocalOffset(NamedTuple):
     days_since_1970: int
     seconds_since_midnight: float
     local_offset: int
+    sid: int
 
 
 def parse_n2k_date_time_local_offset(msg: Message) -> DateTimeLocalOffset:
@@ -1981,6 +1982,7 @@ def parse_n2k_date_time_local_offset(msg: Message) -> DateTimeLocalOffset:
         days_since_1970=msg.get_2_byte_uint(index),
         seconds_since_midnight=msg.get_4_byte_udouble(0.0001, index),
         local_offset=msg.get_2_byte_int(index),
+        sid=msg.get_byte_uint(index)
     )
 
 
@@ -1988,7 +1990,7 @@ def parse_n2k_date_time_local_offset(msg: Message) -> DateTimeLocalOffset:
 def set_n2k_ais_class_a_position(message_id: int, repeat: N2kAISRepeat, user_id: int, latitude: float, longitude: float,
                                  accuracy: bool, raim: bool, seconds: int, cog: float, sog: float,
                                  ais_transceiver_information: N2kAISTransceiverInformation, heading: float,
-                                 rot: float, nav_status: N2kAISNavStatus) -> Message:
+                                 rot: float, nav_status: N2kAISNavStatus, sid: int = 0xff) -> Message:
     """
     AIS Position Reports for Class A (PGN 129038)
 
@@ -2010,6 +2012,7 @@ def set_n2k_ais_class_a_position(message_id: int, repeat: N2kAISRepeat, user_id:
     :param heading: Compass heading
     :param rot: Rate of Turn
     :param nav_status: Navigational status
+    :param sid: Sequence ID
     :return: NMEA2000 Messag, ready to be sent
     """
     msg = Message()
@@ -2029,6 +2032,7 @@ def set_n2k_ais_class_a_position(message_id: int, repeat: N2kAISRepeat, user_id:
     msg.add_2_byte_double(rot, 3.125e-5)  # 1e-3/32.0
     msg.add_byte_uint(0xf0 | (nav_status & 0x0f))
     msg.add_byte_uint(0xff)  # reserved
+    msg.add_byte_uint(sid)
     return msg
 
 
@@ -2047,6 +2051,7 @@ class AISClassAPositionReport(NamedTuple):
     heading: float
     rot: float
     nav_status: N2kAISNavStatus
+    sid: int
 
 
 def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
@@ -2072,6 +2077,8 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
     rot = msg.get_2_byte_double(3.125e-5, index)
     vb = msg.get_byte_uint(index)
     nav_status = N2kAISNavStatus(vb & 0x03)
+    msg.get_byte_uint(index) # reserved
+    sid = msg.get_byte_uint(index)
 
     return AISClassAPositionReport(
         message_id=message_id,
@@ -2088,6 +2095,7 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
         heading=heading,
         rot=rot,
         nav_status=nav_status,
+        sid=sid,
     )
 
 
@@ -2096,7 +2104,7 @@ def set_n2k_ais_class_b_position(message_id: int, repeat: N2kAISRepeat, user_id:
                                  accuracy: bool, raim: bool, seconds: int, cog: float, sog: float,
                                  ais_transceiver_information: N2kAISTransceiverInformation, heading: float,
                                  unit: N2kAISUnit, display: bool, dsc: bool, band: bool, msg22: bool, mode: N2kAISMode,
-                                 state: bool) -> Message:
+                                 state: bool, sid: int = 0xff) -> Message:
     """
     AIS Position Reports for Class A (PGN 129038)
 
@@ -2142,6 +2150,7 @@ def set_n2k_ais_class_b_position(message_id: int, repeat: N2kAISRepeat, user_id:
     msg.add_byte_uint(0xff)  # Regional application
     msg.add_byte_uint((mode & 0x01) << 7 | (msg22 & 0x01) << 6 | (band & 0x01) << 5 | (dsc & 0x01) << 4 | (display & 0x01) << 3 | (unit & 0x01) << 2)
     msg.add_byte_uint(0xfe | (state & 0x01))
+    msg.add_byte_uint(sid)
     return msg
 
 
@@ -2165,6 +2174,7 @@ class AISClassBPositionReport(NamedTuple):
     msg22: bool
     mode: N2kAISMode
     state: bool
+    sid: int
 
 
 def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
@@ -2197,6 +2207,7 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
     mode = N2kAISMode((vb >> 7) & 0x01)
     vb = msg.get_byte_uint(index)
     state = bool(vb & 0x01)
+    sid = msg.get_byte_uint(index)
 
     return AISClassBPositionReport(
         message_id=message_id,
@@ -2218,6 +2229,7 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
         msg22=msg22,
         mode=mode,
         state=state,
+        sid=sid,
     )
 
 
@@ -2760,7 +2772,8 @@ def set_n2k_ais_class_a_static_data(message_id: int, repeat: N2kAISRepeat, user_
                                     name: str, vessel_type: int, length: float, beam: float, pos_ref_stbd: float,
                                     pos_ref_bow: float, eta_date: int, eta_time: float, draught: float, destination: str,
                                     ais_version: N2kAISVersion, gnss_type: N2kGNSSType, dte: N2kAISDTE,
-                                    ais_info: N2kAISTransceiverInformation) -> Message:
+                                    ais_info: N2kAISTransceiverInformation = N2kAISTransceiverInformation.Channel_A_VDL_reception,
+                                    sid: int = 0xff) -> Message:
     """
     AIS Class A Static Data (PGN 129794)
 
@@ -2816,7 +2829,7 @@ def set_n2k_ais_class_a_static_data(message_id: int, repeat: N2kAISRepeat, user_
     msg.add_ais_str(destination, 20)
     msg.add_byte_uint((dte & 0x01) << 6 | (gnss_type & 0x0f) << 2 | (ais_version & 0x03))
     msg.add_byte_uint(0xe0 | (ais_info & 0x1f))
-    msg.add_byte_uint(0xff)
+    msg.add_byte_uint(sid)
 
     return msg
 
@@ -2841,6 +2854,7 @@ class AISClassAStaticData(NamedTuple):
     gnss_type: N2kGNSSType
     dte: N2kAISDTE
     ais_info: N2kAISTransceiverInformation
+    sid: int
 
 
 def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
@@ -2866,6 +2880,7 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
     gnss_type = N2kGNSSType((vb >> 2) & 0x0f)
     dte = N2kAISDTE((vb >> 6) & 0x1f)
     ais_info = N2kAISTransceiverInformation(msg.get_byte_uint(index) & 0x1f)
+    sid = msg.get_byte_uint(index)
 
     return AISClassAStaticData(
         message_id=message_id,
@@ -2887,11 +2902,14 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
         gnss_type=gnss_type,
         dte=dte,
         ais_info=ais_info,
+        sid=sid,
     )
 
 
 # AIS CLass B Static Data part A (PGN 129809)
-def set_n2k_ais_class_b_static_data_part_a(message_id: int, repeat: N2kAISRepeat, user_id: int, name: str) -> Message:
+def set_n2k_ais_class_b_static_data_part_a(message_id: int, repeat: N2kAISRepeat, user_id: int, name: str, 
+                                           ais_info: N2kAISTransceiverInformation = N2kAISTransceiverInformation.Channel_A_VDL_reception,
+                                           sid: int = 0xff) -> Message:
     """
     AIS CLass B Static Data part A (PGN 129809)
 
@@ -2911,6 +2929,8 @@ def set_n2k_ais_class_b_static_data_part_a(message_id: int, repeat: N2kAISRepeat
     msg.add_byte_uint((repeat & 0x03) << 6 | (message_id & 0x3f))
     msg.add_4_byte_uint(user_id)
     msg.add_ais_str(name, 20)
+    msg.add_byte_uint(0xe0 | (ais_info & 0x1f))  # AIS Transceiver info + reserved
+    msg.add_byte_uint(sid)  # SID
 
     return msg
 
@@ -2920,6 +2940,8 @@ class AISClassBStaticDataPartA(NamedTuple):
     repeat: N2kAISRepeat
     user_id: int
     name: str
+    ais_info: N2kAISTransceiverInformation
+    sid: int
 
 
 def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDataPartA:
@@ -2927,19 +2949,28 @@ def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDat
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3f
     repeat = N2kAISRepeat((vb >> 6) & 0x03)
+    user_id = msg.get_4_byte_uint(index)
+    name=msg.get_str(20, index)
+    vb = msg.get_byte_uint(index)
+    ais_info = N2kAISTransceiverInformation(vb & 0x1f)
+    sid = msg.get_byte_uint(index)
 
     return AISClassBStaticDataPartA(
         message_id=message_id,
         repeat=repeat,
-        user_id=msg.get_4_byte_uint(index),
-        name=msg.get_str(20, index),
+        user_id=user_id,
+        name=name,
+        ais_info=ais_info,
+        sid=sid,
     )
 
 
 # AIS CLass B Static Data part B (PGN 129810)
 def set_n2k_ais_class_b_static_data_part_b(message_id: int, repeat: N2kAISRepeat, user_id: int, vessel_type: int,
                                            vendor: str, callsign: str, length: float, beam: float, pos_ref_stbd: float,
-                                           pos_ref_bow: float, mothership_id: int) -> Message:
+                                           pos_ref_bow: float, mothership_id: int, 
+                                           ais_info: N2kAISTransceiverInformation = N2kAISTransceiverInformation.Channel_A_VDL_reception, 
+                                           sid: int = 0xff) -> Message:
     """
     AIS CLass B Static Data part B (PGN 129810)
 
@@ -2976,7 +3007,9 @@ def set_n2k_ais_class_b_static_data_part_b(message_id: int, repeat: N2kAISRepeat
     msg.add_2_byte_udouble(pos_ref_stbd, 0.1)
     msg.add_2_byte_udouble(pos_ref_bow, 0.1)
     msg.add_4_byte_uint(mothership_id)
-    msg.add_byte_uint(0xff)  # Reserved
+    msg.add_byte_uint(0x03)  # Reserved + AIS spare
+    msg.add_byte_uint(0xe0 | (ais_info & 0x1f))  # AIS Tranceiver info + reserved
+    msg.add_byte_uint(sid)  # SID
 
     return msg
 
@@ -2993,6 +3026,8 @@ class AISClassBStaticDataPartB(NamedTuple):
     pos_ref_stbd: float
     pos_ref_bow: float
     mothership_id: int
+    ais_info: N2kAISTransceiverInformation
+    sid: int
 
 
 def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDataPartB:
@@ -3000,19 +3035,34 @@ def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDat
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3f
     repeat = N2kAISRepeat((vb >> 6) & 0x03)
+    user_id = msg.get_4_byte_uint(index)
+    vessel_type = msg.get_byte_uint(index)
+    vendor = msg.get_str(7, index)
+    callsign = msg.get_str(7, index)
+    length = msg.get_2_byte_udouble(0.1, index)
+    beam = msg.get_2_byte_udouble(0.1, index)
+    pos_ref_stbd = msg.get_2_byte_udouble(0.1, index)
+    pos_ref_bow = msg.get_2_byte_udouble(0.1, index)
+    mothership_id = msg.get_4_byte_uint(index)
+    msg.get_byte_uint(index)  # 2-reserved, 6-spare
+    vb = msg.get_byte_uint(index)
+    ais_info = N2kAISTransceiverInformation(vb & 0x1f)
+    sid = msg.get_byte_uint(index)
 
     return AISClassBStaticDataPartB(
         message_id=message_id,
         repeat=repeat,
-        user_id=msg.get_4_byte_uint(index),
-        vessel_type=msg.get_byte_uint(index),
-        vendor=msg.get_str(7, index),
-        callsign = msg.get_str(7, index),
-        length = msg.get_2_byte_udouble(0.1, index),
-        beam = msg.get_2_byte_udouble(0.1, index),
-        pos_ref_stbd = msg.get_2_byte_udouble(0.1, index),
-        pos_ref_bow = msg.get_2_byte_udouble(0.1, index),
-        mothership_id = msg.get_4_byte_uint(index),
+        user_id=user_id,
+        vessel_type=vessel_type,
+        vendor=vendor,
+        callsign=callsign,
+        length=length,
+        beam=beam,
+        pos_ref_stbd=pos_ref_stbd,
+        pos_ref_bow=pos_ref_bow,
+        mothership_id=mothership_id,
+        ais_info=ais_info,
+        sid=sid,
     )
 
 
