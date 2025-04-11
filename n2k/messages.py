@@ -820,6 +820,16 @@ def parse_n2k_trip_parameters_engine(msg: Message) -> TripFuelConsumptionEngine:
 N2kBinaryStatus = int
 
 
+def n2k_reset_binary_status(_bank_status: N2kBinaryStatus) -> int:
+    """
+    Reset all single binary status values to not available
+    
+    This helper function returns a new fully reset 64bit bank status.
+    For each individual item the status will be 3 (0b11 - Unavailable :py:class:`N2kOnOff`)
+    """
+    return 0xffffffffffffffff
+
+
 def n2k_get_status_on_binary_status(bank_status: N2kBinaryStatus, item_index: int = 1) -> N2kOnOff:
     """
     Get single status of full binary bank status returned by :py:func:`parse_n2k_binary_status`.
@@ -881,6 +891,48 @@ def parse_n2k_binary_status_report(msg: Message) -> BinaryStatusReport:
     vb = msg.get_uint_64(index)
     return BinaryStatusReport(
         device_bank_instance=vb & 0xff,
+        bank_status=vb >> 8,
+    )
+
+
+# Switch Bank Control (PGN 127502)
+def set_n2k_switch_bank_control(target_bank_instance: int, bank_status: N2kBinaryStatus) -> Message:
+    """
+    Switch Bank Control (PGN 127502)
+
+    This PGN is deprecated by NMEA and modern switch bank devices may well not support it, favouring PGN 126208 Command Group Function.
+
+    Command channel states on a remote switch bank. Up to 28 remote binary states can be controlled.
+
+    When you create a tN2kBinaryStatus object for use with this function you should ensure that you only command (that is set ON or OFF) those channels which you intend to operate. 
+    Channels in which you have no interest should not be commanded but set not available.
+    
+    Review :py:func:`n2k_reset_binary_status`, :py:func:`n2k_set_status_binary_on_status` and the documentation of :py:class:`N2kOnOff` for information on how to set up bank status.
+
+    Remember as well, that transmission of a PGN 127502 message is equivalent to issuing a command, so do not send the same message repeatedly: once should be enough. 
+    You can always check that the target switch bank has responded by checking its PGN 127501 broadcasts.
+
+    :param target_bank_instance: Instance number of the switch bank that was targeted by this switch bank control message.
+    :param bank_status: The binary status component of the switch bank control containing the commanded state of channels on the target switch bank\n
+        Use :py:func:`n2k_get_status_on_binary_status` to get single status
+    """
+    msg = Message()
+    msg.pgn = PGN.SwitchBankControl
+    msg.priority = 3
+    msg.add_uint_64((bank_status << 8) | (target_bank_instance & 0xff))
+    return msg
+
+
+class SwitchBankControl(NamedTuple):
+    target_bank_instance: int
+    bank_status: N2kBinaryStatus
+
+
+def parse_n2k_switch_bank_control(msg: Message) -> SwitchBankControl:
+    index = IntRef(0)
+    vb = msg.get_uint_64(index)
+    return SwitchBankControl(
+        target_bank_instance=vb & 0xff,
         bank_status=vb >> 8,
     )
 
