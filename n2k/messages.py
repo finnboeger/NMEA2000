@@ -1137,6 +1137,82 @@ def parse_n2k_battery_status(msg: Message) -> BatteryStatus:
     )
 
 
+# Charger Configuration Status (PGN 127510)
+def set_n2k_charger_configuration_status(charger_instance: int, battery_instance: int, enable: N2kOnOff,
+                                         charge_current_limit: int, charging_algorithm: N2kChargingAlgorithm, 
+                                         charger_mode: N2kChargerMode, battery_temperature: N2kBattTempNoSensor, 
+                                         equalization_enabled: N2kOnOff, over_charge_enable: N2kOnOff, 
+                                         equalization_time_remaining: int) -> Message:
+    """
+    Charger Configuration Status (PGN 127510)
+
+    Any device capable of charging a battery can transmit this
+
+    :param charger_instance: Charger Instance
+    :param battery_instance: Battery Instance
+    :param charge_current_limit: CurrentLimit in % range 0-252 resolution 1%
+    :param battery_temperature: Battery temp when no sensor
+    :param equalization_enabled: Equalize one time enable/disable
+    :param over_charge_enable: Enable/Disable over charge
+    :param equalization_time_remaining: Time remaining in seconds
+    :return: NMEA2000 Message, ready to be sent
+    """
+    msg = Message()
+    msg.pgn = PGN.ChargerConfigurationStatus
+    msg.priority = 6
+    msg.add_byte_uint(charger_instance)
+    msg.add_byte_uint(battery_instance)
+    msg.add_byte_uint(enable & 0x03)
+    msg.add_byte_uint(charge_current_limit) # 0 - 252%
+    msg.add_byte_uint((charger_mode & 0x0f) << 4 | (charging_algorithm & 0x0f))
+    msg.add_byte_uint((over_charge_enable & 0x03) << 6  | (equalization_enabled & 0x03) << 4 | (battery_temperature & 0x0f))
+    msg.add_2_byte_uint(equalization_time_remaining)
+    return msg
+
+
+class ChargerConfigurationStatus(NamedTuple):
+    charger_instance: int
+    battery_instance: int
+    enable: N2kOnOff
+    charge_current_limit: int
+    charging_algorithm: N2kChargingAlgorithm
+    charger_mode: N2kChargerMode
+    battery_temperature: N2kBattTempNoSensor
+    equalization_enabled: N2kOnOff
+    over_charge_enable: N2kOnOff
+    equalization_time_remaining: int
+
+
+def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfigurationStatus:
+    index = IntRef(0)
+
+    charger_instance = msg.get_byte_uint(index)
+    battery_instance = msg.get_byte_uint(index)
+    enable = N2kOnOff(msg.get_byte_uint(index) & 0x03)
+    charge_current_limit = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index)
+    charging_algorithm = N2kChargingAlgorithm(vb & 0x0f)
+    charger_mode = N2kChargerMode((vb >> 4) & 0x0f)
+    vb = msg.get_byte_uint(index)
+    battery_temperature = N2kBattTempNoSensor(vb & 0x04)
+    equalization_enabled = N2kOnOff((vb >> 4) & 0x03)
+    over_charge_enable = N2kOnOff((vb >> 6) & 0x03)
+    equalization_time_remaining = msg.get_2_byte_uint(index)
+
+    return ChargerConfigurationStatus(
+        charger_instance=charger_instance,
+        battery_instance=battery_instance,
+        enable=enable,
+        charge_current_limit=charge_current_limit,
+        charging_algorithm=charging_algorithm,
+        charger_mode=charger_mode,
+        battery_temperature=battery_temperature,
+        equalization_enabled=equalization_enabled,
+        over_charge_enable=over_charge_enable,
+        equalization_time_remaining=equalization_time_remaining,
+    )
+
+
 # Battery Configuration Status (PGN 127513)
 def set_n2k_battery_configuration_status(battery_instance: int, battery_type: N2kBatType,
                                          supports_equal: N2kBatEqSupport, battery_nominal_voltage: N2kBatNomVolt,

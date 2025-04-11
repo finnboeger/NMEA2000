@@ -326,6 +326,24 @@ class N2kChargerMode(IntEnum):
     Unavailable = 15
                           
 
+class N2kChargingAlgorithm(IntEnum):
+    Trickle = 0
+    CVCC = 1 # Constant Voltage Constant Current
+    TwoStage = 2 # 2 Stage (no Float)
+    ThreeStage = 3 # 3 Stage (Bulk, Absorption, Float?)
+    Error = 14
+    NotAvailable = 15
+
+
+# Battery temperature with no temperature sensor
+class N2kBattTempNoSensor(IntEnum):
+    Cold = 0
+    Warm = 1
+    Hot = 2
+    Error = 14
+    NotAvailable = 15
+
+
 class N2kSteeringMode(IntEnum):
     MainSteering = 0
     NonFollowUpDevice = 1
