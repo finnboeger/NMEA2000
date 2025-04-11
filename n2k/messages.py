@@ -2654,7 +2654,7 @@ def set_n2k_gnss_dop(sid: int, desired_mode: N2kGNSSDOPmode, actual_mode: N2kGNS
     msg.pgn = PGN.GNSSDOPData
     msg.priority = 6
     msg.add_byte_uint(sid)
-    msg.add_byte_uint((desired_mode & 0x07) << 5 | ((actual_mode & 0x07) << 2))
+    msg.add_byte_uint(0xc0 | ((actual_mode & 0x07) << 3) | (desired_mode & 0x07))
     msg.add_2_byte_double(hdop, 0.01)
     msg.add_2_byte_double(vdop, 0.01)
     msg.add_2_byte_double(tdop, 0.01)
@@ -2674,12 +2674,12 @@ def parse_n2k_gnss_dop(msg: Message) -> GNSSDOPData:
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)
+    modes = msg.get_byte_uint(index)
 
     return GNSSDOPData(
         sid=sid,
-        desired_mode=N2kGNSSDOPmode((vb >> 5) & 0x07),
-        actual_mode=N2kGNSSDOPmode((vb >> 2) & 0x07),
+        desired_mode=N2kGNSSDOPmode(modes & 0x07),
+        actual_mode=N2kGNSSDOPmode((modes >> 3) & 0x07),
         hdop=msg.get_2_byte_double(0.01, index),
         vdop=msg.get_2_byte_double(0.01, index),
         tdop=msg.get_2_byte_double(0.01, index),
@@ -2714,7 +2714,7 @@ def set_n2k_gnss_satellites_in_view(sid: int, mode: N2kRangeResidualMode, satell
     msg.pgn = PGN.GNSSSatellitesInView
     msg.priority = 6
     msg.add_byte_uint(sid)
-    msg.add_byte_uint(mode | 0xfc)  # 2 bit mode, 6 bit reserved
+    msg.add_byte_uint(0xfc | (mode & 0x03))  # 2 bit mode, 6 bit reserved
 
     if len(satellites) > MAX_SATELLITE_INFO_COUNT:
         # TODO: Log warning
