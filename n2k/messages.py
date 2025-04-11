@@ -2060,7 +2060,7 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3f
     repeat = N2kAISRepeat((vb >> 6) & 0x03)
-    user_id = msg.get_byte_uint(index)
+    user_id = msg.get_4_byte_uint(index)
     longitude = msg.get_4_byte_double(1e-7, index)
     latitude = msg.get_4_byte_double(1e-7, index)
     vb = msg.get_byte_uint(index)
