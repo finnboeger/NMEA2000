@@ -1,0 +1,15 @@
+{
+    "search.exclude": {
+        ".venv": true,
+        "dist": true,
+        "docs/build": true,
+        "n2k.egg-info": true,
+    },
+    "python.defaultInterpreterPath": ".venv/bin/python",
+    "autoDocstring.docstringFormat": "sphinx",
+    "cSpell.language": "en",
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+}
