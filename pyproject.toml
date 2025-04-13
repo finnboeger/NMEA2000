@@ -38,7 +38,7 @@ docs = [
 
 [project.urls]
 homepage = "https://github.com/finnboeger/NMEA2000"
-documentation = "https://github.com/finnboeger/NMEA2000"
+documentation = "https://finnboeger.github.io/NMEA2000/"
 repository = "https://github.com/finnboeger/NMEA2000"
 
 [build-system]
