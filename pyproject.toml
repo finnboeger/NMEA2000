@@ -13,7 +13,12 @@ requires-python = ">=3.7"
 keywords = ["NMEA2000", "CAN"]
 
 classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Embedded Systems",
+    "Topic :: Software Development :: Embedded Systems :: Controller Area Network (CAN)",
+    "Topic :: Software Development :: Libraries",
 ]
 
 dependencies = [
