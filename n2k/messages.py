@@ -2567,14 +2567,6 @@ def parse_n2k_navigation_info(msg: Message) -> NavigationInfo:
 
 # Route Waypoint Information (PGN 129285)
 @dataclass
-class Waypoint:
-    id: int
-    name: str
-    latitude: float
-    longitude: float
-
-
-@dataclass
 class RouteWaypointInformation:
     start: int
     database: int
@@ -2730,14 +2722,6 @@ MAX_SATELLITE_INFO_COUNT = 18  # Maximum amount of satellites that fit into fast
 
 
 # GNSS Satellites in View (PGN 129540)
-@dataclass
-class SatelliteInfo:
-    prn: int
-    elevation: float
-    azimuth: float
-    snr: float
-    range_residuals: float
-    usage_status: N2kPRNUsageStatus
 
 
 @dataclass

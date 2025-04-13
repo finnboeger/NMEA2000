@@ -483,3 +483,21 @@ N2kWindlassOperatingEvents = n2k.nmea2000_std_types.N2kDD483
 N2kWindlassDirectionControl = n2k.nmea2000_std_types.N2kDD484
 N2kMotorPowerType = n2k.nmea2000_std_types.N2kDD487
 N2kSpeedType = n2k.nmea2000_std_types.N2kDD488
+
+
+@dataclass
+class Waypoint:
+    id: int
+    name: str
+    latitude: float
+    longitude: float
+
+
+@dataclass
+class SatelliteInfo:
+    prn: int
+    elevation: float
+    azimuth: float
+    snr: float
+    range_residuals: float
+    usage_status: N2kPRNUsageStatus
