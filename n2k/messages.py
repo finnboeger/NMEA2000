@@ -10,7 +10,8 @@ from n2k.utils import IntRef, with_fallback
 
 
 # System Date/Time (PGN 126992)
-class SystemTime(NamedTuple):
+@dataclass
+class SystemTime:
     sid: int
     system_date: int
     system_time: float
@@ -58,7 +59,8 @@ def parse_n2k_system_time(msg: Message) -> SystemTime:
 
 
 # AIS Safety Related Broadcast Message (PGN 129802)
-class AISSafetyRelatedBroadcast(NamedTuple):
+@dataclass
+class AISSafetyRelatedBroadcast:
     message_id: int
     repeat: N2kAISRepeat
     source_id: int
@@ -112,7 +114,8 @@ def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadca
 
 
 # Man Overboard Notification (PGN 127233)
-class MOBNotification(NamedTuple):
+@dataclass
+class MOBNotification:
     sid: int
     mob_emitter_id: int
     mob_status: N2kMOBStatus
@@ -200,7 +203,8 @@ def parse_n2k_mob_notification(msg: Message) -> MOBNotification:
 
 
 # Heading/Track Control (PGN 127237)
-class HeadingTrackControl(NamedTuple):
+@dataclass
+class HeadingTrackControl:
     rudder_limit_exceeded: N2kOnOff
     off_heading_limit_exceeded: N2kOnOff
     off_track_limit_exceeded: N2kOnOff
@@ -313,7 +317,8 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
 
 
 # Rudder (PGN 127245)
-class Rudder(NamedTuple):
+@dataclass
+class Rudder:
     rudder_position: float
     instance: int
     rudder_direction_order: N2kRudderDirectionOrder
@@ -361,7 +366,8 @@ def parse_n2k_rudder(msg: Message) -> Rudder:
 
 
 # Vessel Heading (PGN 127250)
-class Heading(NamedTuple):
+@dataclass
+class Heading:
     sid: int
     heading: float
     deviation: float
@@ -416,7 +422,8 @@ def parse_n2k_heading(msg: Message) -> Heading:
 
 
 # Rate of Turn (PGN 127251)
-class RateOfTurn(NamedTuple):
+@dataclass
+class RateOfTurn:
     sid: int
     rate_of_turn: float
 
@@ -449,7 +456,8 @@ def parse_n2k_rate_of_turn(msg: Message) -> RateOfTurn:
 
 
 # Heave (PGN 127252)
-class Heave(NamedTuple):
+@dataclass
+class Heave:
     sid: int
     heave: float
     delay: float
@@ -492,7 +500,8 @@ def parse_n2k_heave(msg: Message) -> Heave:
 
 
 # Attitude (PGN 127257)
-class Attitude(NamedTuple):
+@dataclass
+class Attitude:
     sid: int
     yaw: float
     pitch: float
@@ -532,7 +541,8 @@ def parse_n2k_attitude(msg: Message) -> Attitude:
 
 
 # Magnetic Variation (PGN 127258)
-class MagneticVariation(NamedTuple):
+@dataclass
+class MagneticVariation:
     sid: int
     source: N2kMagneticVariation
     days_since_1970: int
@@ -573,7 +583,8 @@ def parse_n2k_magnetic_variation(msg: Message) -> MagneticVariation:
 
 
 # Engine Parameters Rapid (PGN 127488)
-class EngineParametersRapid(NamedTuple):
+@dataclass
+class EngineParametersRapid:
     engine_instance: int
     engine_speed: float
     engine_boost_pressure: float
@@ -620,7 +631,8 @@ def parse_n2k_engine_parameters_rapid(msg: Message) -> EngineParametersRapid:
 
 
 # Engine Parameters Dynamic (PGN 127489)
-class EngineParametersDynamic(NamedTuple):
+@dataclass
+class EngineParametersDynamic:
     engine_instance: int
     engine_oil_press: float
     engine_oil_temp: float
@@ -717,7 +729,8 @@ def parse_n2k_engine_parameters_dynamic(msg: Message) -> EngineParametersDynamic
 
 
 # Transmission parameters, dynamic (PGN 127493)
-class TransmissionParametersDynamic(NamedTuple):
+@dataclass
+class TransmissionParametersDynamic:
     engine_instance: int
     transmission_gear: N2kTransmissionGear
     oil_pressure: float
@@ -771,7 +784,8 @@ def parse_n2k_transmission_parameters_dynamic(
 
 
 # Trip Parameters, Engine (PGN 127497)
-class TripFuelConsumptionEngine(NamedTuple):
+@dataclass
+class TripFuelConsumptionEngine:
     engine_instance: int
     trip_fuel_used: float
     fuel_rate_average: float
@@ -869,7 +883,8 @@ def n2k_set_status_binary_on_status(
 
 
 # Binary status report (PGN 127501)
-class BinaryStatusReport(NamedTuple):
+@dataclass
+class BinaryStatusReport:
     device_bank_instance: int
     bank_status: N2kBinaryStatus
 
@@ -899,7 +914,8 @@ def parse_n2k_binary_status_report(msg: Message) -> BinaryStatusReport:
 
 
 # Switch Bank Control (PGN 127502)
-class SwitchBankControl(NamedTuple):
+@dataclass
+class SwitchBankControl:
     target_bank_instance: int
     bank_status: N2kBinaryStatus
 
@@ -943,7 +959,8 @@ def parse_n2k_switch_bank_control(msg: Message) -> SwitchBankControl:
 
 
 # Fluid level (PGN 127505)
-class FluidLevel(NamedTuple):
+@dataclass
+class FluidLevel:
     instance: int
     fluid_type: N2kFluidType
     level: float
@@ -982,7 +999,8 @@ def parse_n2k_fluid_level(msg: Message) -> FluidLevel:
 
 
 # DC Detailed Status (PGN 127506)
-class DCDetailedStatus(NamedTuple):
+@dataclass
+class DCDetailedStatus:
     sid: int
     dc_instance: int
     dc_type: N2kDCType
@@ -1037,7 +1055,8 @@ def parse_n2k_dc_detailed_status(msg: Message) -> DCDetailedStatus:
 
 
 # Charger Status (PGN 127507)
-class ChargerStatus(NamedTuple):
+@dataclass
+class ChargerStatus:
     instance: int
     battery_instance: int
     charge_state: N2kChargeState
@@ -1098,7 +1117,8 @@ def parse_n2k_charger_status(msg: Message) -> ChargerStatus:
 
 
 # Battery Status (PGN 127508)
-class BatteryStatus(NamedTuple):
+@dataclass
+class BatteryStatus:
     battery_instance: int
     battery_voltage: float
     battery_current: float
@@ -1141,7 +1161,8 @@ def parse_n2k_battery_status(msg: Message) -> BatteryStatus:
 
 
 # Charger Configuration Status (PGN 127510)
-class ChargerConfigurationStatus(NamedTuple):
+@dataclass
+class ChargerConfigurationStatus:
     charger_instance: int
     battery_instance: int
     enable: N2kOnOff
@@ -1219,7 +1240,8 @@ def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfiguration
 
 
 # Battery Configuration Status (PGN 127513)
-class BatteryConfigurationStatus(NamedTuple):
+@dataclass
+class BatteryConfigurationStatus:
     battery_instance: int
     battery_type: N2kBatType
     supports_equal: N2kBatEqSupport
@@ -1295,7 +1317,8 @@ def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfiguration
 
 
 # Converter (Inverter/Charger) Status (PGN 127750)
-class ConverterStatus(NamedTuple):
+@dataclass
+class ConverterStatus:
     sid: int
     connection_number: int
     operating_state: N2kConvMode
@@ -1363,7 +1386,8 @@ def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
 
 
 # Leeway (PGN 128000)
-class Leeway(NamedTuple):
+@dataclass
+class Leeway:
     sid: int
     leeway: float
 
@@ -1400,7 +1424,8 @@ def parse_n2k_leeway(msg: Message) -> Leeway:
 
 
 # Boat Speed (PGN 128259)
-class BoatSpeed(NamedTuple):
+@dataclass
+class BoatSpeed:
     sid: int
     water_referenced: float
     ground_referenced: float
@@ -1441,7 +1466,8 @@ def parse_n2k_boat_speed(msg: Message) -> BoatSpeed:
 
 
 # Water depth (PGN 128267)
-class WaterDepth(NamedTuple):
+@dataclass
+class WaterDepth:
     sid: int
     depth_below_transducer: float
     offset: float
@@ -1481,7 +1507,8 @@ def parse_n2k_water_depth(msg: Message) -> WaterDepth:
 
 
 # Distance log (PGN 128275)
-class DistanceLog(NamedTuple):
+@dataclass
+class DistanceLog:
     days_since_1970: int
     seconds_since_midnight: float
     log: int
@@ -1519,7 +1546,8 @@ def parse_n2k_distance_log(msg: Message) -> DistanceLog:
 
 
 # Anchor Windlass Control Status (PGN 128776)
-class AnchorWindlassControlStatus(NamedTuple):
+@dataclass
+class AnchorWindlassControlStatus:
     sid: int
     windlass_identifier: int
     windlass_direction_control: N2kWindlassDirectionControl
@@ -1617,7 +1645,8 @@ def parse_n2k_anchor_windlass_control_status(
 
 
 # Anchor Windlass Operating Status (PGN 128777)
-class AnchorWindlassOperatingStatus(NamedTuple):
+@dataclass
+class AnchorWindlassOperatingStatus:
     sid: int
     windlass_identifier: int
     rode_counter_value: float
@@ -1691,7 +1720,8 @@ def parse_n2k_anchor_windlass_operating_status(
 
 
 # Anchor Windlass Monitoring Status (PGN 128778)
-class AnchorWindlassMonitoringStatus(NamedTuple):
+@dataclass
+class AnchorWindlassMonitoringStatus:
     sid: int
     windlass_identifier: int
     total_motor_time: float
@@ -1746,7 +1776,8 @@ def parse_n2k_anchor_windlass_monitoring_status(
 
 
 # Lat/lon rapid (PGN 129025)
-class LatLonRapid(NamedTuple):
+@dataclass
+class LatLonRapid:
     latitude: float
     longitude: float
 
@@ -1777,7 +1808,8 @@ def parse_n2k_lat_long_rapid(msg: Message) -> LatLonRapid:
 
 
 # COG SOG rapid (PGN 129026)
-class CogSogRapid(NamedTuple):
+@dataclass
+class CogSogRapid:
     sid: int
     heading_reference: N2kHeadingReference
     cog: float
@@ -1819,7 +1851,8 @@ def parse_n2k_cog_sog_rapid(msg: Message) -> CogSogRapid:
 
 
 # GNSS Position Data (PGN 129029)
-class GNSSPositionData(NamedTuple):
+@dataclass
+class GNSSPositionData:
     sid: int
     days_since_1970: int
     seconds_since_midnight: float
@@ -1953,7 +1986,8 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
 
 
 # Date,Time & Local offset (PGN 129033, see also PGN 126992)
-class DateTimeLocalOffset(NamedTuple):
+@dataclass
+class DateTimeLocalOffset:
     days_since_1970: int
     seconds_since_midnight: float
     local_offset: int
@@ -1990,7 +2024,8 @@ def parse_n2k_date_time_local_offset(msg: Message) -> DateTimeLocalOffset:
 
 
 # AIS position reports for Class A (PGN 129038)
-class AISClassAPositionReport(NamedTuple):
+@dataclass
+class AISClassAPositionReport:
     message_id: int
     repeat: N2kAISRepeat
     user_id: int
@@ -2102,7 +2137,8 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
 
 
 # AIS position reports for Class B (PGN 129039)
-class AISClassBPositionReport(NamedTuple):
+@dataclass
+class AISClassBPositionReport:
     message_id: int
     repeat: N2kAISRepeat
     user_id: int
@@ -2241,7 +2277,8 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
 
 
 # AIS Aids to Navigation (AtoN) Report (PGN 129041)
-class AISAtoNReportData(NamedTuple):
+@dataclass
+class AISAtoNReportData:
     message_id: int
     repeat: N2kAISRepeat
     user_id: int
@@ -2386,7 +2423,8 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
 
 
 # Cross Track Error (PGN 129283)
-class CrossTrackError(NamedTuple):
+@dataclass
+class CrossTrackError:
     sid: int
     xte_mode: N2kXTEMode
     navigation_terminated: bool
@@ -2433,7 +2471,8 @@ def parse_n2k_cross_track_error(msg: Message) -> CrossTrackError:
 
 
 # Navigation Info (PGN 129284)
-class NavigationInfo(NamedTuple):
+@dataclass
+class NavigationInfo:
     sid: int
     distance_to_waypoint: float
     bearing_reference: N2kHeadingReference
@@ -2527,14 +2566,16 @@ def parse_n2k_navigation_info(msg: Message) -> NavigationInfo:
 
 
 # Route Waypoint Information (PGN 129285)
-class Waypoint(NamedTuple):
+@dataclass
+class Waypoint:
     id: int
     name: str
     latitude: float
     longitude: float
 
 
-class RouteWaypointInformation(NamedTuple):
+@dataclass
+class RouteWaypointInformation:
     start: int
     database: int
     route: int
@@ -2633,7 +2674,8 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
 
 
 # GNSS DOP data (PGN 129539)
-class GNSSDOPData(NamedTuple):
+@dataclass
+class GNSSDOPData:
     sid: int
     desired_mode: N2kGNSSDOPmode
     actual_mode: N2kGNSSDOPmode
@@ -2688,8 +2730,8 @@ MAX_SATELLITE_INFO_COUNT = 18  # Maximum amount of satellites that fit into fast
 
 
 # GNSS Satellites in View (PGN 129540)
-class SatelliteInfo(NamedTuple):
-    # TODO: figure out a way to type NamedTuples properly.
+@dataclass
+class SatelliteInfo:
     prn: int
     elevation: float
     azimuth: float
@@ -2698,7 +2740,8 @@ class SatelliteInfo(NamedTuple):
     usage_status: N2kPRNUsageStatus
 
 
-class GNSSSatellitesInView(NamedTuple):
+@dataclass
+class GNSSSatellitesInView:
     sid: int
     mode: N2kRangeResidualMode
     satellites: List[SatelliteInfo]
@@ -2770,7 +2813,8 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
 
 
 # AIS Class A Static Data (PGN 129794)
-class AISClassAStaticData(NamedTuple):
+@dataclass
+class AISClassAStaticData:
     message_id: int
     repeat: N2kAISRepeat
     user_id: int
@@ -2908,7 +2952,8 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
 
 
 # AIS CLass B Static Data part A (PGN 129809)
-class AISClassBStaticDataPartA(NamedTuple):
+@dataclass
+class AISClassBStaticDataPartA:
     message_id: int
     repeat: N2kAISRepeat
     user_id: int
@@ -2965,7 +3010,8 @@ def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDat
 
 
 # AIS CLass B Static Data part B (PGN 129810)
-class AISClassBStaticDataPartB(NamedTuple):
+@dataclass
+class AISClassBStaticDataPartB:
     message_id: int
     repeat: N2kAISRepeat
     user_id: int
@@ -3062,7 +3108,8 @@ def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDat
 
 
 # Waypoint list (PGN 130074)
-class WaypointList(NamedTuple):
+@dataclass
+class WaypointList:
     start: int
     num_waypoints: int
     database: int
@@ -3149,7 +3196,8 @@ def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
 
 
 # Wind Speed (PGN 130306)
-class WindSpeed(NamedTuple):
+@dataclass
+class WindSpeed:
     sid: int
     wind_speed: float
     wind_angle: float

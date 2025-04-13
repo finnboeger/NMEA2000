@@ -1,9 +1,11 @@
 # convert can message to usable format somehow
 # e.g. by converting id
-from typing import NamedTuple, Optional
+from dataclasses import dataclass
+from typing import Optional
 
 
-class MsgHeader(NamedTuple):
+@dataclass
+class MsgHeader:
     source: int
     priority: int
     destination: int

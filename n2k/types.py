@@ -1,10 +1,11 @@
-from typing import NamedTuple
+from dataclasses import dataclass
 from enum import IntEnum
 
 import n2k.nmea2000_std_types
 
 
-class ProductInformation(NamedTuple):
+@dataclass
+class ProductInformation:
     n2k_version: int  # unsigned short
     product_code: int  # unsigned short
     n2k_model_id: str
@@ -15,13 +16,15 @@ class ProductInformation(NamedTuple):
     load_equivalency: int  # unsigned char
 
 
-class ConfigurationInformation(NamedTuple):
+@dataclass
+class ConfigurationInformation:
     manufacturer_information: str
     installation_description1: str
     installation_description2: str
 
 
-class CANSendFrame(NamedTuple):
+@dataclass
+class CANSendFrame:
     id: int  # unsigned long
     length: int  # unsigned char
     buffer: bytearray  # 8 bit max
