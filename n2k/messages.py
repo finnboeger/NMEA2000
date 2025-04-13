@@ -10,11 +10,15 @@ from n2k.utils import IntRef, with_fallback
 
 
 # System Date/Time (PGN 126992)
+class SystemTime(NamedTuple):
+    sid: int
+    system_date: int
+    system_time: float
+    time_source: N2kTimeSource
+
+
 def set_n2k_system_time(
-    sid: int,
-    system_date: int,
-    system_time: float,
-    time_source: N2kTimeSource = N2kTimeSource.GPS,
+    data: SystemTime,
 ) -> Message:
     """
     Generate NMEA2000 message containing specified System Date/Time (PGN 126992). System Time is in UTC.
@@ -30,18 +34,11 @@ def set_n2k_system_time(
     msg = Message()
     msg.pgn = PGN.SystemDateTime
     msg.priority = 3
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint((time_source & 0x0F) | 0xF0)
-    msg.add_2_byte_uint(system_date)
-    msg.add_4_byte_double(system_time, 1e-4)
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint((data.time_source & 0x0F) | 0xF0)
+    msg.add_2_byte_uint(data.system_date)
+    msg.add_4_byte_double(data.system_time, 1e-4)
     return msg
-
-
-class SystemTime(NamedTuple):
-    sid: int
-    system_date: int
-    system_time: float
-    time_source: N2kTimeSource
 
 
 def parse_n2k_system_time(msg: Message) -> SystemTime:
@@ -61,12 +58,16 @@ def parse_n2k_system_time(msg: Message) -> SystemTime:
 
 
 # AIS Safety Related Broadcast Message (PGN 129802)
+class AISSafetyRelatedBroadcast(NamedTuple):
+    message_id: int
+    repeat: N2kAISRepeat
+    source_id: int
+    ais_transceiver_information: N2kAISTransceiverInformation
+    safety_related_text: str | None
+
+
 def set_n2k_ais_related_broadcast_msg(
-    message_id: int,
-    repeat: N2kAISRepeat,
-    source_id: int,
-    ais_transceiver_information: N2kAISTransceiverInformation,
-    safety_related_text: str,
+    data: AISSafetyRelatedBroadcast,
 ) -> Message:
     """
     Generate NMEA2000 message containing AIS Safety Related Broadcast Message. (PGN 129802)
@@ -82,19 +83,11 @@ def set_n2k_ais_related_broadcast_msg(
     msg = Message()
     msg.pgn = PGN.AISSafetyRelatedBroadcastMessage
     msg.priority = 5
-    msg.add_byte_uint((repeat & 0x03) << 6 | (message_id & 0x3F))
-    msg.add_4_byte_uint(0xC0000000 | (source_id & 0x3FFFFFFF))
-    msg.add_byte_uint(0xE0 | (0x1F & ais_transceiver_information))
-    msg.add_var_str(safety_related_text)
+    msg.add_byte_uint((data.repeat & 0x03) << 6 | (data.message_id & 0x3F))
+    msg.add_4_byte_uint(0xC0000000 | (data.source_id & 0x3FFFFFFF))
+    msg.add_byte_uint(0xE0 | (0x1F & data.ais_transceiver_information))
+    msg.add_var_str(data.safety_related_text or "")
     return msg
-
-
-class AISSafetyRelatedBroadcast(NamedTuple):
-    message_id: int
-    repeat: N2kAISRepeat
-    source_id: int
-    ais_transceiver_information: N2kAISTransceiverInformation
-    safety_related_text: str | None
 
 
 def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadcast:
@@ -119,22 +112,24 @@ def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadca
 
 
 # Man Overboard Notification (PGN 127233)
-def set_n2k_mob_notification(
-    sid: int,
-    mob_emitter_id: int,
-    mob_status: N2kMOBStatus,
-    activation_time: float,
-    position_source: N2kMOBPositionSource,
-    position_date: int,
-    position_time: float,
-    latitude: float,
-    longitude: float,
-    cog_reference: N2kHeadingReference,
-    cog: float,
-    sog: float,
-    mmsi: int,
-    mob_emitter_battery_status: N2kMOBEmitterBatteryStatus,
-) -> Message:
+class MOBNotification(NamedTuple):
+    sid: int
+    mob_emitter_id: int
+    mob_status: N2kMOBStatus
+    activation_time: float
+    position_source: N2kMOBPositionSource
+    position_date: int
+    position_time: float
+    latitude: float
+    longitude: float
+    cog_reference: N2kHeadingReference
+    cog: float
+    sog: float
+    mmsi: int
+    mob_emitter_battery_status: N2kMOBEmitterBatteryStatus
+
+
+def set_n2k_mob_notification(data: MOBNotification) -> Message:
     """
     Generate NMEA2000 message containing Man Overboard Notification (PGN 127233)
 
@@ -158,38 +153,21 @@ def set_n2k_mob_notification(
     msg = Message()
     msg.pgn = PGN.ManOverBoard
     msg.priority = 3
-    msg.add_byte_uint(sid)
-    msg.add_4_byte_uint(mob_emitter_id)
-    msg.add_byte_uint((mob_status & 0x07) | 0xF8)
-    msg.add_4_byte_udouble(activation_time, 0.0001)
-    msg.add_byte_uint((position_source & 0x07) | 0xF8)
-    msg.add_2_byte_uint(position_date)
-    msg.add_4_byte_udouble(position_time, 0.0001)
-    msg.add_4_byte_double(latitude, 1e-7)
-    msg.add_4_byte_double(longitude, 1e-7)
-    msg.add_byte_uint((cog_reference & 0x03) | 0xFC)
-    msg.add_2_byte_udouble(cog, 0.0001)
-    msg.add_2_byte_udouble(sog, 0.01)
-    msg.add_4_byte_uint(mmsi)
-    msg.add_byte_uint((mob_emitter_battery_status & 0x07) | 0xF8)
+    msg.add_byte_uint(data.sid)
+    msg.add_4_byte_uint(data.mob_emitter_id)
+    msg.add_byte_uint((data.mob_status & 0x07) | 0xF8)
+    msg.add_4_byte_udouble(data.activation_time, 0.0001)
+    msg.add_byte_uint((data.position_source & 0x07) | 0xF8)
+    msg.add_2_byte_uint(data.position_date)
+    msg.add_4_byte_udouble(data.position_time, 0.0001)
+    msg.add_4_byte_double(data.latitude, 1e-7)
+    msg.add_4_byte_double(data.longitude, 1e-7)
+    msg.add_byte_uint((data.cog_reference & 0x03) | 0xFC)
+    msg.add_2_byte_udouble(data.cog, 0.0001)
+    msg.add_2_byte_udouble(data.sog, 0.01)
+    msg.add_4_byte_uint(data.mmsi)
+    msg.add_byte_uint((data.mob_emitter_battery_status & 0x07) | 0xF8)
     return msg
-
-
-class MOBNotification(NamedTuple):
-    sid: int
-    mob_emitter_id: int
-    mob_status: N2kMOBStatus
-    activation_time: float
-    position_source: N2kMOBPositionSource
-    position_date: int
-    position_time: float
-    latitude: float
-    longitude: float
-    cog_reference: N2kHeadingReference
-    cog: float
-    sog: float
-    mmsi: int
-    mob_emitter_battery_status: N2kMOBEmitterBatteryStatus
 
 
 def parse_n2k_mob_notification(msg: Message) -> MOBNotification:
@@ -222,24 +200,28 @@ def parse_n2k_mob_notification(msg: Message) -> MOBNotification:
 
 
 # Heading/Track Control (PGN 127237)
+class HeadingTrackControl(NamedTuple):
+    rudder_limit_exceeded: N2kOnOff
+    off_heading_limit_exceeded: N2kOnOff
+    off_track_limit_exceeded: N2kOnOff
+    override: N2kOnOff
+    steering_mode: N2kSteeringMode
+    turn_mode: N2kTurnMode
+    heading_reference: N2kHeadingReference
+    commanded_rudder_direction: N2kRudderDirectionOrder
+    commanded_rudder_angle: float
+    heading_to_steer_course: float
+    track: float
+    rudder_limit: float
+    off_heading_limit: float
+    radius_of_turn_order: float
+    rate_of_turn_order: float
+    off_track_limit: float
+    vessel_heading: float
+
+
 def set_n2k_heading_track_control(
-    rudder_limit_exceeded: N2kOnOff,
-    off_heading_limit_exceeded: N2kOnOff,
-    off_track_limit_exceeded: N2kOnOff,
-    override: N2kOnOff,
-    steering_mode: N2kSteeringMode,
-    turn_mode: N2kTurnMode,
-    heading_reference: N2kHeadingReference,
-    commanded_rudder_direction: N2kRudderDirectionOrder,
-    commanded_rudder_angle: float,
-    heading_to_steer_course: float,
-    track: float,
-    rudder_limit: float,
-    off_heading_limit: float,
-    radius_of_turn_order: float,
-    rate_of_turn_order: float,
-    off_track_limit: float,
-    vessel_heading: float,
+    data: HeadingTrackControl,
 ) -> Message:
     """
     Generate NMEA2000 message containing Heading/Track Control information (PGN 127233)
@@ -267,47 +249,27 @@ def set_n2k_heading_track_control(
     msg.pgn = PGN.HeadingTrackControl
     msg.priority = 2
     msg.add_byte_uint(
-        (rudder_limit_exceeded & 0x03) << 0
-        | (off_heading_limit_exceeded & 0x03) << 2
-        | (off_track_limit_exceeded & 0x03) << 4
-        | (override & 0x03) << 6
+        (data.rudder_limit_exceeded & 0x03) << 0
+        | (data.off_heading_limit_exceeded & 0x03) << 2
+        | (data.off_track_limit_exceeded & 0x03) << 4
+        | (data.override & 0x03) << 6
     )
     msg.add_byte_uint(
-        (steering_mode & 0x07) << 0
-        | (turn_mode & 0x07) << 3
-        | (heading_reference & 0x03) << 6
+        (data.steering_mode & 0x07) << 0
+        | (data.turn_mode & 0x07) << 3
+        | (data.heading_reference & 0x03) << 6
     )
-    msg.add_byte_uint((commanded_rudder_direction & 0x07) << 5 | 0x1F)
-    msg.add_2_byte_double(commanded_rudder_angle, 0.0001)
-    msg.add_2_byte_udouble(heading_to_steer_course, 0.0001)
-    msg.add_2_byte_udouble(track, 0.0001)
-    msg.add_2_byte_udouble(rudder_limit, 0.0001)
-    msg.add_2_byte_udouble(off_heading_limit, 0.0001)
-    msg.add_2_byte_double(radius_of_turn_order, 1)
-    msg.add_2_byte_double(rate_of_turn_order, 3.125e-5)
-    msg.add_2_byte_double(off_track_limit, 1)
-    msg.add_2_byte_udouble(vessel_heading, 0.0001)
+    msg.add_byte_uint((data.commanded_rudder_direction & 0x07) << 5 | 0x1F)
+    msg.add_2_byte_double(data.commanded_rudder_angle, 0.0001)
+    msg.add_2_byte_udouble(data.heading_to_steer_course, 0.0001)
+    msg.add_2_byte_udouble(data.track, 0.0001)
+    msg.add_2_byte_udouble(data.rudder_limit, 0.0001)
+    msg.add_2_byte_udouble(data.off_heading_limit, 0.0001)
+    msg.add_2_byte_double(data.radius_of_turn_order, 1)
+    msg.add_2_byte_double(data.rate_of_turn_order, 3.125e-5)
+    msg.add_2_byte_double(data.off_track_limit, 1)
+    msg.add_2_byte_udouble(data.vessel_heading, 0.0001)
     return msg
-
-
-class HeadingTrackControl(NamedTuple):
-    rudder_limit_exceeded: N2kOnOff
-    off_heading_limit_exceeded: N2kOnOff
-    off_track_limit_exceeded: N2kOnOff
-    override: N2kOnOff
-    steering_mode: N2kSteeringMode
-    turn_mode: N2kTurnMode
-    heading_reference: N2kHeadingReference
-    commanded_rudder_direction: N2kRudderDirectionOrder
-    commanded_rudder_angle: float
-    heading_to_steer_course: float
-    track: float
-    rudder_limit: float
-    off_heading_limit: float
-    radius_of_turn_order: float
-    rate_of_turn_order: float
-    off_track_limit: float
-    vessel_heading: float
 
 
 def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
@@ -351,11 +313,15 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
 
 
 # Rudder (PGN 127245)
+class Rudder(NamedTuple):
+    rudder_position: float
+    instance: int
+    rudder_direction_order: N2kRudderDirectionOrder
+    angle_order: float
+
+
 def set_n2k_rudder(
-    rudder_position: float,
-    instance: int = 0,
-    rudder_direction_order: N2kRudderDirectionOrder = N2kRudderDirectionOrder.NoDirectionOrder,
-    angle_order: float = N2K_DOUBLE_NA,
+    data: Rudder,
 ) -> Message:
     """
     Rudder
@@ -369,20 +335,13 @@ def set_n2k_rudder(
     msg = Message()
     msg.pgn = PGN.Rudder
     msg.priority = 2
-    msg.add_byte_uint(instance)
-    msg.add_byte_uint((rudder_direction_order & 0x07) | 0xF8)
-    msg.add_2_byte_double(angle_order, 0.0001)
-    msg.add_2_byte_double(rudder_position, 0.0001)
+    msg.add_byte_uint(data.instance)
+    msg.add_byte_uint((data.rudder_direction_order & 0x07) | 0xF8)
+    msg.add_2_byte_double(data.angle_order, 0.0001)
+    msg.add_2_byte_double(data.rudder_position, 0.0001)
     msg.add_byte_uint(0xFF)  # reserved
     msg.add_byte_uint(0xFF)  # reserved
     return msg
-
-
-class Rudder(NamedTuple):
-    rudder_position: float
-    instance: int
-    rudder_direction_order: N2kRudderDirectionOrder
-    angle_order: float
 
 
 def parse_n2k_rudder(msg: Message) -> Rudder:
@@ -402,12 +361,16 @@ def parse_n2k_rudder(msg: Message) -> Rudder:
 
 
 # Vessel Heading (PGN 127250)
+class Heading(NamedTuple):
+    sid: int
+    heading: float
+    deviation: float
+    variation: float
+    ref: N2kHeadingReference
+
+
 def set_n2k_heading(
-    sid: int,
-    heading: float,
-    deviation: float = N2K_DOUBLE_NA,
-    variation: float = N2K_DOUBLE_NA,
-    ref: N2kHeadingReference = N2kHeadingReference.true,
+    data: Heading,
 ) -> Message:
     """
     Vessel Heading (PGN 127250).
@@ -425,20 +388,12 @@ def set_n2k_heading(
     msg = Message()
     msg.pgn = PGN.VesselHeading
     msg.priority = 2
-    msg.add_byte_uint(sid)
-    msg.add_2_byte_udouble(heading, 0.0001)
-    msg.add_2_byte_double(deviation, 0.0001)
-    msg.add_2_byte_double(variation, 0.0001)
-    msg.add_byte_uint(0xFC | ref)
+    msg.add_byte_uint(data.sid)
+    msg.add_2_byte_udouble(data.heading, 0.0001)
+    msg.add_2_byte_double(data.deviation, 0.0001)
+    msg.add_2_byte_double(data.variation, 0.0001)
+    msg.add_byte_uint(0xFC | data.ref)
     return msg
-
-
-class Heading(NamedTuple):
-    sid: int
-    heading: float
-    deviation: float
-    variation: float
-    ref: N2kHeadingReference
 
 
 def parse_n2k_heading(msg: Message) -> Heading:
@@ -461,7 +416,12 @@ def parse_n2k_heading(msg: Message) -> Heading:
 
 
 # Rate of Turn (PGN 127251)
-def set_n2k_rate_of_turn(sid: int, rate_of_turn: float) -> Message:
+class RateOfTurn(NamedTuple):
+    sid: int
+    rate_of_turn: float
+
+
+def set_n2k_rate_of_turn(data: RateOfTurn) -> Message:
     """
     Rate of Turn (PGN 127251)
 
@@ -473,16 +433,11 @@ def set_n2k_rate_of_turn(sid: int, rate_of_turn: float) -> Message:
     msg = Message()
     msg.pgn = PGN.RateOfTurn
     msg.priority = 2
-    msg.add_byte_uint(sid)
-    msg.add_4_byte_double(rate_of_turn, 3.125e-08)  # 1e-6/32.0
+    msg.add_byte_uint(data.sid)
+    msg.add_4_byte_double(data.rate_of_turn, 3.125e-08)  # 1e-6/32.0
     msg.add_byte_uint(0xFF)
     msg.add_2_byte_uint(0xFFFF)
     return msg
-
-
-class RateOfTurn(NamedTuple):
-    sid: int
-    rate_of_turn: float
 
 
 def parse_n2k_rate_of_turn(msg: Message) -> RateOfTurn:
@@ -494,8 +449,15 @@ def parse_n2k_rate_of_turn(msg: Message) -> RateOfTurn:
 
 
 # Heave (PGN 127252)
+class Heave(NamedTuple):
+    sid: int
+    heave: float
+    delay: float
+    delay_source: N2kDelaySource
+
+
 def set_n2k_heave(
-    sid: int, heave: float, delay: float, delay_source: N2kDelaySource
+    data: Heave,
 ) -> Message:
     """
     Heave (PGN 127252)
@@ -510,20 +472,13 @@ def set_n2k_heave(
     msg = Message()
     msg.pgn = PGN.Heave
     msg.priority = 3
-    msg.add_byte_uint(sid)
-    msg.add_2_byte_double(heave, 0.01)
-    msg.add_2_byte_udouble(delay, 0.01)
-    msg.add_byte_uint(0xF0 | (delay_source & 0x0F))
+    msg.add_byte_uint(data.sid)
+    msg.add_2_byte_double(data.heave, 0.01)
+    msg.add_2_byte_udouble(data.delay, 0.01)
+    msg.add_byte_uint(0xF0 | (data.delay_source & 0x0F))
     msg.add_2_byte_uint(N2K_UINT16_NA)
 
     return msg
-
-
-class Heave(NamedTuple):
-    sid: int
-    heave: float
-    delay: float
-    delay_source: N2kDelaySource
 
 
 def parse_n2k_heave(msg: Message) -> Heave:
@@ -537,7 +492,14 @@ def parse_n2k_heave(msg: Message) -> Heave:
 
 
 # Attitude (PGN 127257)
-def set_n2k_attitude(sid: int, yaw: float, pitch: float, roll: float) -> Message:
+class Attitude(NamedTuple):
+    sid: int
+    yaw: float
+    pitch: float
+    roll: float
+
+
+def set_n2k_attitude(data: Attitude) -> Message:
     """
     Attitude (PGN 127257)
 
@@ -551,19 +513,12 @@ def set_n2k_attitude(sid: int, yaw: float, pitch: float, roll: float) -> Message
     msg = Message()
     msg.pgn = PGN.Attitude
     msg.priority = 3
-    msg.add_byte_uint(sid)
-    msg.add_2_byte_double(yaw, 0.0001)
-    msg.add_2_byte_double(pitch, 0.0001)
-    msg.add_2_byte_double(roll, 0.0001)
+    msg.add_byte_uint(data.sid)
+    msg.add_2_byte_double(data.yaw, 0.0001)
+    msg.add_2_byte_double(data.pitch, 0.0001)
+    msg.add_2_byte_double(data.roll, 0.0001)
     msg.add_byte_uint(0xFF)  # Reserved
     return msg
-
-
-class Attitude(NamedTuple):
-    sid: int
-    yaw: float
-    pitch: float
-    roll: float
 
 
 def parse_n2k_attitude(msg: Message) -> Attitude:
@@ -577,9 +532,14 @@ def parse_n2k_attitude(msg: Message) -> Attitude:
 
 
 # Magnetic Variation (PGN 127258)
-def set_n2k_magnetic_variation(
-    sid: int, source: N2kMagneticVariation, days_since_1970: int, variation: float
-) -> Message:
+class MagneticVariation(NamedTuple):
+    sid: int
+    source: N2kMagneticVariation
+    days_since_1970: int
+    variation: float
+
+
+def set_n2k_magnetic_variation(data: MagneticVariation) -> Message:
     """
     Magnetic Variation (PGN 127258)
 
@@ -594,19 +554,12 @@ def set_n2k_magnetic_variation(
     msg = Message()
     msg.pgn = PGN.MagneticVariation
     msg.priority = 6
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint(source & 0x0F)
-    msg.add_2_byte_uint(days_since_1970)
-    msg.add_2_byte_double(variation, 0.0001)
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(data.source & 0x0F)
+    msg.add_2_byte_uint(data.days_since_1970)
+    msg.add_2_byte_double(data.variation, 0.0001)
     msg.add_2_byte_uint(0xFFFF)
     return msg
-
-
-class MagneticVariation(NamedTuple):
-    sid: int
-    source: N2kMagneticVariation
-    days_since_1970: int
-    variation: float
 
 
 def parse_n2k_magnetic_variation(msg: Message) -> MagneticVariation:
@@ -620,12 +573,14 @@ def parse_n2k_magnetic_variation(msg: Message) -> MagneticVariation:
 
 
 # Engine Parameters Rapid (PGN 127488)
-def set_n2k_engine_parameters_rapid(
-    engine_instance: int,
-    engine_speed: float,
-    engine_boost_pressure: float,
-    engine_tilt_trim: int,
-) -> Message:
+class EngineParametersRapid(NamedTuple):
+    engine_instance: int
+    engine_speed: float
+    engine_boost_pressure: float
+    engine_tilt_trim: int
+
+
+def set_n2k_engine_parameters_rapid(data: EngineParametersRapid) -> Message:
     """
     Engine Parameters Rapid (PGN 127488)
 
@@ -643,22 +598,15 @@ def set_n2k_engine_parameters_rapid(
     msg = Message()
     msg.pgn = PGN.EngineParametersRapid
     msg.priority = 2
-    msg.add_byte_uint(engine_instance)
-    msg.add_2_byte_udouble(engine_speed, 0.25)
-    msg.add_2_byte_udouble(engine_boost_pressure, 100)
+    msg.add_byte_uint(data.engine_instance)
+    msg.add_2_byte_udouble(data.engine_speed, 0.25)
+    msg.add_2_byte_udouble(data.engine_boost_pressure, 100)
     msg.add_byte_uint(
-        engine_tilt_trim
+        data.engine_tilt_trim
     )  # TODO: this is proably incorrect and should instead be add_byte_int. Verify with Garmin Display
     msg.add_byte_uint(0xFF)  # reserved
     msg.add_byte_uint(0xFF)  # reserved
     return msg
-
-
-class EngineParametersRapid(NamedTuple):
-    engine_instance: int
-    engine_speed: float
-    engine_boost_pressure: float
-    engine_tilt_trim: int
 
 
 def parse_n2k_engine_parameters_rapid(msg: Message) -> EngineParametersRapid:
@@ -672,21 +620,23 @@ def parse_n2k_engine_parameters_rapid(msg: Message) -> EngineParametersRapid:
 
 
 # Engine Parameters Dynamic (PGN 127489)
-def set_n2k_engine_parameters_dynamic(
-    engine_instance: int,
-    engine_oil_press: float,
-    engine_oil_temp: float,
-    engine_coolant_temp: float,
-    alternator_voltage: float,
-    fuel_rate: float,
-    engine_hours: float,
-    engine_coolant_press: float,
-    engine_fuel_press: float,
-    engine_load: int,
-    engine_torque: int,
-    status1: N2kEngineDiscreteStatus1,
-    status2: N2kEngineDiscreteStatus2,
-) -> Message:
+class EngineParametersDynamic(NamedTuple):
+    engine_instance: int
+    engine_oil_press: float
+    engine_oil_temp: float
+    engine_coolant_temp: float
+    alternator_voltage: float
+    fuel_rate: float
+    engine_hours: float
+    engine_coolant_press: float
+    engine_fuel_press: float
+    engine_load: int
+    engine_torque: int
+    status1: N2kEngineDiscreteStatus1
+    status2: N2kEngineDiscreteStatus2
+
+
+def set_n2k_engine_parameters_dynamic(data: EngineParametersDynamic) -> Message:
     """
     Engine Parameters Dynamic (PGN 127489)
 
@@ -713,37 +663,21 @@ def set_n2k_engine_parameters_dynamic(
     msg = Message()
     msg.pgn = PGN.EngineParametersDynamic
     msg.priority = 2
-    msg.add_byte_uint(engine_instance)
-    msg.add_2_byte_udouble(engine_oil_press, 100)
-    msg.add_2_byte_udouble(engine_oil_temp, 0.1)
-    msg.add_2_byte_udouble(engine_coolant_temp, 0.01)
-    msg.add_2_byte_double(alternator_voltage, 0.01)
-    msg.add_2_byte_double(fuel_rate, 0.1)
-    msg.add_4_byte_udouble(engine_hours, 1)
-    msg.add_2_byte_udouble(engine_coolant_press, 100)
-    msg.add_2_byte_udouble(engine_fuel_press, 1000)
+    msg.add_byte_uint(data.engine_instance)
+    msg.add_2_byte_udouble(data.engine_oil_press, 100)
+    msg.add_2_byte_udouble(data.engine_oil_temp, 0.1)
+    msg.add_2_byte_udouble(data.engine_coolant_temp, 0.01)
+    msg.add_2_byte_double(data.alternator_voltage, 0.01)
+    msg.add_2_byte_double(data.fuel_rate, 0.1)
+    msg.add_4_byte_udouble(data.engine_hours, 1)
+    msg.add_2_byte_udouble(data.engine_coolant_press, 100)
+    msg.add_2_byte_udouble(data.engine_fuel_press, 1000)
     msg.add_byte_uint(0xFF)  # reserved
-    msg.add_2_byte_uint(status1.status)
-    msg.add_2_byte_uint(status2.status)
-    msg.add_byte_uint(engine_load)
-    msg.add_byte_uint(engine_torque)
+    msg.add_2_byte_uint(data.status1.status)
+    msg.add_2_byte_uint(data.status2.status)
+    msg.add_byte_uint(data.engine_load)
+    msg.add_byte_uint(data.engine_torque)
     return msg
-
-
-class EngineParametersDynamic(NamedTuple):
-    engine_instance: int
-    engine_oil_press: float
-    engine_oil_temp: float
-    engine_coolant_temp: float
-    alternator_voltage: float
-    fuel_rate: float
-    engine_hours: float
-    engine_coolant_press: float
-    engine_fuel_press: float
-    engine_load: int
-    engine_torque: int
-    status1: N2kEngineDiscreteStatus1
-    status2: N2kEngineDiscreteStatus2
 
 
 def parse_n2k_engine_parameters_dynamic(msg: Message) -> EngineParametersDynamic:
@@ -783,12 +717,16 @@ def parse_n2k_engine_parameters_dynamic(msg: Message) -> EngineParametersDynamic
 
 
 # Transmission parameters, dynamic (PGN 127493)
+class TransmissionParametersDynamic(NamedTuple):
+    engine_instance: int
+    transmission_gear: N2kTransmissionGear
+    oil_pressure: float
+    oil_temperature: float
+    discrete_status1: N2kTransmissionDiscreteStatus1
+
+
 def set_n2k_transmission_parameters_dynamic(
-    engine_instance: int,
-    transmission_gear: N2kTransmissionGear,
-    oil_pressure: float,
-    oil_temperature: float,
-    discrete_status1: N2kTransmissionDiscreteStatus1,
+    data: TransmissionParametersDynamic,
 ) -> Message:
     """
     Transmission Parameters, Dynamic (PGN 127493)
@@ -808,21 +746,13 @@ def set_n2k_transmission_parameters_dynamic(
     msg = Message()
     msg.pgn = PGN.TransmissionParameters
     msg.priority = 2
-    msg.add_byte_uint(engine_instance)
-    msg.add_byte_uint((transmission_gear & 0x03) | 0xFC)
-    msg.add_2_byte_udouble(oil_pressure, 100)
-    msg.add_2_byte_udouble(oil_temperature, 0.1)
-    msg.add_byte_uint(discrete_status1.status)
+    msg.add_byte_uint(data.engine_instance)
+    msg.add_byte_uint((data.transmission_gear & 0x03) | 0xFC)
+    msg.add_2_byte_udouble(data.oil_pressure, 100)
+    msg.add_2_byte_udouble(data.oil_temperature, 0.1)
+    msg.add_byte_uint(data.discrete_status1.status)
     msg.add_byte_uint(0xFF)  # Reserved
     return msg
-
-
-class TransmissionParametersDynamic(NamedTuple):
-    engine_instance: int
-    transmission_gear: N2kTransmissionGear
-    oil_pressure: float
-    oil_temperature: float
-    discrete_status1: N2kTransmissionDiscreteStatus1
 
 
 def parse_n2k_transmission_parameters_dynamic(
@@ -841,13 +771,15 @@ def parse_n2k_transmission_parameters_dynamic(
 
 
 # Trip Parameters, Engine (PGN 127497)
-def set_n2k_trip_parameters_engine(
-    engine_instance: int,
-    trip_fuel_used: float,
-    fuel_rate_average: float,
-    fuel_rate_economy: float,
-    instantaneous_fuel_economy: float,
-) -> Message:
+class TripFuelConsumptionEngine(NamedTuple):
+    engine_instance: int
+    trip_fuel_used: float
+    fuel_rate_average: float
+    fuel_rate_economy: float
+    instantaneous_fuel_economy: float
+
+
+def set_n2k_trip_parameters_engine(data: TripFuelConsumptionEngine) -> Message:
     """
     Trip Fuel Consumption by Engine (PGN 127497)
 
@@ -866,20 +798,12 @@ def set_n2k_trip_parameters_engine(
     msg = Message()
     msg.pgn = PGN.TripFuelConsumptionEngine
     msg.priority = 2
-    msg.add_byte_uint(engine_instance)
-    msg.add_2_byte_udouble(trip_fuel_used, 1)
-    msg.add_2_byte_double(fuel_rate_average, 0.1)
-    msg.add_2_byte_double(fuel_rate_economy, 0.1)
-    msg.add_2_byte_double(instantaneous_fuel_economy, 0.1)
+    msg.add_byte_uint(data.engine_instance)
+    msg.add_2_byte_udouble(data.trip_fuel_used, 1)
+    msg.add_2_byte_double(data.fuel_rate_average, 0.1)
+    msg.add_2_byte_double(data.fuel_rate_economy, 0.1)
+    msg.add_2_byte_double(data.instantaneous_fuel_economy, 0.1)
     return msg
-
-
-class TripFuelConsumptionEngine(NamedTuple):
-    engine_instance: int
-    trip_fuel_used: float
-    fuel_rate_averate: float
-    fuel_rate_economy: float
-    instantaneous_fuel_economy: float
 
 
 def parse_n2k_trip_parameters_engine(msg: Message) -> TripFuelConsumptionEngine:
@@ -887,7 +811,7 @@ def parse_n2k_trip_parameters_engine(msg: Message) -> TripFuelConsumptionEngine:
     return TripFuelConsumptionEngine(
         engine_instance=msg.get_byte_uint(index),
         trip_fuel_used=msg.get_2_byte_udouble(1, index),
-        fuel_rate_averate=msg.get_2_byte_double(0.1, index),
+        fuel_rate_average=msg.get_2_byte_double(0.1, index),
         fuel_rate_economy=msg.get_2_byte_double(0.1, index),
         instantaneous_fuel_economy=msg.get_2_byte_double(0.1, index),
     )
@@ -945,9 +869,12 @@ def n2k_set_status_binary_on_status(
 
 
 # Binary status report (PGN 127501)
-def set_n2k_binary_status_report(
-    device_bank_instance: int, bank_status: N2kBinaryStatus
-) -> Message:
+class BinaryStatusReport(NamedTuple):
+    device_bank_instance: int
+    bank_status: N2kBinaryStatus
+
+
+def set_n2k_binary_status_report(data: BinaryStatusReport) -> Message:
     """
     Binary Status Report (PGN 127501)
 
@@ -958,13 +885,8 @@ def set_n2k_binary_status_report(
     msg = Message()
     msg.pgn = PGN.BinaryStatusReport
     msg.priority = 3
-    msg.add_uint_64((bank_status << 8) | (device_bank_instance & 0xFF))
+    msg.add_uint_64((data.bank_status << 8) | (data.device_bank_instance & 0xFF))
     return msg
-
-
-class BinaryStatusReport(NamedTuple):
-    device_bank_instance: int
-    bank_status: N2kBinaryStatus
 
 
 def parse_n2k_binary_status_report(msg: Message) -> BinaryStatusReport:
@@ -977,8 +899,13 @@ def parse_n2k_binary_status_report(msg: Message) -> BinaryStatusReport:
 
 
 # Switch Bank Control (PGN 127502)
+class SwitchBankControl(NamedTuple):
+    target_bank_instance: int
+    bank_status: N2kBinaryStatus
+
+
 def set_n2k_switch_bank_control(
-    target_bank_instance: int, bank_status: N2kBinaryStatus
+    data: SwitchBankControl,
 ) -> Message:
     """
     Switch Bank Control (PGN 127502)
@@ -1002,13 +929,8 @@ def set_n2k_switch_bank_control(
     msg = Message()
     msg.pgn = PGN.SwitchBankControl
     msg.priority = 3
-    msg.add_uint_64((bank_status << 8) | (target_bank_instance & 0xFF))
+    msg.add_uint_64((data.bank_status << 8) | (data.target_bank_instance & 0xFF))
     return msg
-
-
-class SwitchBankControl(NamedTuple):
-    target_bank_instance: int
-    bank_status: N2kBinaryStatus
 
 
 def parse_n2k_switch_bank_control(msg: Message) -> SwitchBankControl:
@@ -1021,9 +943,14 @@ def parse_n2k_switch_bank_control(msg: Message) -> SwitchBankControl:
 
 
 # Fluid level (PGN 127505)
-def set_n2k_fluid_level(
-    instance: int, fluid_type: N2kFluidType, level: float, capacity: float
-) -> Message:
+class FluidLevel(NamedTuple):
+    instance: int
+    fluid_type: N2kFluidType
+    level: float
+    capacity: float
+
+
+def set_n2k_fluid_level(data: FluidLevel) -> Message:
     """
     Fluid Level (PGN 127505)
 
@@ -1035,18 +962,11 @@ def set_n2k_fluid_level(
     """
     msg = Message()
     msg.priority = 6
-    msg.add_byte_uint((instance & 0x0F) | ((fluid_type & 0x0F) << 4))
-    msg.add_2_byte_double(level, 0.004)
-    msg.add_4_byte_udouble(capacity, 0.1)
+    msg.add_byte_uint((data.instance & 0x0F) | ((data.fluid_type & 0x0F) << 4))
+    msg.add_2_byte_double(data.level, 0.004)
+    msg.add_4_byte_udouble(data.capacity, 0.1)
     msg.add_byte_uint(0xFF)  # Reserved
     return msg
-
-
-class FluidLevel(NamedTuple):
-    instance: int
-    fluid_type: N2kFluidType
-    level: float
-    capacity: float
 
 
 def parse_n2k_fluid_level(msg: Message) -> FluidLevel:
@@ -1062,16 +982,18 @@ def parse_n2k_fluid_level(msg: Message) -> FluidLevel:
 
 
 # DC Detailed Status (PGN 127506)
-def set_n2k_dc_detailed_status(
-    sid: int,
-    dc_instance: int,
-    dc_type: N2kDCType,
-    state_of_charge: int,
-    state_of_health: int,
-    time_remaining: float,
-    ripple_voltage: float,
-    capacity: float,
-) -> Message:
+class DCDetailedStatus(NamedTuple):
+    sid: int
+    dc_instance: int
+    dc_type: N2kDCType
+    state_of_charge: int
+    state_of_health: int
+    time_remaining: float
+    ripple_voltage: float
+    capacity: float
+
+
+def set_n2k_dc_detailed_status(data: DCDetailedStatus) -> Message:
     """
     DC Detailed Status (PGN 127506)
 
@@ -1089,26 +1011,15 @@ def set_n2k_dc_detailed_status(
     msg = Message()
     msg.pgn = PGN.DCDetailedstatus
     msg.priority = 6
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint(dc_instance)
-    msg.add_byte_uint(dc_type)
-    msg.add_byte_uint(state_of_charge)
-    msg.add_byte_uint(state_of_health)
-    msg.add_2_byte_udouble(time_remaining, 60)
-    msg.add_2_byte_udouble(ripple_voltage, 0.001)
-    msg.add_2_byte_udouble(capacity, 3600)
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(data.dc_instance)
+    msg.add_byte_uint(data.dc_type)
+    msg.add_byte_uint(data.state_of_charge)
+    msg.add_byte_uint(data.state_of_health)
+    msg.add_2_byte_udouble(data.time_remaining, 60)
+    msg.add_2_byte_udouble(data.ripple_voltage, 0.001)
+    msg.add_2_byte_udouble(data.capacity, 3600)
     return msg
-
-
-class DCDetailedStatus(NamedTuple):
-    sid: int
-    dc_instance: int
-    dc_type: N2kDCType
-    state_of_charge: int
-    state_of_health: int
-    time_remaining: float
-    ripple_voltage: float
-    capacity: float
 
 
 def parse_n2k_dc_detailed_status(msg: Message) -> DCDetailedStatus:
@@ -1126,15 +1037,17 @@ def parse_n2k_dc_detailed_status(msg: Message) -> DCDetailedStatus:
 
 
 # Charger Status (PGN 127507)
-def set_n2k_charger_status(
-    instance: int,
-    battery_instance: int,
-    charge_state: N2kChargeState,
-    charger_mode: N2kChargerMode,
-    enabled: N2kOnOff,
-    equalization_pending: N2kOnOff,
-    equalization_time_remaining: float,
-) -> Message:
+class ChargerStatus(NamedTuple):
+    instance: int
+    battery_instance: int
+    charge_state: N2kChargeState
+    charger_mode: N2kChargerMode
+    enabled: N2kOnOff
+    equalization_pending: N2kOnOff
+    equalization_time_remaining: float
+
+
+def set_n2k_charger_status(data: ChargerStatus) -> Message:
     """
     Charger Status (PGN 127507)
 
@@ -1150,22 +1063,14 @@ def set_n2k_charger_status(
     msg = Message()
     msg.pgn = PGN.ChargerStatus
     msg.priority = 6
-    msg.add_byte_uint(instance)
-    msg.add_byte_uint(battery_instance)
-    msg.add_byte_uint((charger_mode & 0x0F) << 4 | (charge_state & 0x0F))
-    msg.add_byte_uint(0x0F << 4 | (equalization_pending & 0x03) << 2 | (enabled & 0x03))
-    msg.add_2_byte_udouble(equalization_time_remaining, 1)
+    msg.add_byte_uint(data.instance)
+    msg.add_byte_uint(data.battery_instance)
+    msg.add_byte_uint((data.charger_mode & 0x0F) << 4 | (data.charge_state & 0x0F))
+    msg.add_byte_uint(
+        0x0F << 4 | (data.equalization_pending & 0x03) << 2 | (data.enabled & 0x03)
+    )
+    msg.add_2_byte_udouble(data.equalization_time_remaining, 1)
     return msg
-
-
-class ChargerStatus(NamedTuple):
-    instance: int
-    battery_instance: int
-    charge_state: N2kChargeState
-    charger_mode: N2kChargerMode
-    enabled: N2kOnOff
-    equalization_pending: N2kOnOff
-    equalization_time_remaining: float
 
 
 def parse_n2k_charger_status(msg: Message) -> ChargerStatus:
@@ -1193,13 +1098,15 @@ def parse_n2k_charger_status(msg: Message) -> ChargerStatus:
 
 
 # Battery Status (PGN 127508)
-def set_n2k_battery_status(
-    battery_instance: int,
-    battery_voltage: float,
-    battery_current: float,
-    battery_temperature: float,
-    sid: int,
-) -> Message:
+class BatteryStatus(NamedTuple):
+    battery_instance: int
+    battery_voltage: float
+    battery_current: float
+    battery_temperature: float
+    sid: int
+
+
+def set_n2k_battery_status(data: BatteryStatus) -> Message:
     """
     Battery Status (PGN 127508)
 
@@ -1214,20 +1121,12 @@ def set_n2k_battery_status(
     msg = Message()
     msg.pgn = PGN.BatteryStatus
     msg.priority = 6
-    msg.add_byte_uint(battery_instance)
-    msg.add_2_byte_double(battery_voltage, 0.01)
-    msg.add_2_byte_double(battery_current, 0.1)
-    msg.add_2_byte_udouble(battery_temperature, 0.01)
-    msg.add_byte_uint(sid)
+    msg.add_byte_uint(data.battery_instance)
+    msg.add_2_byte_double(data.battery_voltage, 0.01)
+    msg.add_2_byte_double(data.battery_current, 0.1)
+    msg.add_2_byte_udouble(data.battery_temperature, 0.01)
+    msg.add_byte_uint(data.sid)
     return msg
-
-
-class BatteryStatus(NamedTuple):
-    battery_instance: int
-    battery_voltage: float
-    battery_current: float
-    battery_temperature: float
-    sid: int
 
 
 def parse_n2k_battery_status(msg: Message) -> BatteryStatus:
@@ -1242,18 +1141,20 @@ def parse_n2k_battery_status(msg: Message) -> BatteryStatus:
 
 
 # Charger Configuration Status (PGN 127510)
-def set_n2k_charger_configuration_status(
-    charger_instance: int,
-    battery_instance: int,
-    enable: N2kOnOff,
-    charge_current_limit: int,
-    charging_algorithm: N2kChargingAlgorithm,
-    charger_mode: N2kChargerMode,
-    battery_temperature: N2kBattTempNoSensor,
-    equalization_enabled: N2kOnOff,
-    over_charge_enable: N2kOnOff,
-    equalization_time_remaining: int,
-) -> Message:
+class ChargerConfigurationStatus(NamedTuple):
+    charger_instance: int
+    battery_instance: int
+    enable: N2kOnOff
+    charge_current_limit: int
+    charging_algorithm: N2kChargingAlgorithm
+    charger_mode: N2kChargerMode
+    battery_temperature: N2kBattTempNoSensor
+    equalization_enabled: N2kOnOff
+    over_charge_enable: N2kOnOff
+    equalization_time_remaining: int
+
+
+def set_n2k_charger_configuration_status(data: ChargerConfigurationStatus) -> Message:
     """
     Charger Configuration Status (PGN 127510)
 
@@ -1271,31 +1172,20 @@ def set_n2k_charger_configuration_status(
     msg = Message()
     msg.pgn = PGN.ChargerConfigurationStatus
     msg.priority = 6
-    msg.add_byte_uint(charger_instance)
-    msg.add_byte_uint(battery_instance)
-    msg.add_byte_uint(enable & 0x03)
-    msg.add_byte_uint(charge_current_limit)  # 0 - 252%
-    msg.add_byte_uint((charger_mode & 0x0F) << 4 | (charging_algorithm & 0x0F))
+    msg.add_byte_uint(data.charger_instance)
+    msg.add_byte_uint(data.battery_instance)
+    msg.add_byte_uint(data.enable & 0x03)
+    msg.add_byte_uint(data.charge_current_limit)  # 0 - 252%
     msg.add_byte_uint(
-        (over_charge_enable & 0x03) << 6
-        | (equalization_enabled & 0x03) << 4
-        | (battery_temperature & 0x0F)
+        (data.charger_mode & 0x0F) << 4 | (data.charging_algorithm & 0x0F)
     )
-    msg.add_2_byte_uint(equalization_time_remaining)
+    msg.add_byte_uint(
+        (data.over_charge_enable & 0x03) << 6
+        | (data.equalization_enabled & 0x03) << 4
+        | (data.battery_temperature & 0x0F)
+    )
+    msg.add_2_byte_uint(data.equalization_time_remaining)
     return msg
-
-
-class ChargerConfigurationStatus(NamedTuple):
-    charger_instance: int
-    battery_instance: int
-    enable: N2kOnOff
-    charge_current_limit: int
-    charging_algorithm: N2kChargingAlgorithm
-    charger_mode: N2kChargerMode
-    battery_temperature: N2kBattTempNoSensor
-    equalization_enabled: N2kOnOff
-    over_charge_enable: N2kOnOff
-    equalization_time_remaining: int
 
 
 def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfigurationStatus:
@@ -1329,17 +1219,19 @@ def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfiguration
 
 
 # Battery Configuration Status (PGN 127513)
-def set_n2k_battery_configuration_status(
-    battery_instance: int,
-    battery_type: N2kBatType,
-    supports_equal: N2kBatEqSupport,
-    battery_nominal_voltage: N2kBatNomVolt,
-    battery_chemistry: N2kBatChem,
-    battery_capacity: float,
-    battery_temperature_coefficient: int,
-    peukert_exponent: float,
-    charge_efficiency_factor: int,
-) -> Message:
+class BatteryConfigurationStatus(NamedTuple):
+    battery_instance: int
+    battery_type: N2kBatType
+    supports_equal: N2kBatEqSupport
+    battery_nominal_voltage: N2kBatNomVolt
+    battery_chemistry: N2kBatChem
+    battery_capacity: float
+    battery_temperature_coefficient: int
+    peukert_exponent: float
+    charge_efficiency_factor: int
+
+
+def set_n2k_battery_configuration_status(data: BatteryConfigurationStatus) -> Message:
     """
     Battery Configuration Status (PGN 127513)
 
@@ -1358,36 +1250,24 @@ def set_n2k_battery_configuration_status(
     msg = Message()
     msg.pgn = PGN.BatteryConfigurationStatus
     msg.priority = 6
-    msg.add_byte_uint(battery_instance)
+    msg.add_byte_uint(data.battery_instance)
     msg.add_byte_uint(
-        0xC0 | ((supports_equal & 0x03) << 4) | (battery_type & 0x0F)
+        0xC0 | ((data.supports_equal & 0x03) << 4) | (data.battery_type & 0x0F)
     )  # BatType (4 bit), SupportsEqual (2 bit), Reserved (2 bit)
     msg.add_byte_uint(
-        ((battery_chemistry & 0x0F) << 4) | (battery_nominal_voltage & 0x0F)
+        ((data.battery_chemistry & 0x0F) << 4) | (data.battery_nominal_voltage & 0x0F)
     )
-    msg.add_2_byte_double(battery_capacity, 3600)
-    msg.add_byte_uint(battery_temperature_coefficient)
+    msg.add_2_byte_double(data.battery_capacity, 3600)
+    msg.add_byte_uint(data.battery_temperature_coefficient)
     # Original code was unsure if this is correct.
     # I am fairly certain it is as the exponent can't be better than 1 and shouldn't be worse than 1.5
-    peukert_exponent -= 1
+    peukert_exponent = data.peukert_exponent - 1
     if peukert_exponent < 0 or peukert_exponent > 0.504:
         msg.add_byte_uint(0xFF)
     else:
         msg.add_1_byte_udouble(peukert_exponent, 0.002, -1)
-    msg.add_byte_uint(charge_efficiency_factor)
+    msg.add_byte_uint(data.charge_efficiency_factor)
     return msg
-
-
-class BatteryConfigurationStatus(NamedTuple):
-    battery_instance: int
-    battery_type: N2kBatType
-    supports_equal: N2kBatEqSupport
-    battery_nominal_voltage: N2kBatNomVolt
-    battery_chemistry: N2kBatChem
-    battery_capacity: float
-    battery_temperature_coefficient: int
-    peukert_exponent: float
-    charge_efficiency_factor: int
 
 
 def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfigurationStatus:
@@ -1415,15 +1295,17 @@ def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfiguration
 
 
 # Converter (Inverter/Charger) Status (PGN 127750)
-def set_n2k_converter_status(
-    sid: int,
-    connection_number: int,
-    operating_state: N2kConvMode,
-    temperature_state: N2kTemperatureState,
-    overload_state: N2kOverloadState,
-    low_dc_voltage_state: N2kDCVoltageState,
-    ripple_state: N2kRippleState,
-) -> Message:
+class ConverterStatus(NamedTuple):
+    sid: int
+    connection_number: int
+    operating_state: N2kConvMode
+    temperature_state: N2kTemperatureState
+    overload_state: N2kOverloadState
+    low_dc_voltage_state: N2kDCVoltageState
+    ripple_state: N2kRippleState
+
+
+def set_n2k_converter_status(data: ConverterStatus) -> Message:
     """
     Converter (Inverter/Charger) Status (PGN 127750)
 
@@ -1444,27 +1326,17 @@ def set_n2k_converter_status(
     msg = Message()
     msg.pgn = PGN.ConverterStatus
     msg.priority = 6
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint(connection_number)
-    msg.add_byte_uint(operating_state)  # note: might be N2kChargeState
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(data.connection_number)
+    msg.add_byte_uint(data.operating_state)  # note: might be N2kChargeState
     msg.add_byte_uint(
-        (ripple_state & 0x03) << 6
-        | (low_dc_voltage_state & 0x03) << 4
-        | (overload_state & 0x03) << 2
-        | (temperature_state & 0x03)
+        (data.ripple_state & 0x03) << 6
+        | (data.low_dc_voltage_state & 0x03) << 4
+        | (data.overload_state & 0x03) << 2
+        | (data.temperature_state & 0x03)
     )
     msg.add_4_byte_uint(0xFFFFFFFF)  # Reserved
     return msg
-
-
-class ConverterStatus(NamedTuple):
-    sid: int
-    connection_number: int
-    operating_state: N2kConvMode
-    temperature_state: N2kTemperatureState
-    overload_state: N2kOverloadState
-    low_dc_voltage_state: N2kDCVoltageState
-    ripple_state: N2kRippleState
 
 
 def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
@@ -1491,7 +1363,12 @@ def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
 
 
 # Leeway (PGN 128000)
-def set_n2k_leeway(sid: int, leeway: float) -> Message:
+class Leeway(NamedTuple):
+    sid: int
+    leeway: float
+
+
+def set_n2k_leeway(data: Leeway) -> Message:
     """
     Leeway (PGN 128000)
 
@@ -1504,19 +1381,14 @@ def set_n2k_leeway(sid: int, leeway: float) -> Message:
     msg = Message()
     msg.pgn = PGN.Leeway
     msg.priority = 4
-    msg.add_byte_uint(sid)
-    msg.add_2_byte_double(leeway, 0.0001)
+    msg.add_byte_uint(data.sid)
+    msg.add_2_byte_double(data.leeway, 0.0001)
     msg.add_byte_uint(0xFF)  # Reserved
     msg.add_byte_uint(0xFF)  # Reserved
     msg.add_byte_uint(0xFF)  # Reserved
     msg.add_byte_uint(0xFF)  # Reserved
     msg.add_byte_uint(0xFF)  # Reserved
     return msg
-
-
-class Leeway(NamedTuple):
-    sid: int
-    leeway: float
 
 
 def parse_n2k_leeway(msg: Message) -> Leeway:
@@ -1528,12 +1400,14 @@ def parse_n2k_leeway(msg: Message) -> Leeway:
 
 
 # Boat Speed (PGN 128259)
-def set_n2k_boat_speed(
-    sid: int,
-    water_referenced: float,
-    ground_referenced: float,
-    swrt: N2kSpeedWaterReferenceType,
-) -> Message:
+class BoatSpeed(NamedTuple):
+    sid: int
+    water_referenced: float
+    ground_referenced: float
+    swrt: N2kSpeedWaterReferenceType
+
+
+def set_n2k_boat_speed(data: BoatSpeed) -> Message:
     """
     Boat Speed (PGN 128259)
 
@@ -1547,20 +1421,13 @@ def set_n2k_boat_speed(
     msg = Message()
     msg.pgn = PGN.BoatSpeed
     msg.priority = 2
-    msg.add_byte_uint(sid)
-    msg.add_2_byte_udouble(water_referenced, 0.01)
-    msg.add_2_byte_udouble(ground_referenced, 0.01)
-    msg.add_byte_uint(swrt)
+    msg.add_byte_uint(data.sid)
+    msg.add_2_byte_udouble(data.water_referenced, 0.01)
+    msg.add_2_byte_udouble(data.ground_referenced, 0.01)
+    msg.add_byte_uint(data.swrt)
     msg.add_byte_uint(0xFF)  # Reserved
     msg.add_byte_uint(0xFF)  # Reserved
     return msg
-
-
-class BoatSpeed(NamedTuple):
-    sid: int
-    water_referenced: float
-    ground_referenced: float
-    swrt: N2kSpeedWaterReferenceType
 
 
 def parse_n2k_boat_speed(msg: Message) -> BoatSpeed:
@@ -1574,9 +1441,14 @@ def parse_n2k_boat_speed(msg: Message) -> BoatSpeed:
 
 
 # Water depth (PGN 128267)
-def set_n2k_water_depth(
-    sid: int, depth_below_transducer: float, offset: float, max_range: float
-) -> Message:
+class WaterDepth(NamedTuple):
+    sid: int
+    depth_below_transducer: float
+    offset: float
+    max_range: float
+
+
+def set_n2k_water_depth(data: WaterDepth) -> Message:
     """
     Water Depth (PGN 128267)
 
@@ -1591,18 +1463,11 @@ def set_n2k_water_depth(
     msg = Message()
     msg.pgn = PGN.WaterDepth
     msg.priority = 3
-    msg.add_byte_uint(sid)
-    msg.add_4_byte_udouble(depth_below_transducer, 0.01)
-    msg.add_2_byte_double(offset, 0.001)
-    msg.add_1_byte_udouble(max_range, 10)
+    msg.add_byte_uint(data.sid)
+    msg.add_4_byte_udouble(data.depth_below_transducer, 0.01)
+    msg.add_2_byte_double(data.offset, 0.001)
+    msg.add_1_byte_udouble(data.max_range, 10)
     return msg
-
-
-class WaterDepth(NamedTuple):
-    sid: int
-    depth_below_transducer: float
-    offset: float
-    max_range: float
 
 
 def parse_n2k_water_depth(msg: Message) -> WaterDepth:
@@ -1616,9 +1481,14 @@ def parse_n2k_water_depth(msg: Message) -> WaterDepth:
 
 
 # Distance log (PGN 128275)
-def set_n2k_distance_log(
-    days_since_1970: int, seconds_since_midnight: float, log: int, trip_log: int
-) -> Message:
+class DistanceLog(NamedTuple):
+    days_since_1970: int
+    seconds_since_midnight: float
+    log: int
+    trip_log: int
+
+
+def set_n2k_distance_log(data: DistanceLog) -> Message:
     """
     Distance Log (PGN 128275)
 
@@ -1631,18 +1501,11 @@ def set_n2k_distance_log(
     msg = Message()
     msg.pgn = PGN.DistanceLog
     msg.priority = 6
-    msg.add_2_byte_uint(days_since_1970)
-    msg.add_4_byte_udouble(seconds_since_midnight, 0.0001)
-    msg.add_4_byte_uint(log)
-    msg.add_4_byte_uint(trip_log)
+    msg.add_2_byte_uint(data.days_since_1970)
+    msg.add_4_byte_udouble(data.seconds_since_midnight, 0.0001)
+    msg.add_4_byte_uint(data.log)
+    msg.add_4_byte_uint(data.trip_log)
     return msg
-
-
-class DistanceLog(NamedTuple):
-    days_since_1970: int
-    seconds_since_midnight: float
-    log: int
-    trip_log: int
 
 
 def parse_n2k_distance_log(msg: Message) -> DistanceLog:
@@ -1656,19 +1519,23 @@ def parse_n2k_distance_log(msg: Message) -> DistanceLog:
 
 
 # Anchor Windlass Control Status (PGN 128776)
+class AnchorWindlassControlStatus(NamedTuple):
+    sid: int
+    windlass_identifier: int
+    windlass_direction_control: N2kWindlassDirectionControl
+    speed_control: int
+    speed_control_type: N2kSpeedType
+    anchor_docking_control: N2kGenericStatusPair
+    power_enable: N2kGenericStatusPair
+    mechanical_lock: N2kGenericStatusPair
+    deck_and_anchor_wash: N2kGenericStatusPair
+    anchor_light: N2kGenericStatusPair
+    command_timeout: float
+    windlass_control_events: N2kWindlassControlEvents
+
+
 def set_n2k_anchor_windlass_control_status(
-    sid: int,
-    windlass_identifier: int,
-    windlass_direction_control: N2kWindlassDirectionControl,
-    speed_control: int,
-    speed_control_type: N2kSpeedType,
-    anchor_docking_control: N2kGenericStatusPair,
-    power_enable: N2kGenericStatusPair,
-    mechanical_lock: N2kGenericStatusPair,
-    deck_and_anchor_wash: N2kGenericStatusPair,
-    anchor_light: N2kGenericStatusPair,
-    command_timeout: float,
-    windlass_control_events: N2kWindlassControlEvents,
+    data: AnchorWindlassControlStatus,
 ) -> Message:
     """
     Anchor Windlass Control Status (PGN 128776)
@@ -1693,39 +1560,24 @@ def set_n2k_anchor_windlass_control_status(
     msg = Message()
     msg.pgn = PGN.AnchorWindlassControlStatus
     msg.priority = 2
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint(windlass_identifier)
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(data.windlass_identifier)
     msg.add_byte_uint(
         0x03 << 6
-        | (speed_control_type & 0x03) << 4
-        | (anchor_docking_control & 0x03) << 2
-        | windlass_direction_control & 0x03
+        | (data.speed_control_type & 0x03) << 4
+        | (data.anchor_docking_control & 0x03) << 2
+        | (data.windlass_direction_control & 0x03)
     )
-    msg.add_byte_uint(speed_control)
+    msg.add_byte_uint(data.speed_control)
     msg.add_byte_uint(
-        (anchor_light & 0x03) << 6
-        | (deck_and_anchor_wash & 0x03) << 4
-        | (mechanical_lock & 0x03) << 2
-        | power_enable & 0x03
+        (data.anchor_light & 0x03) << 6
+        | (data.deck_and_anchor_wash & 0x03) << 4
+        | (data.mechanical_lock & 0x03) << 2
+        | (data.power_enable & 0x03)
     )
-    msg.add_1_byte_udouble(command_timeout, 0.005)
-    msg.add_byte_uint(windlass_control_events.events)
+    msg.add_1_byte_udouble(data.command_timeout, 0.005)
+    msg.add_byte_uint(data.windlass_control_events.events)
     return msg
-
-
-class AnchorWindlassControlStatus(NamedTuple):
-    sid: int
-    windlass_identifier: int
-    windlass_direction_control: N2kWindlassDirectionControl
-    speed_control: int
-    speed_control_type: N2kSpeedType
-    anchor_docking_control: N2kGenericStatusPair
-    power_enable: N2kGenericStatusPair
-    mechanical_lock: N2kGenericStatusPair
-    deck_and_anchor_wash: N2kGenericStatusPair
-    anchor_light: N2kGenericStatusPair
-    command_timeout: float
-    windlass_control_events: N2kWindlassControlEvents
 
 
 def parse_n2k_anchor_windlass_control_status(
@@ -1765,15 +1617,19 @@ def parse_n2k_anchor_windlass_control_status(
 
 
 # Anchor Windlass Operating Status (PGN 128777)
+class AnchorWindlassOperatingStatus(NamedTuple):
+    sid: int
+    windlass_identifier: int
+    rode_counter_value: float
+    windlass_line_speed: float
+    windlass_motion_status: N2kWindlassMotionStates
+    rode_type_status: N2kRodeTypeStates
+    anchor_docking_status: N2kAnchorDockingStates
+    windlass_operating_events: N2kWindlassOperatingEvents
+
+
 def set_n2k_anchor_windlass_operating_status(
-    sid: int,
-    windlass_identifier: int,
-    rode_counter_value: float,
-    windlass_line_speed: float,
-    windlass_motion_status: N2kWindlassMotionStates = N2kWindlassMotionStates.Unavailable,
-    rode_type_status: N2kRodeTypeStates = N2kRodeTypeStates.Unavailable,
-    anchor_docking_status: N2kAnchorDockingStates = N2kAnchorDockingStates.DataNotAvailable,
-    windlass_operating_events: N2kWindlassOperatingEvents = N2kWindlassOperatingEvents(),
+    data: AnchorWindlassOperatingStatus,
 ) -> Message:
     """
     Anchor Windlass Operating Status (PGN 128777)
@@ -1791,28 +1647,20 @@ def set_n2k_anchor_windlass_operating_status(
     """
     msg = Message()
     msg.pgn = PGN.AnchorWindlassOperatingStatus
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint(windlass_identifier)
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(data.windlass_identifier)
     msg.add_byte_uint(
-        0xF0 | ((rode_type_status & 0x03) << 2) | (windlass_motion_status & 0x03)
+        0xF0
+        | ((data.rode_type_status & 0x03) << 2)
+        | (data.windlass_motion_status & 0x03)
     )
-    msg.add_2_byte_udouble(rode_counter_value, 0.1)
-    msg.add_2_byte_udouble(windlass_line_speed, 0.01)
+    msg.add_2_byte_udouble(data.rode_counter_value, 0.1)
+    msg.add_2_byte_udouble(data.windlass_line_speed, 0.01)
     msg.add_byte_uint(
-        (windlass_operating_events.event << 2) | (anchor_docking_status & 0x03)
+        (data.windlass_operating_events.event << 2)
+        | (data.anchor_docking_status & 0x03)
     )
     return msg
-
-
-class AnchorWindlassOperatingStatus(NamedTuple):
-    sid: int
-    windlass_identifier: int
-    rode_counter_value: float
-    windlass_line_speed: float
-    windlass_motion_status: N2kWindlassMotionStates
-    rode_type_status: N2kRodeTypeStates
-    anchor_docking_status: N2kAnchorDockingStates
-    windlass_operating_events: N2kWindlassOperatingEvents
 
 
 def parse_n2k_anchor_windlass_operating_status(
@@ -1843,13 +1691,17 @@ def parse_n2k_anchor_windlass_operating_status(
 
 
 # Anchor Windlass Monitoring Status (PGN 128778)
+class AnchorWindlassMonitoringStatus(NamedTuple):
+    sid: int
+    windlass_identifier: int
+    total_motor_time: float
+    controller_voltage: float
+    motor_current: float
+    windlass_monitoring_events: N2kWindlassMonitoringEvents
+
+
 def set_n2k_anchor_windlass_monitoring_status(
-    sid: int,
-    windlass_identifier: int,
-    total_motor_time: float,
-    controller_voltage: float = N2K_DOUBLE_NA,
-    motor_current: float = N2K_DOUBLE_NA,
-    windlass_monitoring_events: N2kWindlassMonitoringEvents = N2kWindlassMonitoringEvents(),
+    data: AnchorWindlassMonitoringStatus,
 ) -> Message:
     """
     Anchor Windlass Monitoring Status (PGN 128778)
@@ -1866,23 +1718,14 @@ def set_n2k_anchor_windlass_monitoring_status(
     msg = Message()
     msg.pgn = PGN.AnchorWindlassMonitoringStatus
     msg.priority = 2
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint(windlass_identifier)
-    msg.add_byte_uint(windlass_monitoring_events.events)
-    msg.add_1_byte_udouble(controller_voltage, 0.2)
-    msg.add_1_byte_udouble(motor_current, 1.0)
-    msg.add_2_byte_udouble(total_motor_time, 60.0)
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(data.windlass_identifier)
+    msg.add_byte_uint(data.windlass_monitoring_events.events)
+    msg.add_1_byte_udouble(data.controller_voltage, 0.2)
+    msg.add_1_byte_udouble(data.motor_current, 1.0)
+    msg.add_2_byte_udouble(data.total_motor_time, 60.0)
     msg.add_byte_uint(0xFF)
     return msg
-
-
-class AnchorWindlassMonitoringStatus(NamedTuple):
-    sid: int
-    windlass_identifier: int
-    total_motor_time: float
-    controller_voltage: float
-    motor_current: float
-    windlass_monitoring_events: N2kWindlassMonitoringEvents
 
 
 def parse_n2k_anchor_windlass_monitoring_status(
@@ -1903,7 +1746,12 @@ def parse_n2k_anchor_windlass_monitoring_status(
 
 
 # Lat/lon rapid (PGN 129025)
-def set_n2k_lat_long_rapid(latitude: float, longitude: float) -> Message:
+class LatLonRapid(NamedTuple):
+    latitude: float
+    longitude: float
+
+
+def set_n2k_lat_long_rapid(data: LatLonRapid) -> Message:
     """
     Position rapid update (PGN 129025)
 
@@ -1914,14 +1762,9 @@ def set_n2k_lat_long_rapid(latitude: float, longitude: float) -> Message:
     msg = Message()
     msg.pgn = PGN.LatLonRapid
     msg.priority = 2
-    msg.add_4_byte_double(latitude, 1e-7)
-    msg.add_4_byte_double(longitude, 1e-7)
+    msg.add_4_byte_double(data.latitude, 1e-7)
+    msg.add_4_byte_double(data.longitude, 1e-7)
     return msg
-
-
-class LatLonRapid(NamedTuple):
-    latitude: float
-    longitude: float
 
 
 def parse_n2k_lat_long_rapid(msg: Message) -> LatLonRapid:
@@ -1934,9 +1777,14 @@ def parse_n2k_lat_long_rapid(msg: Message) -> LatLonRapid:
 
 
 # COG SOG rapid (PGN 129026)
-def set_n2k_cog_sog_rapid(
-    sid: int, heading_reference: N2kHeadingReference, cog: float, sog: float
-) -> Message:
+class CogSogRapid(NamedTuple):
+    sid: int
+    heading_reference: N2kHeadingReference
+    cog: float
+    sog: float
+
+
+def set_n2k_cog_sog_rapid(data: CogSogRapid) -> Message:
     """
     Course and Speed over Ground, rapid update (PGN 129026)
 
@@ -1950,20 +1798,13 @@ def set_n2k_cog_sog_rapid(
     msg = Message()
     msg.pgn = PGN.CogSogRapid
     msg.priority = 2
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint((heading_reference & 0x03) | 0xFC)
-    msg.add_2_byte_udouble(cog, 0.0001)  # Radians
-    msg.add_2_byte_udouble(sog, 0.01)  # Meters per second
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint((data.heading_reference & 0x03) | 0xFC)
+    msg.add_2_byte_udouble(data.cog, 0.0001)  # Radians
+    msg.add_2_byte_udouble(data.sog, 0.01)  # Meters per second
     msg.add_byte_uint(0xFF)  # Reserved
     msg.add_byte_uint(0xFF)  # Reserved
     return msg
-
-
-class CogSogRapid(NamedTuple):
-    sid: int
-    heading_reference: N2kHeadingReference
-    cog: float
-    sog: float
 
 
 def parse_n2k_cog_sog_rapid(msg: Message) -> CogSogRapid:
@@ -1978,25 +1819,27 @@ def parse_n2k_cog_sog_rapid(msg: Message) -> CogSogRapid:
 
 
 # GNSS Position Data (PGN 129029)
+class GNSSPositionData(NamedTuple):
+    sid: int
+    days_since_1970: int
+    seconds_since_midnight: float
+    latitude: float
+    longitude: float
+    altitude: float
+    gnss_type: N2kGNSSType
+    gnss_method: N2kGNSSMethod
+    n_satellites: int
+    hdop: float
+    pdop: float
+    geoidal_separation: float
+    n_reference_station: int
+    reference_station_type: Optional[N2kGNSSType]
+    reference_station_id: Optional[int]
+    age_of_correction: Optional[float]
+
+
 # TODO: check if seconds since midnight is UTC or timezone specific
-def set_n2k_gnss_data(
-    sid: int,
-    days_since_1970: int,
-    seconds_since_midnight: float,
-    latitude: float,
-    longitude: float,
-    altitude: float,
-    gnss_type: N2kGNSSType,
-    gnss_method: N2kGNSSMethod,
-    n_satellites: int,
-    hdop: float,
-    pdop: float,
-    geoidal_separation: float,
-    n_reference_station: int,
-    reference_station_type: Optional[N2kGNSSType],
-    reference_station_id: Optional[int],
-    age_of_correction: Optional[float],
-) -> Message:
+def set_n2k_gnss_data(data: GNSSPositionData) -> Message:
     """
     GNSS Position Data (PGN 129029)
 
@@ -2024,49 +1867,32 @@ def set_n2k_gnss_data(
     msg = Message()
     msg.pgn = PGN.GNSSPositionData
     msg.priority = 3
-    msg.add_byte_uint(sid)
-    msg.add_2_byte_uint(days_since_1970)
-    msg.add_4_byte_udouble(seconds_since_midnight, 0.0001)
-    msg.add_8_byte_double(latitude, 1e-16)
-    msg.add_8_byte_double(longitude, 1e-16)
-    msg.add_8_byte_double(altitude, 1e-6)
-    msg.add_byte_uint((gnss_type & 0x0F) | (gnss_method & 0x0F) << 4)
+    msg.add_byte_uint(data.sid)
+    msg.add_2_byte_uint(data.days_since_1970)
+    msg.add_4_byte_udouble(data.seconds_since_midnight, 0.0001)
+    msg.add_8_byte_double(data.latitude, 1e-16)
+    msg.add_8_byte_double(data.longitude, 1e-16)
+    msg.add_8_byte_double(data.altitude, 1e-6)
+    msg.add_byte_uint((data.gnss_type & 0x0F) | (data.gnss_method & 0x0F) << 4)
     msg.add_byte_uint(1 | 0xFC)  # Integrity byte, reserved 6 bits
-    msg.add_byte_uint(n_satellites)
-    msg.add_2_byte_double(hdop, 0.01)
-    msg.add_2_byte_double(pdop, 0.01)
-    msg.add_4_byte_double(geoidal_separation, 0.01)
-    if 0 < n_reference_station < 0xFF:
+    msg.add_byte_uint(data.n_satellites)
+    msg.add_2_byte_double(data.hdop, 0.01)
+    msg.add_2_byte_double(data.pdop, 0.01)
+    msg.add_4_byte_double(data.geoidal_separation, 0.01)
+    if 0 < data.n_reference_station < 0xFF:
         msg.add_byte_uint(
             1
         )  # Note that we have values for only one reference station, so pass only one values.
         msg.add_2_byte_int(
-            (with_fallback(reference_station_type, N2kGNSSType.GPS) & 0x0F)
-            | with_fallback(reference_station_id, N2K_INT16_NA) << 4
+            (with_fallback(data.reference_station_type, N2kGNSSType.GPS) & 0x0F)
+            | with_fallback(data.reference_station_id, N2K_INT16_NA) << 4
         )
-        msg.add_2_byte_udouble(with_fallback(age_of_correction, N2K_DOUBLE_NA), 0.01)
+        msg.add_2_byte_udouble(
+            with_fallback(data.age_of_correction, N2K_DOUBLE_NA), 0.01
+        )
     else:
-        msg.add_byte_uint(n_reference_station)
+        msg.add_byte_uint(data.n_reference_station)
     return msg
-
-
-class GNSSPositionData(NamedTuple):
-    sid: int
-    days_since_1970: int
-    seconds_since_midnight: float
-    latitude: float
-    longitude: float
-    altitude: float
-    gnss_type: N2kGNSSType
-    gnss_method: N2kGNSSMethod
-    n_satellites: int
-    hdop: float
-    pdop: float
-    geoidal_separation: float
-    n_reference_station: int
-    reference_station_type: Optional[N2kGNSSType]
-    reference_station_id: Optional[int]
-    age_of_correction: Optional[float]
 
 
 def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
@@ -2127,9 +1953,14 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
 
 
 # Date,Time & Local offset (PGN 129033, see also PGN 126992)
-def set_n2k_date_time_local_offset(
-    days_since_1970: int, seconds_since_midnight: float, local_offset: int
-) -> Message:
+class DateTimeLocalOffset(NamedTuple):
+    days_since_1970: int
+    seconds_since_midnight: float
+    local_offset: int
+    sid: int
+
+
+def set_n2k_date_time_local_offset(data: DateTimeLocalOffset) -> Message:
     """
     Date, Time & Local offset (PGN 129033), see also PGN 126992
 
@@ -2141,17 +1972,10 @@ def set_n2k_date_time_local_offset(
     msg = Message()
     msg.pgn = PGN.DateTimeLocalOffset
     msg.priority = 3
-    msg.add_2_byte_uint(days_since_1970)
-    msg.add_4_byte_udouble(seconds_since_midnight, 0.0001)
-    msg.add_2_byte_int(local_offset)
+    msg.add_2_byte_uint(data.days_since_1970)
+    msg.add_4_byte_udouble(data.seconds_since_midnight, 0.0001)
+    msg.add_2_byte_int(data.local_offset)
     return msg
-
-
-class DateTimeLocalOffset(NamedTuple):
-    days_since_1970: int
-    seconds_since_midnight: float
-    local_offset: int
-    sid: int
 
 
 def parse_n2k_date_time_local_offset(msg: Message) -> DateTimeLocalOffset:
@@ -2166,23 +1990,25 @@ def parse_n2k_date_time_local_offset(msg: Message) -> DateTimeLocalOffset:
 
 
 # AIS position reports for Class A (PGN 129038)
-def set_n2k_ais_class_a_position(
-    message_id: int,
-    repeat: N2kAISRepeat,
-    user_id: int,
-    latitude: float,
-    longitude: float,
-    accuracy: bool,
-    raim: bool,
-    seconds: int,
-    cog: float,
-    sog: float,
-    ais_transceiver_information: N2kAISTransceiverInformation,
-    heading: float,
-    rot: float,
-    nav_status: N2kAISNavStatus,
-    sid: int = 0xFF,
-) -> Message:
+class AISClassAPositionReport(NamedTuple):
+    message_id: int
+    repeat: N2kAISRepeat
+    user_id: int
+    latitude: float
+    longitude: float
+    accuracy: bool
+    raim: bool
+    seconds: int
+    cog: float
+    sog: float
+    ais_transceiver_information: N2kAISTransceiverInformation
+    heading: float
+    rot: float
+    nav_status: N2kAISNavStatus
+    sid: int
+
+
+def set_n2k_ais_class_a_position(data: AISClassAPositionReport) -> Message:
     """
     AIS Position Reports for Class A (PGN 129038)
 
@@ -2210,40 +2036,24 @@ def set_n2k_ais_class_a_position(
     msg = Message()
     msg.pgn = PGN.AISClassAPositionReport
     msg.priority = 4
-    msg.add_byte_uint((repeat & 0x03) << 6 | (message_id & 0x3F))
-    msg.add_4_byte_uint(user_id)
-    msg.add_4_byte_double(longitude, 1e-7)
-    msg.add_4_byte_double(latitude, 1e-7)
-    msg.add_byte_uint((seconds & 0x3F) << 2 | (raim & 0x01) << 1 | (accuracy & 0x01))
-    msg.add_2_byte_udouble(cog, 1e-4)
-    msg.add_2_byte_udouble(sog, 0.01)
+    msg.add_byte_uint((data.repeat & 0x03) << 6 | (data.message_id & 0x3F))
+    msg.add_4_byte_uint(data.user_id)
+    msg.add_4_byte_double(data.longitude, 1e-7)
+    msg.add_4_byte_double(data.latitude, 1e-7)
+    msg.add_byte_uint(
+        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01)
+    )
+    msg.add_2_byte_udouble(data.cog, 1e-4)
+    msg.add_2_byte_udouble(data.sog, 0.01)
     msg.add_byte_uint(0xFF)  # Communication State (19 bits)
     msg.add_byte_uint(0xFF)
-    msg.add_byte_uint(((0x1F & ais_transceiver_information) << 3) | 0x07)
-    msg.add_2_byte_udouble(heading, 1e-4)
-    msg.add_2_byte_double(rot, 3.125e-5)  # 1e-3/32.0
-    msg.add_byte_uint(0xF0 | (nav_status & 0x0F))
+    msg.add_byte_uint(((data.ais_transceiver_information & 0x1F) << 3) | 0x07)
+    msg.add_2_byte_udouble(data.heading, 1e-4)
+    msg.add_2_byte_double(data.rot, 3.125e-5)  # 1e-3/32.0
+    msg.add_byte_uint(0xF0 | (data.nav_status & 0x0F))
     msg.add_byte_uint(0xFF)  # reserved
-    msg.add_byte_uint(sid)
+    msg.add_byte_uint(data.sid)
     return msg
-
-
-class AISClassAPositionReport(NamedTuple):
-    message_id: int
-    repeat: N2kAISRepeat
-    user_id: int
-    latitude: float
-    longitude: float
-    accuracy: bool
-    raim: bool
-    seconds: int
-    cog: float
-    sog: float
-    ais_transceiver_information: N2kAISTransceiverInformation
-    heading: float
-    rot: float
-    nav_status: N2kAISNavStatus
-    sid: int
 
 
 def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
@@ -2292,28 +2102,30 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
 
 
 # AIS position reports for Class B (PGN 129039)
-def set_n2k_ais_class_b_position(
-    message_id: int,
-    repeat: N2kAISRepeat,
-    user_id: int,
-    latitude: float,
-    longitude: float,
-    accuracy: bool,
-    raim: bool,
-    seconds: int,
-    cog: float,
-    sog: float,
-    ais_transceiver_information: N2kAISTransceiverInformation,
-    heading: float,
-    unit: N2kAISUnit,
-    display: bool,
-    dsc: bool,
-    band: bool,
-    msg22: bool,
-    mode: N2kAISMode,
-    state: bool,
-    sid: int = 0xFF,
-) -> Message:
+class AISClassBPositionReport(NamedTuple):
+    message_id: int
+    repeat: N2kAISRepeat
+    user_id: int
+    latitude: float
+    longitude: float
+    accuracy: bool
+    raim: bool
+    seconds: int
+    cog: float
+    sog: float
+    ais_transceiver_information: N2kAISTransceiverInformation
+    heading: float
+    unit: N2kAISUnit
+    display: bool
+    dsc: bool
+    band: bool
+    msg22: bool
+    mode: N2kAISMode
+    state: bool
+    sid: int
+
+
+def set_n2k_ais_class_b_position(data: AISClassBPositionReport) -> Message:
     """
     AIS Position Reports for Class A (PGN 129038)
 
@@ -2345,52 +2157,31 @@ def set_n2k_ais_class_b_position(
     msg = Message()
     msg.pgn = PGN.AISClassBPositionReport
     msg.priority = 4
-    msg.add_byte_uint((repeat & 0x03) << 6 | (message_id & 0x3F))
-    msg.add_4_byte_uint(user_id)
-    msg.add_4_byte_double(longitude, 1e-7)
-    msg.add_4_byte_double(latitude, 1e-7)
-    msg.add_byte_uint((seconds & 0x3F) << 2 | (raim & 0x01) << 1 | (accuracy & 0x01))
-    msg.add_2_byte_udouble(cog, 1e-4)
-    msg.add_2_byte_udouble(sog, 0.01)
+    msg.add_byte_uint((data.repeat & 0x03) << 6 | (data.message_id & 0x3F))
+    msg.add_4_byte_uint(data.user_id)
+    msg.add_4_byte_double(data.longitude, 1e-7)
+    msg.add_4_byte_double(data.latitude, 1e-7)
+    msg.add_byte_uint(
+        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01)
+    )
+    msg.add_2_byte_udouble(data.cog, 1e-4)
+    msg.add_2_byte_udouble(data.sog, 0.01)
     msg.add_byte_uint(0xFF)  # Communication State (19 bits)
     msg.add_byte_uint(0xFF)
-    msg.add_byte_uint(((0x1F & ais_transceiver_information) << 3) | 0x07)
-    msg.add_2_byte_udouble(heading, 1e-4)
+    msg.add_byte_uint(((data.ais_transceiver_information & 0x1F) << 3) | 0x07)
+    msg.add_2_byte_udouble(data.heading, 1e-4)
     msg.add_byte_uint(0xFF)  # Regional application
     msg.add_byte_uint(
-        (mode & 0x01) << 7
-        | (msg22 & 0x01) << 6
-        | (band & 0x01) << 5
-        | (dsc & 0x01) << 4
-        | (display & 0x01) << 3
-        | (unit & 0x01) << 2
+        (data.mode & 0x01) << 7
+        | (data.msg22 & 0x01) << 6
+        | (data.band & 0x01) << 5
+        | (data.dsc & 0x01) << 4
+        | (data.display & 0x01) << 3
+        | (data.unit & 0x01) << 2
     )
-    msg.add_byte_uint(0xFE | (state & 0x01))
-    msg.add_byte_uint(sid)
+    msg.add_byte_uint(0xFE | (data.state & 0x01))
+    msg.add_byte_uint(data.sid)
     return msg
-
-
-class AISClassBPositionReport(NamedTuple):
-    message_id: int
-    repeat: N2kAISRepeat
-    user_id: int
-    latitude: float
-    longitude: float
-    accuracy: bool
-    raim: bool
-    seconds: int
-    cog: float
-    sog: float
-    ais_transceiver_information: N2kAISTransceiverInformation
-    heading: float
-    unit: N2kAISUnit
-    display: bool
-    dsc: bool
-    band: bool
-    msg22: bool
-    mode: N2kAISMode
-    state: bool
-    sid: int
 
 
 def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
@@ -2450,28 +2241,30 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
 
 
 # AIS Aids to Navigation (AtoN) Report (PGN 129041)
-def set_n2k_ais_aids_to_navigation_report(
-    message_id: int = N2K_UINT8_NA,
-    repeat: N2kAISRepeat = N2kAISRepeat.Initial,
-    user_id: int = N2K_UINT32_NA,
-    longitude: float = N2K_DOUBLE_NA,
-    latitude: float = N2K_DOUBLE_NA,
-    accuracy: bool = False,
-    raim: bool = False,
-    seconds: int = N2K_UINT8_NA,
-    length: float = N2K_DOUBLE_NA,
-    beam: float = N2K_DOUBLE_NA,
-    position_reference_starboard: float = N2K_DOUBLE_NA,
-    position_reference_true_north: float = N2K_DOUBLE_NA,
-    a_to_n_type: N2kAISAtoNType = N2kAISAtoNType.not_specified,
-    off_position_reference_indicator: bool = False,
-    virtual_a_to_n_flag: bool = False,
-    assigned_mode_flag: bool = False,
-    gnss_type: N2kGNSSType = N2kGNSSType.GPS,
-    a_to_n_status: int = N2K_UINT8_NA,
-    n2k_ais_transceiver_information: N2kAISTransceiverInformation = N2kAISTransceiverInformation.Channel_A_VDL_reception,
-    a_to_n_name: str = "",
-) -> Message:
+class AISAtoNReportData(NamedTuple):
+    message_id: int
+    repeat: N2kAISRepeat
+    user_id: int
+    longitude: float
+    latitude: float
+    accuracy: bool
+    raim: bool
+    seconds: int
+    length: float
+    beam: float
+    position_reference_starboard: float
+    position_reference_true_north: float
+    a_to_n_type: N2kAISAtoNType
+    off_position_reference_indicator: bool
+    virtual_a_to_n_flag: bool
+    assigned_mode_flag: bool
+    gnss_type: N2kGNSSType
+    a_to_n_status: int
+    n2k_ais_transceiver_information: N2kAISTransceiverInformation
+    a_to_n_name: str | None
+
+
+def set_n2k_ais_aids_to_navigation_report(data: AISAtoNReportData) -> Message:
     """
     AIS Aids to Navigation (AtoN) Report (PGN 129041)
 
@@ -2512,52 +2305,32 @@ def set_n2k_ais_aids_to_navigation_report(
     msg = Message()
     msg.pgn = PGN.AISAidstoNavigationReport
     msg.priority = 4
-    msg.add_byte_uint((repeat & 0x03) << 6 | message_id & 0x3F)
-    msg.add_4_byte_uint(user_id)
-    msg.add_4_byte_double(longitude, 1e-7)
-    msg.add_4_byte_double(latitude, 1e-7)
-    msg.add_byte_uint((seconds & 0x3F) << 2 | (raim & 0x01) << 1 | accuracy & 0x01)
-    msg.add_2_byte_udouble(length, 0.1)
-    msg.add_2_byte_udouble(beam, 0.1)
-    msg.add_2_byte_udouble(position_reference_starboard, 0.1)
-    msg.add_2_byte_udouble(position_reference_true_north, 0.1)
+    msg.add_byte_uint((data.repeat & 0x03) << 6 | data.message_id & 0x3F)
+    msg.add_4_byte_uint(data.user_id)
+    msg.add_4_byte_double(data.longitude, 1e-7)
+    msg.add_4_byte_double(data.latitude, 1e-7)
     msg.add_byte_uint(
-        (assigned_mode_flag & 0x01) << 7
-        | (virtual_a_to_n_flag & 0x01) << 6
-        | (off_position_reference_indicator & 0x01) << 5
-        | (a_to_n_type & 0x1F)
+        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01)
     )
-    msg.add_byte_uint(0xE0 | (gnss_type & 0x0F) << 1)
-    msg.add_byte_uint(a_to_n_status)
-    msg.add_byte_uint(0xE0 | (n2k_ais_transceiver_information & 0x1F))
+    msg.add_2_byte_udouble(data.length, 0.1)
+    msg.add_2_byte_udouble(data.beam, 0.1)
+    msg.add_2_byte_udouble(data.position_reference_starboard, 0.1)
+    msg.add_2_byte_udouble(data.position_reference_true_north, 0.1)
+    msg.add_byte_uint(
+        (data.assigned_mode_flag & 0x01) << 7
+        | (data.virtual_a_to_n_flag & 0x01) << 6
+        | (data.off_position_reference_indicator & 0x01) << 5
+        | (data.a_to_n_type & 0x1F)
+    )
+    msg.add_byte_uint(0xE0 | (data.gnss_type & 0x0F) << 1)
+    msg.add_byte_uint(data.a_to_n_status)
+    msg.add_byte_uint(0xE0 | (data.n2k_ais_transceiver_information & 0x1F))
+    a_to_n_name = with_fallback(data.a_to_n_name, "")
     if len(a_to_n_name) > 34:
         raise ValueError()
     msg.add_var_str(a_to_n_name)
 
     return msg
-
-
-class AISAtoNReportData(NamedTuple):
-    message_id: int
-    repeat: N2kAISRepeat
-    user_id: int
-    longitude: float
-    latitude: float
-    accuracy: bool
-    raim: bool
-    seconds: int
-    length: float
-    beam: float
-    position_reference_starboard: float
-    position_reference_true_north: float
-    a_to_n_type: N2kAISAtoNType
-    off_position_reference_indicator: bool
-    virtual_a_to_n_flag: bool
-    assigned_mode_flag: bool
-    gnss_type: N2kGNSSType
-    a_to_n_status: int
-    n2k_ais_transceiver_information: N2kAISTransceiverInformation
-    a_to_n_name: str | None
 
 
 def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
@@ -2613,9 +2386,14 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
 
 
 # Cross Track Error (PGN 129283)
-def set_n2k_cross_track_error(
-    sid: int, xte_mode: N2kXTEMode, navigation_terminated: bool, xte: float
-) -> Message:
+class CrossTrackError(NamedTuple):
+    sid: int
+    xte_mode: N2kXTEMode
+    navigation_terminated: bool
+    xte: float
+
+
+def set_n2k_cross_track_error(data: CrossTrackError) -> Message:
     """
     Cross Track Error (PGN 129283)
 
@@ -2629,19 +2407,12 @@ def set_n2k_cross_track_error(
     msg = Message()
     msg.pgn = PGN.CrossTrackError
     msg.priority = 3
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint((navigation_terminated & 0x01) << 6 | (xte_mode & 0x0F))
-    msg.add_4_byte_double(xte, 0.01)
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint((data.navigation_terminated & 0x01) << 6 | (data.xte_mode & 0x0F))
+    msg.add_4_byte_double(data.xte, 0.01)
     msg.add_byte_uint(0xFF)  # Reserved
     msg.add_byte_uint(0xFF)  # Reserved
     return msg
-
-
-class CrossTrackError(NamedTuple):
-    sid: int
-    xte_mode: N2kXTEMode
-    navigation_terminated: bool
-    xte: float
 
 
 def parse_n2k_cross_track_error(msg: Message) -> CrossTrackError:
@@ -2662,23 +2433,25 @@ def parse_n2k_cross_track_error(msg: Message) -> CrossTrackError:
 
 
 # Navigation Info (PGN 129284)
-def set_n2k_navigation_info(
-    sid: int,
-    distance_to_waypoint: float,
-    bearing_reference: N2kHeadingReference,
-    perpendicular_crossed: bool,
-    arrival_circle_entered: bool,
-    calculation_type: N2kDistanceCalculationType,
-    eta_time: float,
-    eta_date: int,
-    bearing_origin_to_destination_waypoint: float,
-    bearing_position_to_destination_waypoint: float,
-    origin_waypoint_number: int,
-    destination_waypoint_number: int,
-    destination_latitude: float,
-    destination_longitude: float,
-    waypoint_closing_veloctiy: float,
-) -> Message:
+class NavigationInfo(NamedTuple):
+    sid: int
+    distance_to_waypoint: float
+    bearing_reference: N2kHeadingReference
+    perpendicular_crossed: bool
+    arrival_circle_entered: bool
+    calculation_type: N2kDistanceCalculationType
+    eta_time: float
+    eta_date: int
+    bearing_origin_to_destination_waypoint: float
+    bearing_position_to_destination_waypoint: float
+    origin_waypoint_number: int
+    destination_waypoint_number: int
+    destination_latitude: float
+    destination_longitude: float
+    waypoint_closing_veloctiy: float
+
+
+def set_n2k_navigation_info(data: NavigationInfo) -> Message:
     """
     # Navigation Info (PGN 129284)
 
@@ -2703,43 +2476,25 @@ def set_n2k_navigation_info(
     msg = Message()
     msg.pgn = PGN.NavigationInfo
     msg.priority = 3
-    msg.add_byte_uint(sid)
-    msg.add_4_byte_udouble(distance_to_waypoint, 0.01)
+    msg.add_byte_uint(data.sid)
+    msg.add_4_byte_udouble(data.distance_to_waypoint, 0.01)
     msg.add_byte_uint(
-        (calculation_type & 0x01) << 6
-        | (arrival_circle_entered & 0x01) << 4
-        | (perpendicular_crossed & 0x01) << 2
-        | bearing_reference & 0x03
+        (data.calculation_type & 0x01) << 6
+        | (data.arrival_circle_entered & 0x01) << 4
+        | (data.perpendicular_crossed & 0x01) << 2
+        | (data.bearing_reference & 0x03)
     )
-    msg.add_4_byte_udouble(eta_time, 1e-4)
-    msg.add_2_byte_uint(eta_date)
-    msg.add_2_byte_udouble(bearing_origin_to_destination_waypoint, 1e-4)
-    msg.add_2_byte_udouble(bearing_position_to_destination_waypoint, 1e-4)
-    msg.add_4_byte_uint(origin_waypoint_number)
-    msg.add_4_byte_uint(destination_waypoint_number)
-    msg.add_4_byte_double(destination_latitude, 1e-7)
-    msg.add_4_byte_double(destination_longitude, 1e-7)
-    msg.add_2_byte_double(waypoint_closing_veloctiy, 0.01)
+    msg.add_4_byte_udouble(data.eta_time, 1e-4)
+    msg.add_2_byte_uint(data.eta_date)
+    msg.add_2_byte_udouble(data.bearing_origin_to_destination_waypoint, 1e-4)
+    msg.add_2_byte_udouble(data.bearing_position_to_destination_waypoint, 1e-4)
+    msg.add_4_byte_uint(data.origin_waypoint_number)
+    msg.add_4_byte_uint(data.destination_waypoint_number)
+    msg.add_4_byte_double(data.destination_latitude, 1e-7)
+    msg.add_4_byte_double(data.destination_longitude, 1e-7)
+    msg.add_2_byte_double(data.waypoint_closing_veloctiy, 0.01)
 
     return msg
-
-
-class NavigationInfo(NamedTuple):
-    sid: int
-    distance_to_waypoint: float
-    bearing_reference: N2kHeadingReference
-    perpendicular_crossed: bool
-    arrival_circle_entered: bool
-    calculation_type: N2kDistanceCalculationType
-    eta_time: float
-    eta_date: int
-    bearing_origin_to_destination_waypoint: float
-    bearing_position_to_destination_waypoint: float
-    origin_waypoint_number: int
-    destination_waypoint_number: int
-    destination_latitude: float
-    destination_longitude: float
-    waypoint_closing_veloctiy: float
 
 
 def parse_n2k_navigation_info(msg: Message) -> NavigationInfo:
@@ -2771,6 +2526,7 @@ def parse_n2k_navigation_info(msg: Message) -> NavigationInfo:
     )
 
 
+# Route Waypoint Information (PGN 129285)
 class Waypoint(NamedTuple):
     id: int
     name: str
@@ -2778,16 +2534,17 @@ class Waypoint(NamedTuple):
     longitude: float
 
 
-# Route Waypoint Information (PGN 129285)
-def set_n2k_route_waypoint_information(
-    start: int,
-    database: int,
-    route: int,
-    nav_direction: N2kNavigationDirection,
-    route_name: str,
-    supplementary_data: N2kGenericStatusPair,
-    waypoints: List[Waypoint],
-) -> Message:
+class RouteWaypointInformation(NamedTuple):
+    start: int
+    database: int
+    route: int
+    nav_direction: N2kNavigationDirection
+    route_name: str
+    supplementary_data: N2kGenericStatusPair
+    waypoints: List[Waypoint]
+
+
+def set_n2k_route_waypoint_information(data: RouteWaypointInformation) -> Message:
     """
     Route Waypoint Information (PGN 129285)
 
@@ -2806,12 +2563,12 @@ def set_n2k_route_waypoint_information(
     msg.priority = 6
 
     available_data_len = (
-        msg.max_data_len - 10 - len(route_name) - 2
+        msg.max_data_len - 10 - len(data.route_name) - 2
     )  # Length of space not taken up by list metadata
     base_waypoint_len = (
         2 + 4 + 4 + 2
     )  # ID, Latitude, Longitude, 2 bytes per varchar string
-    for i, waypoint in enumerate(waypoints):
+    for i, waypoint in enumerate(data.waypoints):
         available_data_len -= base_waypoint_len + len(waypoint.name)
         if available_data_len < 0:
             raise ValueError(
@@ -2820,14 +2577,16 @@ def set_n2k_route_waypoint_information(
                 )
             )
 
-    msg.add_2_byte_uint(start)
-    msg.add_2_byte_uint(len(waypoints))
-    msg.add_2_byte_uint(database)
-    msg.add_2_byte_uint(route)
-    msg.add_byte_uint(0xE0 | (supplementary_data & 0x03) << 3 | (nav_direction & 0x07))
-    msg.add_var_str(route_name)
+    msg.add_2_byte_uint(data.start)
+    msg.add_2_byte_uint(len(data.waypoints))
+    msg.add_2_byte_uint(data.database)
+    msg.add_2_byte_uint(data.route)
+    msg.add_byte_uint(
+        0xE0 | (data.supplementary_data & 0x03) << 3 | (data.nav_direction & 0x07)
+    )
+    msg.add_var_str(data.route_name)
     msg.add_byte_uint(0xFF)  # Reserved
-    for waypoint in waypoints:
+    for waypoint in data.waypoints:
         msg.add_2_byte_uint(waypoint.id)
         msg.add_var_str(
             waypoint.name
@@ -2836,16 +2595,6 @@ def set_n2k_route_waypoint_information(
         msg.add_4_byte_double(waypoint.longitude, 1e-7)
 
     return msg
-
-
-class RouteWaypointInformation(NamedTuple):
-    start: int
-    database: int
-    route: int
-    nav_direction: N2kNavigationDirection
-    route_name: str
-    supplementary_data: N2kGenericStatusPair
-    waypoints: List[Waypoint]
 
 
 def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformation:
@@ -2884,14 +2633,16 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
 
 
 # GNSS DOP data (PGN 129539)
-def set_n2k_gnss_dop(
-    sid: int,
-    desired_mode: N2kGNSSDOPmode,
-    actual_mode: N2kGNSSDOPmode,
-    hdop: float,
-    vdop: float,
-    tdop: float,
-) -> Message:
+class GNSSDOPData(NamedTuple):
+    sid: int
+    desired_mode: N2kGNSSDOPmode
+    actual_mode: N2kGNSSDOPmode
+    hdop: float
+    vdop: float
+    tdop: float
+
+
+def set_n2k_gnss_dop(data: GNSSDOPData) -> Message:
     """
     GNSS DOP Data (PGN 129539)
 
@@ -2907,21 +2658,14 @@ def set_n2k_gnss_dop(
     msg = Message()
     msg.pgn = PGN.GNSSDOPData
     msg.priority = 6
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint(0xC0 | ((actual_mode & 0x07) << 3) | (desired_mode & 0x07))
-    msg.add_2_byte_double(hdop, 0.01)
-    msg.add_2_byte_double(vdop, 0.01)
-    msg.add_2_byte_double(tdop, 0.01)
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(
+        0xC0 | ((data.actual_mode & 0x07) << 3) | (data.desired_mode & 0x07)
+    )
+    msg.add_2_byte_double(data.hdop, 0.01)
+    msg.add_2_byte_double(data.vdop, 0.01)
+    msg.add_2_byte_double(data.tdop, 0.01)
     return msg
-
-
-class GNSSDOPData(NamedTuple):
-    sid: int
-    desired_mode: N2kGNSSDOPmode
-    actual_mode: N2kGNSSDOPmode
-    hdop: float
-    vdop: float
-    tdop: float
 
 
 def parse_n2k_gnss_dop(msg: Message) -> GNSSDOPData:
@@ -2943,6 +2687,7 @@ def parse_n2k_gnss_dop(msg: Message) -> GNSSDOPData:
 MAX_SATELLITE_INFO_COUNT = 18  # Maximum amount of satellites that fit into fast packet. TODO: extend using tp message
 
 
+# GNSS Satellites in View (PGN 129540)
 class SatelliteInfo(NamedTuple):
     # TODO: figure out a way to type NamedTuples properly.
     prn: int
@@ -2953,10 +2698,13 @@ class SatelliteInfo(NamedTuple):
     usage_status: N2kPRNUsageStatus
 
 
-# GNSS Satellites in View (PGN 129540)
-def set_n2k_gnss_satellites_in_view(
-    sid: int, mode: N2kRangeResidualMode, satellites: List[SatelliteInfo]
-) -> Message:
+class GNSSSatellitesInView(NamedTuple):
+    sid: int
+    mode: N2kRangeResidualMode
+    satellites: List[SatelliteInfo]
+
+
+def set_n2k_gnss_satellites_in_view(data: GNSSSatellitesInView) -> Message:
     """
     GNSS Satellites in View (PGN 129540)
 
@@ -2969,12 +2717,14 @@ def set_n2k_gnss_satellites_in_view(
     msg = Message()
     msg.pgn = PGN.GNSSSatellitesInView
     msg.priority = 6
-    msg.add_byte_uint(sid)
-    msg.add_byte_uint(0xFC | (mode & 0x03))  # 2 bit mode, 6 bit reserved
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(0xFC | (data.mode & 0x03))  # 2 bit mode, 6 bit reserved
 
-    if len(satellites) > MAX_SATELLITE_INFO_COUNT:
+    if len(data.satellites) > MAX_SATELLITE_INFO_COUNT:
         # TODO: Log warning
-        satellites = satellites[:MAX_SATELLITE_INFO_COUNT]
+        satellites = data.satellites[:MAX_SATELLITE_INFO_COUNT]
+    else:
+        satellites = data.satellites
     msg.add_byte_uint(len(satellites))
 
     for satellite in satellites:
@@ -2986,12 +2736,6 @@ def set_n2k_gnss_satellites_in_view(
         msg.add_byte_uint(satellite.usage_status | 0xF0)
 
     return msg
-
-
-class GNSSSatellitesInView(NamedTuple):
-    sid: int
-    mode: N2kRangeResidualMode
-    satellites: List[SatelliteInfo]
 
 
 def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
@@ -3026,28 +2770,30 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
 
 
 # AIS Class A Static Data (PGN 129794)
-def set_n2k_ais_class_a_static_data(
-    message_id: int,
-    repeat: N2kAISRepeat,
-    user_id: int,
-    imo_number: int,
-    callsign: str,
-    name: str,
-    vessel_type: int,
-    length: float,
-    beam: float,
-    pos_ref_stbd: float,
-    pos_ref_bow: float,
-    eta_date: int,
-    eta_time: float,
-    draught: float,
-    destination: str,
-    ais_version: N2kAISVersion,
-    gnss_type: N2kGNSSType,
-    dte: N2kAISDTE,
-    ais_info: N2kAISTransceiverInformation = N2kAISTransceiverInformation.Channel_A_VDL_reception,
-    sid: int = 0xFF,
-) -> Message:
+class AISClassAStaticData(NamedTuple):
+    message_id: int
+    repeat: N2kAISRepeat
+    user_id: int
+    imo_number: int
+    callsign: str
+    name: str
+    vessel_type: int
+    length: float
+    beam: float
+    pos_ref_stbd: float
+    pos_ref_bow: float
+    eta_date: int
+    eta_time: float
+    draught: float
+    destination: str
+    ais_version: N2kAISVersion
+    gnss_type: N2kGNSSType
+    dte: N2kAISDTE
+    ais_info: N2kAISTransceiverInformation
+    sid: int
+
+
+def set_n2k_ais_class_a_static_data(data: AISClassAStaticData) -> Message:
     """
     AIS Class A Static Data (PGN 129794)
 
@@ -3087,50 +2833,29 @@ def set_n2k_ais_class_a_static_data(
     msg = Message()
     msg.pgn = PGN.AISClassAStaticData
     msg.priority = 6
-    msg.add_byte_uint((repeat & 0x03) << 6 | (message_id & 0x3F))
-    msg.add_4_byte_uint(user_id)
-    msg.add_4_byte_uint(imo_number)
-    msg.add_ais_str(callsign, 7)
-    msg.add_ais_str(name, 20)
-    msg.add_byte_uint(vessel_type)
-    msg.add_2_byte_double(length, 0.1)
-    msg.add_2_byte_double(beam, 0.1)
-    msg.add_2_byte_double(pos_ref_stbd, 0.1)
-    msg.add_2_byte_double(pos_ref_bow, 0.1)
-    msg.add_2_byte_uint(eta_date)
-    msg.add_4_byte_udouble(eta_time, 1e-4)
-    msg.add_2_byte_double(draught, 0.01)
-    msg.add_ais_str(destination, 20)
+    msg.add_byte_uint((data.repeat & 0x03) << 6 | (data.message_id & 0x3F))
+    msg.add_4_byte_uint(data.user_id)
+    msg.add_4_byte_uint(data.imo_number)
+    msg.add_ais_str(data.callsign, 7)
+    msg.add_ais_str(data.name, 20)
+    msg.add_byte_uint(data.vessel_type)
+    msg.add_2_byte_double(data.length, 0.1)
+    msg.add_2_byte_double(data.beam, 0.1)
+    msg.add_2_byte_double(data.pos_ref_stbd, 0.1)
+    msg.add_2_byte_double(data.pos_ref_bow, 0.1)
+    msg.add_2_byte_uint(data.eta_date)
+    msg.add_4_byte_udouble(data.eta_time, 1e-4)
+    msg.add_2_byte_double(data.draught, 0.01)
+    msg.add_ais_str(data.destination, 20)
     msg.add_byte_uint(
-        (dte & 0x01) << 6 | (gnss_type & 0x0F) << 2 | (ais_version & 0x03)
+        (data.dte & 0x01) << 6
+        | (data.gnss_type & 0x0F) << 2
+        | (data.ais_version & 0x03)
     )
-    msg.add_byte_uint(0xE0 | (ais_info & 0x1F))
-    msg.add_byte_uint(sid)
+    msg.add_byte_uint(0xE0 | (data.ais_info & 0x1F))
+    msg.add_byte_uint(data.sid)
 
     return msg
-
-
-class AISClassAStaticData(NamedTuple):
-    message_id: int
-    repeat: N2kAISRepeat
-    user_id: int
-    imo_number: int
-    callsign: str
-    name: str
-    vessel_type: int
-    length: float
-    beam: float
-    pos_ref_stbd: float
-    pos_ref_bow: float
-    eta_date: int
-    eta_time: float
-    draught: float
-    destination: str
-    ais_version: N2kAISVersion
-    gnss_type: N2kGNSSType
-    dte: N2kAISDTE
-    ais_info: N2kAISTransceiverInformation
-    sid: int
 
 
 def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
@@ -3183,14 +2908,16 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
 
 
 # AIS CLass B Static Data part A (PGN 129809)
-def set_n2k_ais_class_b_static_data_part_a(
-    message_id: int,
-    repeat: N2kAISRepeat,
-    user_id: int,
-    name: str,
-    ais_info: N2kAISTransceiverInformation = N2kAISTransceiverInformation.Channel_A_VDL_reception,
-    sid: int = 0xFF,
-) -> Message:
+class AISClassBStaticDataPartA(NamedTuple):
+    message_id: int
+    repeat: N2kAISRepeat
+    user_id: int
+    name: str
+    ais_info: N2kAISTransceiverInformation
+    sid: int
+
+
+def set_n2k_ais_class_b_static_data_part_a(data: AISClassBStaticDataPartA) -> Message:
     """
     AIS CLass B Static Data part A (PGN 129809)
 
@@ -3207,22 +2934,13 @@ def set_n2k_ais_class_b_static_data_part_a(
     msg = Message()
     msg.pgn = PGN.AISClassBStaticDataPartA
     msg.priority = 6
-    msg.add_byte_uint((repeat & 0x03) << 6 | (message_id & 0x3F))
-    msg.add_4_byte_uint(user_id)
-    msg.add_ais_str(name, 20)
-    msg.add_byte_uint(0xE0 | (ais_info & 0x1F))  # AIS Transceiver info + reserved
-    msg.add_byte_uint(sid)  # SID
+    msg.add_byte_uint((data.repeat & 0x03) << 6 | (data.message_id & 0x3F))
+    msg.add_4_byte_uint(data.user_id)
+    msg.add_ais_str(data.name, 20)
+    msg.add_byte_uint(0xE0 | (data.ais_info & 0x1F))  # AIS Transceiver info + reserved
+    msg.add_byte_uint(data.sid)  # SID
 
     return msg
-
-
-class AISClassBStaticDataPartA(NamedTuple):
-    message_id: int
-    repeat: N2kAISRepeat
-    user_id: int
-    name: str
-    ais_info: N2kAISTransceiverInformation
-    sid: int
 
 
 def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDataPartA:
@@ -3247,21 +2965,23 @@ def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDat
 
 
 # AIS CLass B Static Data part B (PGN 129810)
-def set_n2k_ais_class_b_static_data_part_b(
-    message_id: int,
-    repeat: N2kAISRepeat,
-    user_id: int,
-    vessel_type: int,
-    vendor: str,
-    callsign: str,
-    length: float,
-    beam: float,
-    pos_ref_stbd: float,
-    pos_ref_bow: float,
-    mothership_id: int,
-    ais_info: N2kAISTransceiverInformation = N2kAISTransceiverInformation.Channel_A_VDL_reception,
-    sid: int = 0xFF,
-) -> Message:
+class AISClassBStaticDataPartB(NamedTuple):
+    message_id: int
+    repeat: N2kAISRepeat
+    user_id: int
+    vessel_type: int
+    vendor: str
+    callsign: str
+    length: float
+    beam: float
+    pos_ref_stbd: float
+    pos_ref_bow: float
+    mothership_id: int
+    ais_info: N2kAISTransceiverInformation
+    sid: int
+
+
+def set_n2k_ais_class_b_static_data_part_b(data: AISClassBStaticDataPartB) -> Message:
     """
     AIS CLass B Static Data part B (PGN 129810)
 
@@ -3288,37 +3008,21 @@ def set_n2k_ais_class_b_static_data_part_b(
     msg = Message()
     msg.pgn = PGN.AISClassBStaticDataPartB
     msg.priority = 6
-    msg.add_byte_uint((repeat & 0x03) << 6 | (message_id & 0x3F))
-    msg.add_4_byte_uint(user_id)
-    msg.add_byte_uint(vessel_type)
-    msg.add_ais_str(vendor, 7)
-    msg.add_ais_str(callsign, 7)
-    msg.add_2_byte_udouble(length, 0.1)
-    msg.add_2_byte_udouble(beam, 0.1)
-    msg.add_2_byte_udouble(pos_ref_stbd, 0.1)
-    msg.add_2_byte_udouble(pos_ref_bow, 0.1)
-    msg.add_4_byte_uint(mothership_id)
+    msg.add_byte_uint((data.repeat & 0x03) << 6 | (data.message_id & 0x3F))
+    msg.add_4_byte_uint(data.user_id)
+    msg.add_byte_uint(data.vessel_type)
+    msg.add_ais_str(data.vendor, 7)
+    msg.add_ais_str(data.callsign, 7)
+    msg.add_2_byte_udouble(data.length, 0.1)
+    msg.add_2_byte_udouble(data.beam, 0.1)
+    msg.add_2_byte_udouble(data.pos_ref_stbd, 0.1)
+    msg.add_2_byte_udouble(data.pos_ref_bow, 0.1)
+    msg.add_4_byte_uint(data.mothership_id)
     msg.add_byte_uint(0x03)  # Reserved + AIS spare
-    msg.add_byte_uint(0xE0 | (ais_info & 0x1F))  # AIS Tranceiver info + reserved
-    msg.add_byte_uint(sid)  # SID
+    msg.add_byte_uint(0xE0 | (data.ais_info & 0x1F))  # AIS Tranceiver info + reserved
+    msg.add_byte_uint(data.sid)  # SID
 
     return msg
-
-
-class AISClassBStaticDataPartB(NamedTuple):
-    message_id: int
-    repeat: N2kAISRepeat
-    user_id: int
-    vessel_type: int
-    vendor: str
-    callsign: str
-    length: float
-    beam: float
-    pos_ref_stbd: float
-    pos_ref_bow: float
-    mothership_id: int
-    ais_info: N2kAISTransceiverInformation
-    sid: int
 
 
 def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDataPartB:
@@ -3358,8 +3062,15 @@ def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDat
 
 
 # Waypoint list (PGN 130074)
+class WaypointList(NamedTuple):
+    start: int
+    num_waypoints: int
+    database: int
+    waypoints: List[Waypoint]
+
+
 def set_n2k_waypoint_list(
-    start: int, num_waypoints: int, database: int, waypoints: List[Waypoint]
+    data: WaypointList,
 ) -> Message:
     """
     Route and Waypoint Service - Waypoint List - Waypoint Name & Position (PGN 130074)
@@ -3381,7 +3092,7 @@ def set_n2k_waypoint_list(
     base_waypoint_len = (
         2 + 4 + 4 + 2
     )  # ID, Latitude, Longitude, 2 bytes per varchar string
-    for i, waypoint in enumerate(waypoints):
+    for i, waypoint in enumerate(data.waypoints):
         available_data_len -= base_waypoint_len + len(waypoint.name or "\x00")
         if available_data_len < 0:
             raise ValueError(
@@ -3390,14 +3101,14 @@ def set_n2k_waypoint_list(
                 )
             )
 
-    msg.add_2_byte_uint(start)
-    msg.add_2_byte_uint(len(waypoints))
-    msg.add_2_byte_uint(num_waypoints)
-    msg.add_2_byte_uint(database)
+    msg.add_2_byte_uint(data.start)
+    msg.add_2_byte_uint(len(data.waypoints))
+    msg.add_2_byte_uint(data.num_waypoints)
+    msg.add_2_byte_uint(data.database)
     msg.add_byte_uint(0xFF)  # Reserved
     msg.add_byte_uint(0xFF)  # Reserved
 
-    for waypoint in waypoints:
+    for waypoint in data.waypoints:
         msg.add_2_byte_uint(waypoint.id)
         msg.add_var_str(
             waypoint.name or "\x00"
@@ -3406,13 +3117,6 @@ def set_n2k_waypoint_list(
         msg.add_4_byte_double(waypoint.longitude, 1e-7)
 
     return msg
-
-
-class WaypointList(NamedTuple):
-    start: int
-    num_waypoints: int
-    database: int
-    waypoints: List[Waypoint]
 
 
 def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
@@ -3445,9 +3149,14 @@ def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
 
 
 # Wind Speed (PGN 130306)
-def set_n2k_wind_speed(
-    sid: int, wind_speed: float, wind_angle: float, wind_reference: N2kWindReference
-) -> Message:
+class WindSpeed(NamedTuple):
+    sid: int
+    wind_speed: float
+    wind_angle: float
+    wind_reference: N2kWindReference
+
+
+def set_n2k_wind_speed(data: WindSpeed) -> Message:
     """
     Wind Speed (PGN 130306)
 
@@ -3463,20 +3172,13 @@ def set_n2k_wind_speed(
     msg = Message()
     msg.pgn = PGN.WindSpeed
     msg.priority = 2
-    msg.add_byte_uint(sid)
-    msg.add_2_byte_udouble(wind_speed, 0.01)
-    msg.add_2_byte_udouble(wind_angle, 0.0001)
-    msg.add_byte_uint(wind_reference)
+    msg.add_byte_uint(data.sid)
+    msg.add_2_byte_udouble(data.wind_speed, 0.01)
+    msg.add_2_byte_udouble(data.wind_angle, 0.0001)
+    msg.add_byte_uint(data.wind_reference)
     msg.add_byte_uint(0xFF)  # Reserved
     msg.add_byte_uint(0xFF)  # Reserved
     return msg
-
-
-class WindSpeed(NamedTuple):
-    sid: int
-    wind_speed: float
-    wind_angle: float
-    wind_reference: N2kWindReference
 
 
 def parse_n2k_wind_speed(msg: Message) -> WindSpeed:
@@ -3552,24 +3254,8 @@ def set_n2k_pgn_iso_acknowledgement(
 # ISO Address Claim (PGN 60928)
 def set_n2k_iso_address_claim(
     msg: Message,
-    unique_number: int,
-    manufacturer_code: int,
-    device_function: int,
-    device_class: int,
-    device_instance: int = 0,
-    system_instance: int = 0,
-    industry_group: int = 4,
+    device_information: DeviceInformation,
 ) -> None:
-    device_information = DeviceInformation(
-        unique_number=unique_number,
-        manufacturer_code=manufacturer_code,
-        device_function=device_function,
-        device_class=device_class,
-        device_instance=device_instance,
-        system_instance=system_instance,
-        industry_group=industry_group,
-    )
-
     set_n2k_iso_address_claim_by_name(msg, device_information.name)
 
 
@@ -3582,25 +3268,18 @@ def set_n2k_iso_address_claim_by_name(msg: Message, name: int) -> None:
 # Product Information (PGN 126996)
 def set_n2k_product_information(
     msg: Message,
-    n2k_version: int,
-    product_code: int,
-    model_id: str,
-    sw_code: str,
-    model_version: str,
-    model_serial_code: str,
-    certification_level: int = 1,
-    load_equivalency: int = 1,
+    data: ProductInformation,
 ) -> None:
     msg.pgn = PGN.ProductInformation
     msg.priority = 6
-    msg.add_2_byte_uint(n2k_version)
-    msg.add_2_byte_uint(product_code)
-    msg.add_str(model_id, MAX_N2K_MODEL_ID_LEN)
-    msg.add_str(sw_code, MAX_N2K_SW_CODE_LEN)
-    msg.add_str(model_version, MAX_N2K_MODEL_VERSION_LEN)
-    msg.add_str(model_serial_code, MAX_N2K_MODEL_SERIAL_CODE_LEN)
-    msg.add_byte_uint(certification_level)
-    msg.add_byte_uint(load_equivalency)
+    msg.add_2_byte_uint(data.n2k_version)
+    msg.add_2_byte_uint(data.product_code)
+    msg.add_str(data.n2k_model_id, MAX_N2K_MODEL_ID_LEN)
+    msg.add_str(data.n2k_sw_code, MAX_N2K_SW_CODE_LEN)
+    msg.add_str(data.n2k_model_version, MAX_N2K_MODEL_VERSION_LEN)
+    msg.add_str(data.n2k_model_serial_code, MAX_N2K_MODEL_SERIAL_CODE_LEN)
+    msg.add_byte_uint(data.certification_level)
+    msg.add_byte_uint(data.load_equivalency)
 
 
 # TODO: parser
@@ -3623,21 +3302,18 @@ def parse_n2k_pgn_product_information(msg: Message) -> ProductInformation:
 
 # Configuration Information (PGN: 126998)
 def set_n2k_configuration_information(
-    msg: Message,
-    manufacturer_information: str,
-    installation_description1: str,
-    installation_description2: str,
+    msg: Message, data: ConfigurationInformation
 ) -> None:
     total_len = 0
     max_len = msg.max_data_len - 6  # each field has 2 extra bytes
     man_info_len = min(
-        len(manufacturer_information), Max_N2K_CONFIGURATION_INFO_FIELD_LEN
+        len(data.manufacturer_information), Max_N2K_CONFIGURATION_INFO_FIELD_LEN
     )
     inst_desc1_len = min(
-        len(installation_description1), Max_N2K_CONFIGURATION_INFO_FIELD_LEN
+        len(data.installation_description1), Max_N2K_CONFIGURATION_INFO_FIELD_LEN
     )
     inst_desc2_len = min(
-        len(installation_description2), Max_N2K_CONFIGURATION_INFO_FIELD_LEN
+        len(data.installation_description2), Max_N2K_CONFIGURATION_INFO_FIELD_LEN
     )
 
     if total_len + man_info_len > max_len:
@@ -3656,17 +3332,17 @@ def set_n2k_configuration_information(
     # Installation Description 1
     msg.add_byte_uint(inst_desc1_len + 2)
     msg.add_byte_uint(0x01)
-    msg.add_str(installation_description1, inst_desc1_len)
+    msg.add_str(data.installation_description1, inst_desc1_len)
 
     # Installation Description 2
     msg.add_byte_uint(inst_desc2_len + 2)
     msg.add_byte_uint(0x01)
-    msg.add_str(installation_description2, inst_desc1_len)
+    msg.add_str(data.installation_description2, inst_desc1_len)
 
     # Manufacturer Information
     msg.add_byte_uint(man_info_len + 2)
     msg.add_byte_uint(0x01)
-    msg.add_str(manufacturer_information, man_info_len)
+    msg.add_str(data.manufacturer_information, man_info_len)
 
 
 # TODO: parser

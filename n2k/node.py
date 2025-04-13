@@ -9,7 +9,7 @@ from typing import Optional, List, Callable, Set, Deque, Tuple
 
 import n2k
 from n2k.can_message_buffer import N2kCANMessageBuffer
-from n2k.can_tools import can_id_to_n2k, n2k_id_to_can
+from n2k.can_tools import MsgHeader, can_id_to_n2k, n2k_id_to_can
 from n2k.device_list import DeviceList
 from n2k.device_information import DeviceInformation
 from n2k.message import Message
@@ -792,13 +792,15 @@ class Node(can.Listener):
         msg.destination = destination
         set_n2k_iso_address_claim(
             msg=msg,
-            unique_number=self.device_information.unique_number,
-            manufacturer_code=self.device_information.manufacturer_code,
-            device_function=self.device_information.device_function,
-            device_class=self.device_information.device_class,
-            device_instance=self.device_information.device_instance,
-            system_instance=self.device_information.system_instance,
-            industry_group=self.device_information.industry_group,
+            device_information=DeviceInformation(
+                unique_number=self.device_information.unique_number,
+                manufacturer_code=self.device_information.manufacturer_code,
+                device_function=self.device_information.device_function,
+                device_class=self.device_information.device_class,
+                device_instance=self.device_information.device_instance,
+                system_instance=self.device_information.system_instance,
+                industry_group=self.device_information.industry_group,
+            ),
         )
         self.send_msg(msg)
 
@@ -839,14 +841,7 @@ class Node(can.Listener):
         msg.pgn = PGN.ProductInformation
         set_n2k_product_information(
             msg=msg,
-            n2k_version=self.product_information.n2k_version,
-            product_code=self.product_information.product_code,
-            model_id=self.product_information.n2k_model_id,
-            sw_code=self.product_information.n2k_sw_code,
-            model_version=self.product_information.n2k_model_version,
-            model_serial_code=self.product_information.n2k_model_serial_code,
-            certification_level=self.product_information.certification_level,
-            load_equivalency=self.product_information.load_equivalency,
+            data=self.product_information,
         )
         if self.send_msg(msg):
             self.clear_pending_product_information()
@@ -870,9 +865,11 @@ class Node(can.Listener):
         else:
             set_n2k_configuration_information(
                 msg=msg,
-                manufacturer_information=self.configuration_information.manufacturer_information,
-                installation_description1=self.configuration_information.installation_description1,
-                installation_description2=self.configuration_information.installation_description2,
+                data=ConfigurationInformation(
+                    manufacturer_information=self.configuration_information.manufacturer_information,
+                    installation_description1=self.configuration_information.installation_description1,
+                    installation_description2=self.configuration_information.installation_description2,
+                ),
             )
         if self.send_msg(msg):
             self.clear_pending_configuration_information()
@@ -898,10 +895,12 @@ class Node(can.Listener):
             return False
 
         can_id = n2k_id_to_can(
-            priority=msg.priority,
-            pgn=msg.pgn,
-            source=msg.source,
-            destination=msg.destination,
+            MsgHeader(
+                priority=msg.priority,
+                pgn=msg.pgn,
+                source=msg.source,
+                destination=msg.destination,
+            )
         )
 
         if can_id is None or msg.pgn == 0:

@@ -31,12 +31,12 @@ def can_id_to_n2k(can_id: int) -> MsgHeader:
 
 
 def n2k_id_to_can(
-    priority: int, pgn: int, source: int, destination: int
+    data: MsgHeader,
 ) -> Optional[int]:
-    priority = priority & 0xFF
-    pgn = pgn & 0xFFFFFFFF
-    source = source & 0xFFFFFFFF
-    destination = destination & 0xFF
+    priority = data.priority & 0xFF
+    pgn = data.pgn & 0xFFFFFFFF
+    source = data.source & 0xFFFFFFFF
+    destination = data.destination & 0xFF
 
     can_id_pf = (pgn >> 8) & 0xFF
 
