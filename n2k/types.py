@@ -460,6 +460,9 @@ class N2kTransmissionDiscreteStatus1:
         self.sail_drive = (value >> 4) & 0b1
 
 
+N2kBinaryStatus = int
+
+
 # Aliases for N2K standard types
 N2kEngineDiscreteStatus1 = n2k.nmea2000_std_types.N2kDD206
 N2kEngineDiscreteStatus2 = n2k.nmea2000_std_types.N2kDD223
