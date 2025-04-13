@@ -1027,7 +1027,7 @@ def set_n2k_dc_detailed_status(data: DCDetailedStatus) -> Message:
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
-    msg.pgn = PGN.DCDetailedstatus
+    msg.pgn = PGN.DCDetailedStatus
     msg.priority = 6
     msg.add_byte_uint(data.sid)
     msg.add_byte_uint(data.dc_instance)
@@ -2340,7 +2340,7 @@ def set_n2k_ais_aids_to_navigation_report(data: AISAtoNReportData) -> Message:
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
-    msg.pgn = PGN.AISAidstoNavigationReport
+    msg.pgn = PGN.AISAidsToNavigationReport
     msg.priority = 4
     msg.add_byte_uint((data.repeat & 0x03) << 6 | data.message_id & 0x3F)
     msg.add_4_byte_uint(data.user_id)

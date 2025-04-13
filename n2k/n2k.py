@@ -76,12 +76,12 @@ class PGN(IntEnum):
     EngineParametersStatic = 127498  # prio: 5, period: NA
     ACInputStatus = 127503  # prio: 6, period: 1500
     ACOutputStatus = 127504  # prio: 6, period: 1500
-    DCDetailedstatus = 127506  # prio: 6, period: 1500
+    DCDetailedStatus = 127506  # prio: 6, period: 1500
     ChargerStatus = 127507  # prio: 6, period: 1500
     InverterStatus = 127509  # prio: 6, period: 1500
     ChargerConfigurationStatus = 127510  # prio: 6, period: NA
     InverterConfigurationStatus = 127511  # prio: 6, period: NA
-    AGSConfigurationstatus = 127512  # prio: 6, period: NA
+    AGSConfigurationStatus = 127512  # prio: 6, period: NA
     BatteryConfigurationStatus = 127513  # prio: 6, period: NA
     AGSStatus = 127514  # prio: 6, period: 1500
     DistanceLog = 128275  # prio: 6, period: 1000
@@ -91,7 +91,7 @@ class PGN(IntEnum):
     AISClassAPositionReport = 129038  # prio: 4, period: NA
     AISClassBPositionReport = 129039  # prio: 4, period: NA
     AISClassBExtendedPositionReport = 129040  # prio: 4, period: NA
-    AISAidstoNavigationReport = 129041  # prio: 4, period: NA (AtoN)
+    AISAidsToNavigationReport = 129041  # prio: 4, period: NA (AtoN)
     Datum = 129044  # prio: 6, period: 10000
     UserDatumSettings = 129045  # prio: 6, period: NA
     NavigationInfo = 129284  # prio: 3, period: 1000
@@ -273,12 +273,12 @@ def is_default_fast_packet_message(pgn: int) -> bool:
         PGN.EngineParametersStatic,
         PGN.ACInputStatus,
         PGN.ACOutputStatus,
-        PGN.DCDetailedstatus,
+        PGN.DCDetailedStatus,
         PGN.ChargerStatus,
         PGN.InverterStatus,
         PGN.ChargerConfigurationStatus,
         PGN.InverterConfigurationStatus,
-        PGN.AGSConfigurationstatus,
+        PGN.AGSConfigurationStatus,
         PGN.BatteryConfigurationStatus,
         PGN.AGSStatus,
         PGN.DistanceLog,
@@ -288,7 +288,7 @@ def is_default_fast_packet_message(pgn: int) -> bool:
         PGN.AISClassAPositionReport,
         PGN.AISClassBPositionReport,
         PGN.AISClassBExtendedPositionReport,
-        PGN.AISAidstoNavigationReport,
+        PGN.AISAidsToNavigationReport,
         PGN.Datum,
         PGN.UserDatumSettings,
         PGN.NavigationInfo,
