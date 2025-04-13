@@ -270,7 +270,7 @@ def knots_to_meters_per_second(v: float) -> float:
     return v * 1852 / 3600
 
 
-def n2k_reset_binary_status(_bank_status: N2kBinaryStatus) -> int:
+def n2k_reset_binary_status() -> int:
     """
     Reset all single binary status values to not available
 
