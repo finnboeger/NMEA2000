@@ -67,3 +67,8 @@ ignore = ["F405","E501","D101","D102","D103","COM812","ARG001","D212","ARG002","
 quote-style = "double"
 indent-style = "space"
 line-ending = "auto"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "standard"
