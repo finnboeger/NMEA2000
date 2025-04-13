@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import List, Optional
 
 from n2k.device_information import DeviceInformation
@@ -5,7 +6,7 @@ from n2k.n2k import PGN
 from n2k.message import Message
 from n2k.types import *
 from n2k.constants import *
-from n2k.utils import IntRef
+from n2k.utils import IntRef, with_fallback
 
 
 # System Date/Time (PGN 126992)
@@ -93,7 +94,7 @@ class AISSafetyRelatedBroadcast(NamedTuple):
     repeat: N2kAISRepeat
     source_id: int
     ais_transceiver_information: N2kAISTransceiverInformation
-    safety_related_text: str
+    safety_related_text: str | None
 
 
 def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadcast:
@@ -1588,7 +1589,7 @@ def set_n2k_water_depth(
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
-    msg.pgn = (PGN.WaterDepth,)
+    msg.pgn = PGN.WaterDepth
     msg.priority = 3
     msg.add_byte_uint(sid)
     msg.add_4_byte_udouble(depth_below_transducer, 0.01)
@@ -2039,8 +2040,11 @@ def set_n2k_gnss_data(
         msg.add_byte_uint(
             1
         )  # Note that we have values for only one reference station, so pass only one values.
-        msg.add_2_byte_int((reference_station_type & 0x0F) | reference_station_id << 4)
-        msg.add_2_byte_udouble(age_of_correction, 0.01)
+        msg.add_2_byte_int(
+            (with_fallback(reference_station_type, N2kGNSSType.GPS) & 0x0F)
+            | with_fallback(reference_station_id, N2K_INT16_NA) << 4
+        )
+        msg.add_2_byte_udouble(with_fallback(age_of_correction, N2K_DOUBLE_NA), 0.01)
     else:
         msg.add_byte_uint(n_reference_station)
     return msg
@@ -2552,7 +2556,7 @@ class AISAtoNReportData(NamedTuple):
     gnss_type: N2kGNSSType
     a_to_n_status: int
     n2k_ais_transceiver_information: N2kAISTransceiverInformation
-    a_to_n_name: str
+    a_to_n_name: str | None
 
 
 def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
@@ -2852,14 +2856,14 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
     vb = msg.get_byte_uint(index)
     supplementary_data = N2kGenericStatusPair((vb >> 3) & 0x03)
     nav_direction = N2kNavigationDirection(vb & 0x07)
-    route_name = msg.get_var_str(index)
+    route_name = with_fallback(msg.get_var_str(index), "")
     msg.get_byte_uint(index)  # Reserved
     waypoints = []
     while index.value < msg.data_len:
         waypoints.append(
             Waypoint(
                 id=msg.get_2_byte_uint(index),
-                name=msg.get_var_str(index),
+                name=with_fallback(msg.get_var_str(index), ""),
                 latitude=msg.get_4_byte_double(1e-7, index),
                 longitude=msg.get_4_byte_double(1e-7, index),
             )
@@ -3422,7 +3426,7 @@ def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
         waypoints.append(
             Waypoint(
                 id=msg.get_2_byte_uint(index),
-                name=msg.get_var_str(index),
+                name=with_fallback(msg.get_var_str(index), ""),
                 latitude=msg.get_4_byte_double(1e-7, index),
                 longitude=msg.get_4_byte_double(1e-7, index),
             )
@@ -3553,14 +3557,15 @@ def set_n2k_iso_address_claim(
     system_instance: int = 0,
     industry_group: int = 4,
 ) -> None:
-    device_information = DeviceInformation()
-    device_information.unique_number = unique_number
-    device_information.manufacturer_code = manufacturer_code
-    device_information.device_function = device_function
-    device_information.device_class = device_class
-    device_information.device_instance = device_instance
-    device_information.system_instance = system_instance
-    device_information.industry_group = industry_group
+    device_information = DeviceInformation(
+        unique_number=unique_number,
+        manufacturer_code=manufacturer_code,
+        device_function=device_function,
+        device_class=device_class,
+        device_instance=device_instance,
+        system_instance=system_instance,
+        industry_group=industry_group,
+    )
 
     set_n2k_iso_address_claim_by_name(msg, device_information.name)
 

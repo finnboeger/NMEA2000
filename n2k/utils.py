@@ -1,5 +1,7 @@
+from __future__ import annotations
 from time import time
 import math
+from typing import Generic, TypeVar
 from n2k.constants import *
 
 
@@ -265,3 +267,12 @@ def knots_to_meters_per_second(v: float) -> float:
     if n2k_double_is_na(v):
         return v
     return v * 1852 / 3600
+
+
+T = TypeVar("T")
+
+
+def with_fallback(v: T | None, fallback: T) -> T:
+    if v is None:
+        return fallback
+    return v

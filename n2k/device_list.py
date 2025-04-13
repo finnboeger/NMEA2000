@@ -75,8 +75,8 @@ class DeviceList(MessageHandler):
                 dev.n_name_requested = 0
                 self.has_pending_requests = True
 
-        # set last message time to now
-        dev.last_message_time = millis()
+            # set last message time to now
+            dev.last_message_time = millis()
 
     def _handle_iso_address_claim(self, msg: Message) -> None:
         if msg.pgn != PGN.IsoAddressClaim:
@@ -95,7 +95,8 @@ class DeviceList(MessageHandler):
             and self.sources[msg.source] is not None
         ):
             # set current device to stored device
-            dev: n2k.device.Device = self.sources[msg.source]
+            dev = self.sources[msg.source]
+            assert dev is not None
             # check if it has a name
             if dev.dev_i.name == 0:
                 # if it doesn't, check if we have a device with the current name at a different address
@@ -151,12 +152,11 @@ class DeviceList(MessageHandler):
 
     def _handle_product_information(self, msg: Message) -> None:
         # Check if device exists in our list
-        if (
-            not 0 <= msg.source < N2K_MAX_BUS_DEVICES
-            or self.sources[msg.source] is None
-        ):
+        if not 0 <= msg.source < N2K_MAX_BUS_DEVICES:
             return
-        dev: n2k.device.Device = self.sources[msg.source]
+        dev: Optional[n2k.device.Device] = self.sources[msg.source]
+        if dev is None:
+            return
 
         # If the product information has not been loaded yet
         if not dev.prod_i_loaded:
@@ -172,12 +172,11 @@ class DeviceList(MessageHandler):
 
     def _handle_configuration_information(self, msg: Message) -> None:
         # Check if device exists in our list
-        if (
-            not 0 <= msg.source < N2K_MAX_BUS_DEVICES
-            or self.sources[msg.source] is None
-        ):
+        if not 0 <= msg.source < N2K_MAX_BUS_DEVICES:
             return
-        dev: n2k.device.Device = self.sources[msg.source]
+        dev: Optional[n2k.device.Device] = self.sources[msg.source]
+        if dev is None:
+            return
 
         # If the configuration information has not been loaded yet
         if not dev.conf_i_loaded:
@@ -192,12 +191,11 @@ class DeviceList(MessageHandler):
 
     def _handle_supported_pgn_list(self, msg: Message) -> None:
         # Check if device exists in our list
-        if (
-            not 0 <= msg.source < N2K_MAX_BUS_DEVICES
-            or self.sources[msg.source] is None
-        ):
+        if not 0 <= msg.source < N2K_MAX_BUS_DEVICES:
             return
-        dev: n2k.device.Device = self.sources[msg.source]
+        dev: Optional[n2k.device.Device] = self.sources[msg.source]
+        if dev is None:
+            return
 
         # Create an IntRef that we can pass to our get functions so that we can keep track of
         # where we are in the binary data
@@ -239,11 +237,11 @@ class DeviceList(MessageHandler):
 
         # if device has no name, check if name should be requested and then request name
         # (assumes a device exists at this index, as this is a condition for _handle_other to be called)
-        if self.sources[
-            msg.source
-        ].should_request_name() and self._request_iso_address_claim(msg.source):
+        device = self.sources[msg.source]
+        assert device is not None
+        if device.should_request_name() and self._request_iso_address_claim(msg.source):
             # increase requested counter
-            self.sources[msg.source].n_name_requested += 1
+            device.n_name_requested += 1
             # set has_pending_requests to true
             self.has_pending_requests = True
 
@@ -441,7 +439,8 @@ class DeviceList(MessageHandler):
 
         for dev in self.sources[source:]:
             if (
-                dev.dev_i.manufacturer_code == manufacturer_code
+                dev is not None
+                and dev.dev_i.manufacturer_code == manufacturer_code
                 and dev.prod_i.product_code == product_code
             ):
                 return dev

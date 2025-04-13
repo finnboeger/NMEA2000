@@ -5,7 +5,7 @@ from binascii import hexlify
 
 import traceback
 import can
-from typing import Optional, List, Callable, Set, Deque
+from typing import Optional, List, Callable, Set, Deque, Tuple
 
 import n2k
 from n2k.can_message_buffer import N2kCANMessageBuffer
@@ -81,7 +81,7 @@ class Node(can.Listener):
     receive_messages: List[int]
 
     max_pgn_sequence_counters: int = 0  # size_t
-    pgn_sequence_counters: List[int] = None  # unsigned long | array pointer?
+    pgn_sequence_counters: Optional[List[int]] = None  # unsigned long | array pointer?
 
     # ISO Multi Packet Support
     # pending_tp_msg: N2kMessage
@@ -323,11 +323,12 @@ class Node(can.Listener):
         :param manufacturer_code: Maximum of 2046. Has to be bought from the NMEA. `List of registered codes
                <https://www.nmea.org/Assets/20121020%20nmea%202000%20registration%20list.pdf>`_
         """
-        self.device_information = DeviceInformation()
-        self.device_information.unique_number = unique_number
-        self.device_information.manufacturer_code = manufacturer_code
-        self.device_information.device_function = device_function
-        self.device_information.device_class = device_class
+        self.device_information = DeviceInformation(
+            unique_number=unique_number,
+            manufacturer_code=manufacturer_code,
+            device_function=device_function,
+            device_class=device_class,
+        )
         """
         0 - Global
         1 - On-Highway Equipment
@@ -419,23 +420,24 @@ class Node(can.Listener):
         return True
 
     def _get_next_free_can_send_frame(self) -> CANSendFrame:
-        print("NotImplemented _get_next_free_can_send_frame")
+        raise NotImplementedError()
 
     def _send_pending_information(self) -> None:
-        print("NotImplemented _send_pending_information")
+        raise NotImplementedError()
 
     def _is_initialized(self) -> bool:
         print("NotImplemented _is_initialized")
+        return False
 
     # ISO Multi Packet Support
     # def _find_free_can_msg_index(self, pgn: int, source: int, destination: int, tp_msg: bool, msg_index: int) -> None:
     def _find_free_can_msg_index(
         self, pgn: int, source: int, destination: int, msg_index: int
     ) -> None:
-        print("NotImplemented _find_free_can_msg_index")
+        raise NotImplementedError()
 
     def _set_n2k_can_buf_msg(self, can_id: int, length: int, buf: bytearray):
-        print("NotImplemented _set_n2k_can_buf_msg")
+        raise NotImplementedError()
 
     def _is_fast_packet_pgn(self, pgn: int) -> bool:
         return (
@@ -455,7 +457,7 @@ class Node(can.Listener):
             return False
         return self._is_fast_packet_pgn(msg.pgn)
 
-    def _check_known_message(self, pgn: int) -> (bool, bool, bool):
+    def _check_known_message(self, pgn: int) -> Tuple[bool, bool, bool]:
         # TODO: refactor
         system_message = False
         fast_packet = False
@@ -621,7 +623,8 @@ class Node(can.Listener):
             self._start_address_claim()
 
     def _handle_commanded_address(self, msg: Message) -> None:
-        if msg.pgn != PGN.CommandedAddress or not msg.tp_message or msg.data_len != 9:
+        # or not msg.tp_message
+        if msg.pgn != PGN.CommandedAddress or msg.data_len != 9:
             return
         if not is_broadcast(msg.destination) and msg.destination != self.n2k_source:
             return
@@ -686,7 +689,7 @@ class Node(can.Listener):
     # Forward Handling Code Skipped
 
     def _run_message_handlers(self, msg: Message) -> None:
-        print("NotImplemented _run_message_handlers")
+        raise NotImplementedError()
 
     # ISO Multi Packet Support
     # def _test_handle_tp_message(self, pgn: int, source: int, destination: int) -> bool:
@@ -878,7 +881,7 @@ class Node(can.Listener):
 
     # Heartbeat Support
     def send_heartbeat(self, force: bool = False):
-        print("NotImplemented send_heartbeat")
+        raise NotImplementedError()
 
     # Send message to the bus
     def send_msg(self, msg: Message) -> bool:

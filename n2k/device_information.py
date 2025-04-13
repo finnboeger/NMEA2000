@@ -26,6 +26,12 @@ class DeviceInformation:
         self.system_instance = system_instance
         self.industry_group = industry_group
 
+    @staticmethod
+    def from_name(name: int) -> "DeviceInformation":
+        d = DeviceInformation(0, 0, 0, 0)
+        d.name = name
+        return d
+
     @property
     def name(self) -> int:
         """

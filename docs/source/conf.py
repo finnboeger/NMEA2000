@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import List
 
 sys.path.insert(0, os.path.abspath("../../"))
 
@@ -40,7 +41,7 @@ autodoc_default_options = {
 always_document_param_types = True
 typehints_defaults = "comma"
 templates_path = ["_templates"]
-exclude_patterns = []
+exclude_patterns: List[str] = []
 
 
 # -- Options for HTML output -------------------------------------------------

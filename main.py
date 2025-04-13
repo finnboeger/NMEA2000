@@ -7,12 +7,13 @@ import logging
 
 bus = can.Bus("can0", interface="socketcan")
 notifier = can.Notifier(bus, [])
-device_information = n2k.DeviceInformation()
-device_information.unique_number = 1
-device_information.device_function = 130
-device_information.device_class = 25
-device_information.manufacturer_code = 2046
-device_information.industry_group = 4
+device_information = n2k.DeviceInformation(
+    unique_number=1,
+    manufacturer_code=2046,
+    device_function=130,
+    device_class=25,
+    industry_group=4,
+)
 n2k_node = n2k.Node(bus, device_information)
 n2k_node.set_product_information("Test", "0.0.1", "Dev", "00000000001", 2)
 n2k_node.set_configuration_information()
@@ -21,7 +22,7 @@ n2k_node.set_configuration_information()
 
 
 class Handler(n2k.MessageHandler):
-    def __init__(self, node: n2k_node):
+    def __init__(self, node: n2k.Node):
         super().__init__(0, node)
 
     def handle_msg(self, msg: n2k.Message) -> None:

@@ -35,8 +35,7 @@ class Device:
 
     def __init__(self, name, source=255):
         self.source = source
-        self.dev_i = n2k.device_information.DeviceInformation()
-        self.dev_i.name = name
+        self.dev_i = n2k.device_information.DeviceInformation.from_name(name)
         self.create_time = millis()
         self.prod_i = ProductInformation(
             n2k_version=0,

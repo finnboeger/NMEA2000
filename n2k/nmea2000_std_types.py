@@ -221,7 +221,7 @@ class N2kDD374(IntEnum):
 
 
 # Thruster Motor Events
-class N2kDD471(IntEnum):
+class N2kDD471:
     motor_over_temperature_cutout: int = 0
     motor_over_current_cutout: int = 0
     low_oil_level_warning: int = 0
