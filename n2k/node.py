@@ -175,7 +175,8 @@ class Node(can.Listener):
                 msg_header.pgn
             )
             # TODO: assert msg.data is not empty
-            assert msg.data is not None
+            if msg.data is None:
+                raise ValueError()
             if not fast_packet or is_fast_packet_first_frame(msg.data[0]):
                 # This is the first frame of a message
                 # Find free Slot to store the CAN Msg

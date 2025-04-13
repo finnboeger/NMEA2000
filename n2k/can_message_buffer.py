@@ -9,7 +9,8 @@ class N2kCANMessageBuffer:
     _buffer: List[N2kCANMessage]
 
     def __init__(self, size: int):
-        assert size > 0
+        if size <= 0:
+            raise ValueError(size)
 
         self._buffer = []
         for i in range(size):

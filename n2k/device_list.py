@@ -96,7 +96,8 @@ class DeviceList(MessageHandler):
         ):
             # set current device to stored device
             dev = self.sources[msg.source]
-            assert dev is not None
+            if dev is None:
+                raise AssertionError()
             # check if it has a name
             if dev.dev_i.name == 0:
                 # if it doesn't, check if we have a device with the current name at a different address
@@ -204,7 +205,8 @@ class DeviceList(MessageHandler):
         n2k_pgn_list: N2kPGNList = N2kPGNList(msg.get_byte_uint(index))
         # Each PGN takes up 3 bytes. If we get a remainder something is wrong with the data.
         pgn_count, rem = divmod(msg.data_len - index, 3)
-        assert rem == 0
+        if rem != 0:
+            raise AssertionError(rem)
 
         # Clear the corresponding list and select it
         pgn_list: Optional[List] = None
@@ -238,7 +240,8 @@ class DeviceList(MessageHandler):
         # if device has no name, check if name should be requested and then request name
         # (assumes a device exists at this index, as this is a condition for _handle_other to be called)
         device = self.sources[msg.source]
-        assert device is not None
+        if device is None:
+            raise AssertionError()
         if device.should_request_name() and self._request_iso_address_claim(msg.source):
             # increase requested counter
             device.n_name_requested += 1
