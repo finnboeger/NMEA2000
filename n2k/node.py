@@ -570,7 +570,7 @@ class Node(can.Listener):
         if requested_pgn is not None:
             self._respond_iso_request(msg, requested_pgn)
 
-    #  TOOD
+    #  TODO
     # def _respond_group_function(self, msg: N2kMessage, group_function_code: GroupFunctionCode, pgn_for_group_function: int) -> None:
     #     raise NotImplementedError()
 

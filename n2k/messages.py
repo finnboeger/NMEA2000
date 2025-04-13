@@ -331,7 +331,7 @@ def set_n2k_rudder(
     """
     Rudder
 
-    :param rudder_position: Current rudder postion in radians.
+    :param rudder_position: Current rudder position in radians.
     :param instance: Rudder instance.
     :param rudder_direction_order: Direction, where rudder should be turned.
     :param angle_order: Angle where rudder should be turned in radians.
@@ -614,7 +614,7 @@ def set_n2k_engine_parameters_rapid(data: EngineParametersRapid) -> Message:
     msg.add_2_byte_udouble(data.engine_boost_pressure, 100)
     msg.add_byte_uint(
         data.engine_tilt_trim
-    )  # TODO: this is proably incorrect and should instead be add_byte_int. Verify with Garmin Display
+    )  # TODO: this is probably incorrect and should instead be add_byte_int. Verify with Garmin Display
     msg.add_byte_uint(0xFF)  # reserved
     msg.add_byte_uint(0xFF)  # reserved
     return msg
@@ -2066,7 +2066,7 @@ def set_n2k_ais_class_a_position(data: AISClassAPositionReport) -> Message:
     :param rot: Rate of Turn
     :param nav_status: Navigational status
     :param sid: Sequence ID
-    :return: NMEA2000 Messag, ready to be sent
+    :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
     msg.pgn = PGN.AISClassAPositionReport
@@ -2331,7 +2331,7 @@ def set_n2k_ais_aids_to_navigation_report(data: AISAtoNReportData) -> Message:
         - 0: default = real AtoN at indicated position
         - 1: virtual AtoN, does not physically exist.
     :param assigned_mode_flag: Assigned Mode Flag\n
-        - 0: default = Station operating in autonomous and continous mode
+        - 0: default = Station operating in autonomous and continuous mode
         - 1: Station operating in assigned mode
     :param gnss_type: Type of electronic position fixing device, see type
     :param a_to_n_status: AtoN Status byte. Reserved for the indication of the AtoN status.
@@ -2487,7 +2487,7 @@ class NavigationInfo:
     destination_waypoint_number: int
     destination_latitude: float
     destination_longitude: float
-    waypoint_closing_veloctiy: float
+    waypoint_closing_velocity: float
 
 
 def set_n2k_navigation_info(data: NavigationInfo) -> Message:
@@ -2509,8 +2509,8 @@ def set_n2k_navigation_info(data: NavigationInfo) -> Message:
     :param destination_waypoint_number: Destination Waypoint Number
     :param destination_latitude: Destination Waypoint Latitude
     :param destination_longitude: Destination Waypoint Longitude
-    :param waypoint_closing_veloctiy: Waypoint Closing Velocity
-    :return: NMEA2000 Messasge, ready to be sent
+    :param waypoint_closing_velocity: Waypoint Closing Velocity
+    :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
     msg.pgn = PGN.NavigationInfo
@@ -2531,7 +2531,7 @@ def set_n2k_navigation_info(data: NavigationInfo) -> Message:
     msg.add_4_byte_uint(data.destination_waypoint_number)
     msg.add_4_byte_double(data.destination_latitude, 1e-7)
     msg.add_4_byte_double(data.destination_longitude, 1e-7)
-    msg.add_2_byte_double(data.waypoint_closing_veloctiy, 0.01)
+    msg.add_2_byte_double(data.waypoint_closing_velocity, 0.01)
 
     return msg
 
@@ -2561,7 +2561,7 @@ def parse_n2k_navigation_info(msg: Message) -> NavigationInfo:
         destination_waypoint_number=msg.get_4_byte_uint(index),
         destination_latitude=msg.get_4_byte_double(1e-7, index),
         destination_longitude=msg.get_4_byte_double(1e-7, index),
-        waypoint_closing_veloctiy=msg.get_2_byte_double(0.01, index),
+        waypoint_closing_velocity=msg.get_2_byte_double(0.01, index),
     )
 
 
@@ -2835,7 +2835,7 @@ def set_n2k_ais_class_a_static_data(data: AISClassAStaticData) -> Message:
         Maximum 20 * 6bit ASCII characters.\n
         For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.\n
         Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    :param vessel_type: Vessek Type.\n
+    :param vessel_type: Vessel Type.\n
         0: not available or no ship = default\n
         1-99: as defined in § 3.3.2\n
         100-199: reserved, for regional use\n
@@ -3019,7 +3019,7 @@ def set_n2k_ais_class_b_static_data_part_b(data: AISClassBStaticDataPartB) -> Me
     :param repeat: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
         0-3; 0 = default; 3 = do not repeat anymore
     :param user_id: MMSI Number
-    :param vessel_type: Vessek Type.\n
+    :param vessel_type: Vessel Type.\n
         0: not available or no ship = default\n
         1-99: as defined in § 3.3.2\n
         100-199: reserved, for regional use\n
@@ -3049,7 +3049,7 @@ def set_n2k_ais_class_b_static_data_part_b(data: AISClassBStaticDataPartB) -> Me
     msg.add_2_byte_udouble(data.pos_ref_bow, 0.1)
     msg.add_4_byte_uint(data.mothership_id)
     msg.add_byte_uint(0x03)  # Reserved + AIS spare
-    msg.add_byte_uint(0xE0 | (data.ais_info & 0x1F))  # AIS Tranceiver info + reserved
+    msg.add_byte_uint(0xE0 | (data.ais_info & 0x1F))  # AIS Transceiver info + reserved
     msg.add_byte_uint(data.sid)  # SID
 
     return msg

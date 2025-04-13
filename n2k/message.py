@@ -448,7 +448,7 @@ class Message:
         return False
 
 
-# TODO: change all the set functions to instead subclass n2kmessage and be the constructor of the
+# TODO: change all the set functions to instead subclass n2k.message and be the constructor of the
 #  corresponding subclass?
 #  Or maybe just be class functions? Or static functions that return a message (probably best)
 

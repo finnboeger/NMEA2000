@@ -60,7 +60,7 @@ class DeviceList(MessageHandler):
         else:
             self._handle_other(msg)
 
-        # if message destination has been added to our devicelist by now
+        # if message destination has been added to our device list by now
         #  (should always be the case - address claim does it in handle address claim)
         dev = self.sources[msg.source]
         if dev is not None:
@@ -424,7 +424,7 @@ class DeviceList(MessageHandler):
         This function seems to look for the next device with a given manufacturer_code and product_code behind
          the provided source.
          This means to find the first device by code you would need to provide source >= max_devices.
-         As this is weird behaviour it is subject to change and source will be probably renamed to starting_source, ...
+         As this is weird behavior it is subject to change and source will be probably renamed to starting_source, ...
 
         :param manufacturer_code:
         :param product_code:

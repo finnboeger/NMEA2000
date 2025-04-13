@@ -103,7 +103,7 @@ class N2kTempSource(IntEnum):
     MainCabinTemperature = 4
     LiveWellTemperature = 5
     BaitWellTemperature = 6
-    RefridgerationTemperature = 7
+    RefrigerationTemperature = 7
     HeatingSystemTemperature = 8
     DewPointTemperature = 9
     ApparentWindChillTemperature = 10
@@ -252,7 +252,7 @@ class N2kAISNavStatus(IntEnum):
     Under_Way_Motoring = 0
     At_Anchor = 1
     Not_Under_Command = 2
-    Restricted_Manoeuverability = 3
+    Restricted_Maneuverability = 3
     Constrained_By_Draught = 4
     Moored = 5
     Aground = 6
@@ -311,7 +311,7 @@ class N2kChargeState(IntEnum):
     Bulk = 1
     Absorption = 2
     Overcharge = 3
-    Equalise = 4
+    Equalize = 4
     Float = 5
     No_Float = 6
     Constant_VI = 7
