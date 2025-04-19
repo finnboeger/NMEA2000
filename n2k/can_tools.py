@@ -48,6 +48,5 @@ def n2k_id_to_can(
             # for PDU1 format, the lowest byte of the PGN has to be 0, to leave space for the destination
             return None
         return (priority & 0x7) << 26 | pgn << 8 | destination << 8 | source
-    else:
-        # PDU2 format
-        return (priority & 0x7) << 26 | pgn << 8 | source
+    # PDU2 format
+    return (priority & 0x7) << 26 | pgn << 8 | source

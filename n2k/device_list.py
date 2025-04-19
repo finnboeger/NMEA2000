@@ -447,8 +447,7 @@ class DeviceList(MessageHandler):
         dev = self.find_device_by_source(source)
         if dev is None:
             return 0
-        else:
-            return dev.last_message_time
+        return dev.last_message_time
 
     def read_reset_is_list_updated(self):
         if self.list_updated:
