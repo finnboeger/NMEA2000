@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from n2k.constants import *
+from n2k import constants, types
 from n2k.message import Message
 from n2k.n2k import PGN
-from n2k.types import *
 from n2k.utils import IntRef, with_fallback
 
 if TYPE_CHECKING:
@@ -18,7 +18,7 @@ class SystemTime:
     sid: int
     system_date: int
     system_time: float
-    time_source: N2kTimeSource
+    time_source: types.N2kTimeSource
 
 
 def set_n2k_system_time(
@@ -55,7 +55,7 @@ def parse_n2k_system_time(msg: Message) -> SystemTime:
     index = IntRef(0)
     return SystemTime(
         sid=msg.get_byte_uint(index),
-        time_source=N2kTimeSource(msg.get_byte_uint(index) & 0x0F),
+        time_source=types.N2kTimeSource(msg.get_byte_uint(index) & 0x0F),
         system_date=msg.get_2_byte_uint(index),
         system_time=msg.get_4_byte_udouble(0.0001, index),
     )
@@ -65,9 +65,9 @@ def parse_n2k_system_time(msg: Message) -> SystemTime:
 @dataclass
 class AISSafetyRelatedBroadcast:
     message_id: int
-    repeat: N2kAISRepeat
+    repeat: types.N2kAISRepeat
     source_id: int
-    ais_transceiver_information: N2kAISTransceiverInformation
+    ais_transceiver_information: types.N2kAISTransceiverInformation
     safety_related_text: str | None
 
 
@@ -107,9 +107,9 @@ def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadca
 
     return AISSafetyRelatedBroadcast(
         message_id=vb & 0x3F,
-        repeat=N2kAISRepeat((vb >> 6) & 0x03),
+        repeat=types.N2kAISRepeat((vb >> 6) & 0x03),
         source_id=msg.get_4_byte_uint(index) & 0x3FFFFFFF,
-        ais_transceiver_information=N2kAISTransceiverInformation(
+        ais_transceiver_information=types.N2kAISTransceiverInformation(
             msg.get_byte_uint(index) & 0x1F
         ),
         safety_related_text=msg.get_var_str(index),
@@ -121,18 +121,18 @@ def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadca
 class MOBNotification:
     sid: int
     mob_emitter_id: int
-    mob_status: N2kMOBStatus
+    mob_status: types.N2kMOBStatus
     activation_time: float
-    position_source: N2kMOBPositionSource
+    position_source: types.N2kMOBPositionSource
     position_date: int
     position_time: float
     latitude: float
     longitude: float
-    cog_reference: N2kHeadingReference
+    cog_reference: types.N2kHeadingReference
     cog: float
     sog: float
     mmsi: int
-    mob_emitter_battery_status: N2kMOBEmitterBatteryStatus
+    mob_emitter_battery_status: types.N2kMOBEmitterBatteryStatus
 
 
 def set_n2k_mob_notification(data: MOBNotification) -> Message:
@@ -188,18 +188,18 @@ def parse_n2k_mob_notification(msg: Message) -> MOBNotification:
     return MOBNotification(
         sid=msg.get_byte_uint(index),
         mob_emitter_id=msg.get_4_byte_uint(index),
-        mob_status=N2kMOBStatus(msg.get_byte_uint(index) & 0x07),
+        mob_status=types.N2kMOBStatus(msg.get_byte_uint(index) & 0x07),
         activation_time=msg.get_4_byte_udouble(0.0001, index),
-        position_source=N2kMOBPositionSource(msg.get_byte_uint(index) & 0x07),
+        position_source=types.N2kMOBPositionSource(msg.get_byte_uint(index) & 0x07),
         position_date=msg.get_2_byte_uint(index),
         position_time=msg.get_4_byte_udouble(0.0001, index),
         latitude=msg.get_4_byte_double(1e-7, index),
         longitude=msg.get_4_byte_double(1e-7, index),
-        cog_reference=N2kHeadingReference(msg.get_byte_uint(index) & 0x03),
+        cog_reference=types.N2kHeadingReference(msg.get_byte_uint(index) & 0x03),
         cog=msg.get_2_byte_udouble(0.0001, index),
         sog=msg.get_2_byte_udouble(0.01, index),
         mmsi=msg.get_4_byte_uint(index),
-        mob_emitter_battery_status=N2kMOBEmitterBatteryStatus(
+        mob_emitter_battery_status=types.N2kMOBEmitterBatteryStatus(
             msg.get_byte_uint(index) & 0x07
         ),
     )
@@ -208,14 +208,14 @@ def parse_n2k_mob_notification(msg: Message) -> MOBNotification:
 # Heading/Track Control (PGN 127237)
 @dataclass
 class HeadingTrackControl:
-    rudder_limit_exceeded: N2kOnOff
-    off_heading_limit_exceeded: N2kOnOff
-    off_track_limit_exceeded: N2kOnOff
-    override: N2kOnOff
-    steering_mode: N2kSteeringMode
-    turn_mode: N2kTurnMode
-    heading_reference: N2kHeadingReference
-    commanded_rudder_direction: N2kRudderDirectionOrder
+    rudder_limit_exceeded: types.N2kOnOff
+    off_heading_limit_exceeded: types.N2kOnOff
+    off_track_limit_exceeded: types.N2kOnOff
+    override: types.N2kOnOff
+    steering_mode: types.N2kSteeringMode
+    turn_mode: types.N2kTurnMode
+    heading_reference: types.N2kHeadingReference
+    commanded_rudder_direction: types.N2kRudderDirectionOrder
     commanded_rudder_angle: float
     heading_to_steer_course: float
     track: float
@@ -288,14 +288,14 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
     """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
-    rudder_limit_exceeded = N2kOnOff(vb & 0x03)
-    off_heading_limit_exceeded = N2kOnOff((vb >> 2) & 0x03)
-    off_track_limit_exceeded = N2kOnOff((vb >> 4) & 0x03)
-    override = N2kOnOff((vb >> 6) & 0x03)
+    rudder_limit_exceeded = types.N2kOnOff(vb & 0x03)
+    off_heading_limit_exceeded = types.N2kOnOff((vb >> 2) & 0x03)
+    off_track_limit_exceeded = types.N2kOnOff((vb >> 4) & 0x03)
+    override = types.N2kOnOff((vb >> 6) & 0x03)
     vb = msg.get_byte_uint(index)
-    steering_mode = N2kSteeringMode(vb & 0x07)
-    turn_mode = N2kTurnMode((vb >> 3) & 0x07)
-    heading_reference = N2kHeadingReference((vb >> 6) & 0x03)
+    steering_mode = types.N2kSteeringMode(vb & 0x07)
+    turn_mode = types.N2kTurnMode((vb >> 3) & 0x07)
+    heading_reference = types.N2kHeadingReference((vb >> 6) & 0x03)
     return HeadingTrackControl(
         rudder_limit_exceeded=rudder_limit_exceeded,
         off_heading_limit_exceeded=off_heading_limit_exceeded,
@@ -304,7 +304,7 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
         steering_mode=steering_mode,
         turn_mode=turn_mode,
         heading_reference=heading_reference,
-        commanded_rudder_direction=N2kRudderDirectionOrder(
+        commanded_rudder_direction=types.N2kRudderDirectionOrder(
             (msg.get_byte_uint(index) >> 5) & 0x07
         ),
         commanded_rudder_angle=msg.get_2_byte_double(0.0001, index),
@@ -324,7 +324,7 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
 class Rudder:
     rudder_position: float
     instance: int
-    rudder_direction_order: N2kRudderDirectionOrder
+    rudder_direction_order: types.N2kRudderDirectionOrder
     angle_order: float
 
 
@@ -362,7 +362,9 @@ def parse_n2k_rudder(msg: Message) -> Rudder:
     index = IntRef(0)
     return Rudder(
         instance=msg.get_byte_uint(index),
-        rudder_direction_order=N2kRudderDirectionOrder(msg.get_byte_uint(index) & 0x07),
+        rudder_direction_order=types.N2kRudderDirectionOrder(
+            msg.get_byte_uint(index) & 0x07
+        ),
         angle_order=msg.get_2_byte_double(0.0001, index),
         rudder_position=msg.get_2_byte_double(0.0001, index),
     )
@@ -375,7 +377,7 @@ class Heading:
     heading: float
     deviation: float
     variation: float
-    ref: N2kHeadingReference
+    ref: types.N2kHeadingReference
 
 
 def set_n2k_heading(
@@ -419,7 +421,7 @@ def parse_n2k_heading(msg: Message) -> Heading:
         heading=msg.get_2_byte_udouble(0.0001, index),
         deviation=msg.get_2_byte_double(0.0001, index),
         variation=msg.get_2_byte_double(0.0001, index),
-        ref=N2kHeadingReference(msg.get_byte_uint(index) & 0x03),
+        ref=types.N2kHeadingReference(msg.get_byte_uint(index) & 0x03),
     )
 
 
@@ -463,7 +465,7 @@ class Heave:
     sid: int
     heave: float
     delay: float
-    delay_source: N2kDelaySource
+    delay_source: types.N2kDelaySource
 
 
 def set_n2k_heave(
@@ -486,7 +488,7 @@ def set_n2k_heave(
     msg.add_2_byte_double(data.heave, 0.01)
     msg.add_2_byte_udouble(data.delay, 0.01)
     msg.add_byte_uint(0xF0 | (data.delay_source & 0x0F))
-    msg.add_2_byte_uint(N2K_UINT16_NA)
+    msg.add_2_byte_uint(constants.N2K_UINT16_NA)
 
     return msg
 
@@ -497,7 +499,7 @@ def parse_n2k_heave(msg: Message) -> Heave:
         sid=msg.get_byte_uint(index),
         heave=msg.get_2_byte_double(0.01, index),
         delay=msg.get_2_byte_udouble(0.01, index),
-        delay_source=N2kDelaySource(msg.get_byte_uint(index) & 0x0F),
+        delay_source=types.N2kDelaySource(msg.get_byte_uint(index) & 0x0F),
     )
 
 
@@ -546,7 +548,7 @@ def parse_n2k_attitude(msg: Message) -> Attitude:
 @dataclass
 class MagneticVariation:
     sid: int
-    source: N2kMagneticVariation
+    source: types.N2kMagneticVariation
     days_since_1970: int
     variation: float
 
@@ -577,7 +579,7 @@ def parse_n2k_magnetic_variation(msg: Message) -> MagneticVariation:
     index = IntRef(0)
     return MagneticVariation(
         sid=msg.get_byte_uint(index),
-        source=N2kMagneticVariation(msg.get_byte_uint(index) & 0x0F),
+        source=types.N2kMagneticVariation(msg.get_byte_uint(index) & 0x0F),
         days_since_1970=msg.get_2_byte_uint(index),
         variation=msg.get_2_byte_double(0.0001, index),
     )
@@ -645,8 +647,8 @@ class EngineParametersDynamic:
     engine_fuel_press: float
     engine_load: int
     engine_torque: int
-    status1: N2kEngineDiscreteStatus1
-    status2: N2kEngineDiscreteStatus2
+    status1: types.N2kEngineDiscreteStatus1
+    status2: types.N2kEngineDiscreteStatus2
 
 
 def set_n2k_engine_parameters_dynamic(data: EngineParametersDynamic) -> Message:
@@ -707,8 +709,8 @@ def parse_n2k_engine_parameters_dynamic(msg: Message) -> EngineParametersDynamic
     engine_fuel_press = msg.get_2_byte_udouble(1000, index)
 
     msg.get_byte_uint(index)
-    status1 = N2kEngineDiscreteStatus1(msg.get_2_byte_uint(index))
-    status2 = N2kEngineDiscreteStatus2(msg.get_2_byte_uint(index))
+    status1 = types.N2kEngineDiscreteStatus1(msg.get_2_byte_uint(index))
+    status2 = types.N2kEngineDiscreteStatus2(msg.get_2_byte_uint(index))
     engine_load = msg.get_byte_uint(index)
     engine_torque = msg.get_byte_uint(index)
 
@@ -733,10 +735,10 @@ def parse_n2k_engine_parameters_dynamic(msg: Message) -> EngineParametersDynamic
 @dataclass
 class TransmissionParametersDynamic:
     engine_instance: int
-    transmission_gear: N2kTransmissionGear
+    transmission_gear: types.N2kTransmissionGear
     oil_pressure: float
     oil_temperature: float
-    discrete_status1: N2kTransmissionDiscreteStatus1
+    discrete_status1: types.N2kTransmissionDiscreteStatus1
 
 
 def set_n2k_transmission_parameters_dynamic(
@@ -775,10 +777,10 @@ def parse_n2k_transmission_parameters_dynamic(
     index = IntRef(0)
     return TransmissionParametersDynamic(
         engine_instance=msg.get_byte_uint(index),
-        transmission_gear=N2kTransmissionGear(msg.get_byte_uint(index) & 0x03),
+        transmission_gear=types.N2kTransmissionGear(msg.get_byte_uint(index) & 0x03),
         oil_pressure=msg.get_2_byte_udouble(100, index),
         oil_temperature=msg.get_2_byte_udouble(0.1, index),
-        discrete_status1=N2kTransmissionDiscreteStatus1(
+        discrete_status1=types.N2kTransmissionDiscreteStatus1(
             msg.get_byte_uint(index) & 0x1F
         ),
     )
@@ -836,7 +838,7 @@ def parse_n2k_trip_parameters_engine(msg: Message) -> TripFuelConsumptionEngine:
 @dataclass
 class BinaryStatusReport:
     device_bank_instance: int
-    bank_status: N2kBinaryStatus
+    bank_status: types.N2kBinaryStatus
 
 
 def set_n2k_binary_status_report(data: BinaryStatusReport) -> Message:
@@ -867,7 +869,7 @@ def parse_n2k_binary_status_report(msg: Message) -> BinaryStatusReport:
 @dataclass
 class SwitchBankControl:
     target_bank_instance: int
-    bank_status: N2kBinaryStatus
+    bank_status: types.N2kBinaryStatus
 
 
 def set_n2k_switch_bank_control(
@@ -912,7 +914,7 @@ def parse_n2k_switch_bank_control(msg: Message) -> SwitchBankControl:
 @dataclass
 class FluidLevel:
     instance: int
-    fluid_type: N2kFluidType
+    fluid_type: types.N2kFluidType
     level: float
     capacity: float
 
@@ -942,7 +944,7 @@ def parse_n2k_fluid_level(msg: Message) -> FluidLevel:
 
     return FluidLevel(
         instance=vb & 0x0F,
-        fluid_type=N2kFluidType((vb >> 4) & 0x0F),
+        fluid_type=types.N2kFluidType((vb >> 4) & 0x0F),
         level=msg.get_2_byte_double(0.004, index),
         capacity=msg.get_4_byte_udouble(0.1, index),
     )
@@ -953,7 +955,7 @@ def parse_n2k_fluid_level(msg: Message) -> FluidLevel:
 class DCDetailedStatus:
     sid: int
     dc_instance: int
-    dc_type: N2kDCType
+    dc_type: types.N2kDCType
     state_of_charge: int
     state_of_health: int
     time_remaining: float
@@ -995,7 +997,7 @@ def parse_n2k_dc_detailed_status(msg: Message) -> DCDetailedStatus:
     return DCDetailedStatus(
         sid=msg.get_byte_uint(index),
         dc_instance=msg.get_byte_uint(index),
-        dc_type=N2kDCType(msg.get_byte_uint(index)),
+        dc_type=types.N2kDCType(msg.get_byte_uint(index)),
         state_of_charge=msg.get_byte_uint(index),
         state_of_health=msg.get_byte_uint(index),
         time_remaining=msg.get_2_byte_udouble(60, index),
@@ -1009,10 +1011,10 @@ def parse_n2k_dc_detailed_status(msg: Message) -> DCDetailedStatus:
 class ChargerStatus:
     instance: int
     battery_instance: int
-    charge_state: N2kChargeState
-    charger_mode: N2kChargerMode
-    enabled: N2kOnOff
-    equalization_pending: N2kOnOff
+    charge_state: types.N2kChargeState
+    charger_mode: types.N2kChargerMode
+    enabled: types.N2kOnOff
+    equalization_pending: types.N2kOnOff
     equalization_time_remaining: float
 
 
@@ -1048,11 +1050,11 @@ def parse_n2k_charger_status(msg: Message) -> ChargerStatus:
     instance = msg.get_byte_uint(index)
     battery_instance = msg.get_byte_uint(index)
     vb = msg.get_byte_uint(index)
-    charge_state = N2kChargeState(vb & 0x0F)
-    charger_mode = N2kChargerMode((vb >> 4) & 0x0F)
+    charge_state = types.N2kChargeState(vb & 0x0F)
+    charger_mode = types.N2kChargerMode((vb >> 4) & 0x0F)
     vb = msg.get_byte_uint(index)
-    enabled = N2kOnOff(vb & 0x03)
-    equalization_pending = N2kOnOff((vb >> 2) & 0x03)
+    enabled = types.N2kOnOff(vb & 0x03)
+    equalization_pending = types.N2kOnOff((vb >> 2) & 0x03)
     equalization_time_remaining = msg.get_2_byte_double(60, index)
 
     return ChargerStatus(
@@ -1115,13 +1117,13 @@ def parse_n2k_battery_status(msg: Message) -> BatteryStatus:
 class ChargerConfigurationStatus:
     charger_instance: int
     battery_instance: int
-    enable: N2kOnOff
+    enable: types.N2kOnOff
     charge_current_limit: int
-    charging_algorithm: N2kChargingAlgorithm
-    charger_mode: N2kChargerMode
-    battery_temperature: N2kBattTempNoSensor
-    equalization_enabled: N2kOnOff
-    over_charge_enable: N2kOnOff
+    charging_algorithm: types.N2kChargingAlgorithm
+    charger_mode: types.N2kChargerMode
+    battery_temperature: types.N2kBattTempNoSensor
+    equalization_enabled: types.N2kOnOff
+    over_charge_enable: types.N2kOnOff
     equalization_time_remaining: int
 
 
@@ -1164,15 +1166,15 @@ def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfiguration
 
     charger_instance = msg.get_byte_uint(index)
     battery_instance = msg.get_byte_uint(index)
-    enable = N2kOnOff(msg.get_byte_uint(index) & 0x03)
+    enable = types.N2kOnOff(msg.get_byte_uint(index) & 0x03)
     charge_current_limit = msg.get_byte_uint(index)
     vb = msg.get_byte_uint(index)
-    charging_algorithm = N2kChargingAlgorithm(vb & 0x0F)
-    charger_mode = N2kChargerMode((vb >> 4) & 0x0F)
+    charging_algorithm = types.N2kChargingAlgorithm(vb & 0x0F)
+    charger_mode = types.N2kChargerMode((vb >> 4) & 0x0F)
     vb = msg.get_byte_uint(index)
-    battery_temperature = N2kBattTempNoSensor(vb & 0x04)
-    equalization_enabled = N2kOnOff((vb >> 4) & 0x03)
-    over_charge_enable = N2kOnOff((vb >> 6) & 0x03)
+    battery_temperature = types.N2kBattTempNoSensor(vb & 0x04)
+    equalization_enabled = types.N2kOnOff((vb >> 4) & 0x03)
+    over_charge_enable = types.N2kOnOff((vb >> 6) & 0x03)
     equalization_time_remaining = msg.get_2_byte_uint(index)
 
     return ChargerConfigurationStatus(
@@ -1193,10 +1195,10 @@ def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfiguration
 @dataclass
 class BatteryConfigurationStatus:
     battery_instance: int
-    battery_type: N2kBatType
-    supports_equal: N2kBatEqSupport
-    battery_nominal_voltage: N2kBatNomVolt
-    battery_chemistry: N2kBatChem
+    battery_type: types.N2kBatType
+    supports_equal: types.N2kBatEqSupport
+    battery_nominal_voltage: types.N2kBatNomVolt
+    battery_chemistry: types.N2kBatChem
     battery_capacity: float
     battery_temperature_coefficient: int
     peukert_exponent: float
@@ -1247,11 +1249,11 @@ def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfiguration
 
     battery_instance = msg.get_byte_uint(index)
     vb = msg.get_byte_uint(index)
-    battery_type = N2kBatType(vb & 0x0F)
-    supports_equal = N2kBatEqSupport((vb >> 4) & 0x03)
+    battery_type = types.N2kBatType(vb & 0x0F)
+    supports_equal = types.N2kBatEqSupport((vb >> 4) & 0x03)
     vb = msg.get_byte_uint(index)
-    battery_nominal_voltage = N2kBatNomVolt(vb & 0x0F)
-    battery_chemistry = N2kBatChem((vb >> 4) & 0x0F)
+    battery_nominal_voltage = types.N2kBatNomVolt(vb & 0x0F)
+    battery_chemistry = types.N2kBatChem((vb >> 4) & 0x0F)
 
     return BatteryConfigurationStatus(
         battery_instance=battery_instance,
@@ -1271,11 +1273,11 @@ def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfiguration
 class ConverterStatus:
     sid: int
     connection_number: int
-    operating_state: N2kConvMode
-    temperature_state: N2kTemperatureState
-    overload_state: N2kOverloadState
-    low_dc_voltage_state: N2kDCVoltageState
-    ripple_state: N2kRippleState
+    operating_state: types.N2kConvMode
+    temperature_state: types.N2kTemperatureState
+    overload_state: types.N2kOverloadState
+    low_dc_voltage_state: types.N2kDCVoltageState
+    ripple_state: types.N2kRippleState
 
 
 def set_n2k_converter_status(data: ConverterStatus) -> Message:
@@ -1317,12 +1319,14 @@ def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
 
     sid = msg.get_byte_uint(index)
     connection_number = msg.get_byte_uint(index)
-    operating_state = N2kConvMode(msg.get_byte_uint(index))  # might be N2kChargeState
+    operating_state = types.N2kConvMode(
+        msg.get_byte_uint(index)
+    )  # might be N2kChargeState
     vb = msg.get_byte_uint(index)
-    ripple_state = N2kRippleState((vb >> 6) & 0x03)
-    low_dc_voltage_state = N2kDCVoltageState((vb >> 4) & 0x03)
-    overload_state = N2kOverloadState((vb >> 2) & 0x03)
-    temperature_state = N2kTemperatureState(vb & 0x03)
+    ripple_state = types.N2kRippleState((vb >> 6) & 0x03)
+    low_dc_voltage_state = types.N2kDCVoltageState((vb >> 4) & 0x03)
+    overload_state = types.N2kOverloadState((vb >> 2) & 0x03)
+    temperature_state = types.N2kTemperatureState(vb & 0x03)
 
     return ConverterStatus(
         sid=sid,
@@ -1379,7 +1383,7 @@ class BoatSpeed:
     sid: int
     water_referenced: float
     ground_referenced: float
-    swrt: N2kSpeedWaterReferenceType
+    swrt: types.N2kSpeedWaterReferenceType
 
 
 def set_n2k_boat_speed(data: BoatSpeed) -> Message:
@@ -1411,7 +1415,7 @@ def parse_n2k_boat_speed(msg: Message) -> BoatSpeed:
         sid=msg.get_byte_uint(index),
         water_referenced=msg.get_2_byte_udouble(0.01, index),
         ground_referenced=msg.get_2_byte_udouble(0.01, index),
-        swrt=N2kSpeedWaterReferenceType(msg.get_byte_uint(index)),
+        swrt=types.N2kSpeedWaterReferenceType(msg.get_byte_uint(index)),
     )
 
 
@@ -1500,16 +1504,16 @@ def parse_n2k_distance_log(msg: Message) -> DistanceLog:
 class AnchorWindlassControlStatus:
     sid: int
     windlass_identifier: int
-    windlass_direction_control: N2kWindlassDirectionControl
+    windlass_direction_control: types.N2kWindlassDirectionControl
     speed_control: int
-    speed_control_type: N2kSpeedType
-    anchor_docking_control: N2kGenericStatusPair
-    power_enable: N2kGenericStatusPair
-    mechanical_lock: N2kGenericStatusPair
-    deck_and_anchor_wash: N2kGenericStatusPair
-    anchor_light: N2kGenericStatusPair
+    speed_control_type: types.N2kSpeedType
+    anchor_docking_control: types.N2kGenericStatusPair
+    power_enable: types.N2kGenericStatusPair
+    mechanical_lock: types.N2kGenericStatusPair
+    deck_and_anchor_wash: types.N2kGenericStatusPair
+    anchor_light: types.N2kGenericStatusPair
     command_timeout: float
-    windlass_control_events: N2kWindlassControlEvents
+    windlass_control_events: types.N2kWindlassControlEvents
 
 
 def set_n2k_anchor_windlass_control_status(
@@ -1566,17 +1570,17 @@ def parse_n2k_anchor_windlass_control_status(
     sid = msg.get_byte_uint(index)
     windlass_identifier = msg.get_byte_uint(index)
     vb = msg.get_byte_uint(index)
-    windlass_direction_control = N2kWindlassDirectionControl(vb & 0x03)
-    anchor_docking_control = N2kGenericStatusPair((vb >> 2) & 0x03)
-    speed_control_type = N2kSpeedType((vb >> 4) & 0x03)
+    windlass_direction_control = types.N2kWindlassDirectionControl(vb & 0x03)
+    anchor_docking_control = types.N2kGenericStatusPair((vb >> 2) & 0x03)
+    speed_control_type = types.N2kSpeedType((vb >> 4) & 0x03)
     speed_control = msg.get_byte_uint(index)
     vb = msg.get_byte_uint(index)
-    power_enable = N2kGenericStatusPair(vb & 0x03)
-    mechanical_lock = N2kGenericStatusPair((vb >> 2) & 0x03)
-    deck_and_anchor_wash = N2kGenericStatusPair((vb >> 4) & 0x03)
-    anchor_light = N2kGenericStatusPair((vb >> 6) & 0x03)
+    power_enable = types.N2kGenericStatusPair(vb & 0x03)
+    mechanical_lock = types.N2kGenericStatusPair((vb >> 2) & 0x03)
+    deck_and_anchor_wash = types.N2kGenericStatusPair((vb >> 4) & 0x03)
+    anchor_light = types.N2kGenericStatusPair((vb >> 6) & 0x03)
     command_timeout = msg.get_1_byte_udouble(0.005, index)
-    windlass_control_events = N2kWindlassControlEvents(msg.get_byte_uint(index))
+    windlass_control_events = types.N2kWindlassControlEvents(msg.get_byte_uint(index))
 
     return AnchorWindlassControlStatus(
         sid=sid,
@@ -1601,10 +1605,10 @@ class AnchorWindlassOperatingStatus:
     windlass_identifier: int
     rode_counter_value: float
     windlass_line_speed: float
-    windlass_motion_status: N2kWindlassMotionStates
-    rode_type_status: N2kRodeTypeStates
-    anchor_docking_status: N2kAnchorDockingStates
-    windlass_operating_events: N2kWindlassOperatingEvents
+    windlass_motion_status: types.N2kWindlassMotionStates
+    rode_type_status: types.N2kRodeTypeStates
+    anchor_docking_status: types.N2kAnchorDockingStates
+    windlass_operating_events: types.N2kWindlassOperatingEvents
 
 
 def set_n2k_anchor_windlass_operating_status(
@@ -1650,13 +1654,13 @@ def parse_n2k_anchor_windlass_operating_status(
     sid = msg.get_byte_uint(index)
     windlass_identifier = msg.get_byte_uint(index)
     vb = msg.get_byte_uint(index)
-    windlass_motion_status = N2kWindlassMotionStates(vb & 0x03)
-    rode_type_status = N2kRodeTypeStates((vb >> 2) & 0x03)
+    windlass_motion_status = types.N2kWindlassMotionStates(vb & 0x03)
+    rode_type_status = types.N2kRodeTypeStates((vb >> 2) & 0x03)
     rode_counter_value = msg.get_2_byte_udouble(0.1, index)
     windlass_line_speed = msg.get_2_byte_udouble(0.01, index)
     vb = msg.get_byte_uint(index)
-    anchor_docking_status = N2kAnchorDockingStates(vb & 0x03)
-    windlass_operating_events = N2kWindlassOperatingEvents(vb >> 2)
+    anchor_docking_status = types.N2kAnchorDockingStates(vb & 0x03)
+    windlass_operating_events = types.N2kWindlassOperatingEvents(vb >> 2)
     return AnchorWindlassOperatingStatus(
         sid=sid,
         windlass_identifier=windlass_identifier,
@@ -1677,7 +1681,7 @@ class AnchorWindlassMonitoringStatus:
     total_motor_time: float
     controller_voltage: float
     motor_current: float
-    windlass_monitoring_events: N2kWindlassMonitoringEvents
+    windlass_monitoring_events: types.N2kWindlassMonitoringEvents
 
 
 def set_n2k_anchor_windlass_monitoring_status(
@@ -1716,7 +1720,7 @@ def parse_n2k_anchor_windlass_monitoring_status(
     return AnchorWindlassMonitoringStatus(
         sid=msg.get_byte_uint(index),
         windlass_identifier=msg.get_byte_uint(index),
-        windlass_monitoring_events=N2kWindlassMonitoringEvents(
+        windlass_monitoring_events=types.N2kWindlassMonitoringEvents(
             msg.get_byte_uint(index)
         ),
         controller_voltage=msg.get_1_byte_udouble(0.2, index),
@@ -1761,7 +1765,7 @@ def parse_n2k_lat_long_rapid(msg: Message) -> LatLonRapid:
 @dataclass
 class CogSogRapid:
     sid: int
-    heading_reference: N2kHeadingReference
+    heading_reference: types.N2kHeadingReference
     cog: float
     sog: float
 
@@ -1794,7 +1798,7 @@ def parse_n2k_cog_sog_rapid(msg: Message) -> CogSogRapid:
 
     return CogSogRapid(
         sid=msg.get_byte_uint(index),
-        heading_reference=N2kHeadingReference(msg.get_byte_uint(index) & 0x03),
+        heading_reference=types.N2kHeadingReference(msg.get_byte_uint(index) & 0x03),
         cog=msg.get_2_byte_udouble(0.0001, index),
         sog=msg.get_2_byte_udouble(0.01, index),
     )
@@ -1809,14 +1813,14 @@ class GNSSPositionData:
     latitude: float
     longitude: float
     altitude: float
-    gnss_type: N2kGNSSType
-    gnss_method: N2kGNSSMethod
+    gnss_type: types.N2kGNSSType
+    gnss_method: types.N2kGNSSMethod
     n_satellites: int
     hdop: float
     pdop: float
     geoidal_separation: float
     n_reference_station: int
-    reference_station_type: N2kGNSSType | None
+    reference_station_type: types.N2kGNSSType | None
     reference_station_id: int | None
     age_of_correction: float | None
 
@@ -1867,11 +1871,11 @@ def set_n2k_gnss_data(data: GNSSPositionData) -> Message:
             1
         )  # Note that we have values for only one reference station, so pass only one values.
         msg.add_2_byte_int(
-            (with_fallback(data.reference_station_type, N2kGNSSType.GPS) & 0x0F)
-            | with_fallback(data.reference_station_id, N2K_INT16_NA) << 4
+            (with_fallback(data.reference_station_type, types.N2kGNSSType.GPS) & 0x0F)
+            | with_fallback(data.reference_station_id, constants.N2K_INT16_NA) << 4
         )
         msg.add_2_byte_udouble(
-            with_fallback(data.age_of_correction, N2K_DOUBLE_NA), 0.01
+            with_fallback(data.age_of_correction, constants.N2K_DOUBLE_NA), 0.01
         )
     else:
         msg.add_byte_uint(data.n_reference_station)
@@ -1893,8 +1897,8 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
     longitude = msg.get_8_byte_double(1e-16, index)
     altitude = msg.get_8_byte_double(1e-6, index)
     vb = msg.get_byte_uint(index)
-    gnss_type = N2kGNSSType(vb & 0x0F)
-    gnss_method = N2kGNSSMethod((vb >> 4) & 0x0F)
+    gnss_type = types.N2kGNSSType(vb & 0x0F)
+    gnss_method = types.N2kGNSSMethod((vb >> 4) & 0x0F)
     vb = msg.get_byte_uint(index)  # Integrity 2 bit + reserved 6 bit
     n_satellites = msg.get_byte_uint(index)
     hdop = msg.get_2_byte_double(0.01, index)
@@ -1904,16 +1908,16 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
     reference_station_type = None
     reference_station_id = None
     age_of_correction = None
-    if 0 < n_reference_stations < N2K_UINT8_NA:
+    if 0 < n_reference_stations < constants.N2K_UINT8_NA:
         # Note that we return real number of stations, but we only have variables for one.
         vi = msg.get_2_byte_uint(index)
-        reference_station_type = N2kGNSSType(vi & 0x0F)
+        reference_station_type = types.N2kGNSSType(vi & 0x0F)
         reference_station_id = vi >> 4
         age_of_correction = msg.get_2_byte_udouble(0.01, index)
     else:
-        reference_station_type = N2kGNSSType.GPS
-        reference_station_id = N2K_INT16_NA
-        age_of_correction = N2K_DOUBLE_NA
+        reference_station_type = types.N2kGNSSType.GPS
+        reference_station_id = constants.N2K_INT16_NA
+        age_of_correction = constants.N2K_DOUBLE_NA
 
     return GNSSPositionData(
         sid,
@@ -1977,7 +1981,7 @@ def parse_n2k_date_time_local_offset(msg: Message) -> DateTimeLocalOffset:
 @dataclass
 class AISClassAPositionReport:
     message_id: int
-    repeat: N2kAISRepeat
+    repeat: types.N2kAISRepeat
     user_id: int
     latitude: float
     longitude: float
@@ -1986,10 +1990,10 @@ class AISClassAPositionReport:
     seconds: int
     cog: float
     sog: float
-    ais_transceiver_information: N2kAISTransceiverInformation
+    ais_transceiver_information: types.N2kAISTransceiverInformation
     heading: float
     rot: float
-    nav_status: N2kAISNavStatus
+    nav_status: types.N2kAISNavStatus
     sid: int
 
 
@@ -2046,7 +2050,7 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
 
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3F
-    repeat = N2kAISRepeat((vb >> 6) & 0x03)
+    repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     longitude = msg.get_4_byte_double(1e-7, index)
     latitude = msg.get_4_byte_double(1e-7, index)
@@ -2059,11 +2063,11 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
     msg.get_byte_uint(index)  # Communication State (19 bits)
     msg.get_byte_uint(index)
     vb = msg.get_byte_uint(index)  # AIS transceiver information (5 bits)
-    ais_transceiver_information = N2kAISTransceiverInformation((vb >> 3) & 0x1F)
+    ais_transceiver_information = types.N2kAISTransceiverInformation((vb >> 3) & 0x1F)
     heading = msg.get_2_byte_udouble(1e-4, index)
     rot = msg.get_2_byte_double(3.125e-5, index)
     vb = msg.get_byte_uint(index)
-    nav_status = N2kAISNavStatus(vb & 0x03)
+    nav_status = types.N2kAISNavStatus(vb & 0x03)
     msg.get_byte_uint(index)  # reserved
     sid = msg.get_byte_uint(index)
 
@@ -2090,7 +2094,7 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
 @dataclass
 class AISClassBPositionReport:
     message_id: int
-    repeat: N2kAISRepeat
+    repeat: types.N2kAISRepeat
     user_id: int
     latitude: float
     longitude: float
@@ -2099,14 +2103,14 @@ class AISClassBPositionReport:
     seconds: int
     cog: float
     sog: float
-    ais_transceiver_information: N2kAISTransceiverInformation
+    ais_transceiver_information: types.N2kAISTransceiverInformation
     heading: float
-    unit: N2kAISUnit
+    unit: types.N2kAISUnit
     display: bool
     dsc: bool
     band: bool
     msg22: bool
-    mode: N2kAISMode
+    mode: types.N2kAISMode
     state: bool
     sid: int
 
@@ -2175,7 +2179,7 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
 
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3F
-    repeat = N2kAISRepeat((vb >> 6) & 0x03)
+    repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     longitude = msg.get_4_byte_double(1e-7, index)
     latitude = msg.get_4_byte_double(1e-7, index)
@@ -2188,16 +2192,16 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
     msg.get_byte_uint(index)  # Communication State (19 bits)
     msg.get_byte_uint(index)
     vb = msg.get_byte_uint(index)  # AIS transceiver information (5 bits)
-    ais_transceiver_information = N2kAISTransceiverInformation((vb >> 3) & 0x1F)
+    ais_transceiver_information = types.N2kAISTransceiverInformation((vb >> 3) & 0x1F)
     heading = msg.get_2_byte_udouble(1e-4, index)
     msg.get_byte_uint(index)  # Regional application
     vb = msg.get_byte_uint(index)
-    unit = N2kAISUnit((vb >> 2) & 0x01)
+    unit = types.N2kAISUnit((vb >> 2) & 0x01)
     display = bool((vb >> 3) & 0x01)
     dsc = bool((vb >> 4) & 0x01)
     band = bool((vb >> 5) & 0x01)
     msg22 = bool((vb >> 6) & 0x01)
-    mode = N2kAISMode((vb >> 7) & 0x01)
+    mode = types.N2kAISMode((vb >> 7) & 0x01)
     vb = msg.get_byte_uint(index)
     state = bool(vb & 0x01)
     sid = msg.get_byte_uint(index)
@@ -2230,7 +2234,7 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
 @dataclass
 class AISAtoNReportData:
     message_id: int
-    repeat: N2kAISRepeat
+    repeat: types.N2kAISRepeat
     user_id: int
     longitude: float
     latitude: float
@@ -2241,13 +2245,13 @@ class AISAtoNReportData:
     beam: float
     position_reference_starboard: float
     position_reference_true_north: float
-    a_to_n_type: N2kAISAtoNType
+    a_to_n_type: types.N2kAISAtoNType
     off_position_reference_indicator: bool
     virtual_a_to_n_flag: bool
     assigned_mode_flag: bool
-    gnss_type: N2kGNSSType
+    gnss_type: types.N2kGNSSType
     a_to_n_status: int
-    n2k_ais_transceiver_information: N2kAISTransceiverInformation
+    n2k_ais_transceiver_information: types.N2kAISTransceiverInformation
     a_to_n_name: str | None
 
 
@@ -2324,7 +2328,7 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3F
-    repeat = N2kAISRepeat((vb >> 6) & 0x03)
+    repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     longitude = msg.get_4_byte_double(1e-7, index)
     latitude = msg.get_4_byte_double(1e-7, index)
@@ -2337,13 +2341,13 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
     position_reference_starboard = msg.get_2_byte_double(0.1, index)
     position_reference_true_north = msg.get_2_byte_double(0.1, index)
     vb = msg.get_byte_uint(index)
-    a_to_n_type = N2kAISAtoNType(vb & 0x1F)
+    a_to_n_type = types.N2kAISAtoNType(vb & 0x1F)
     off_position_reference_indicator = bool((vb >> 5) & 0x01)
     virtual_a_to_n_flag = bool((vb >> 6) & 0x01)
     assigned_mode_flag = bool((vb >> 7) & 0x01)
-    gnss_type = N2kGNSSType((msg.get_byte_uint(index) >> 1) & 0x0F)
+    gnss_type = types.N2kGNSSType((msg.get_byte_uint(index) >> 1) & 0x0F)
     a_to_n_status = msg.get_byte_uint(index)
-    n2k_ais_transceiver_information = N2kAISTransceiverInformation(
+    n2k_ais_transceiver_information = types.N2kAISTransceiverInformation(
         msg.get_byte_uint(index) & 0x1F
     )
     a_to_n_name = msg.get_var_str(index)
@@ -2376,7 +2380,7 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
 @dataclass
 class CrossTrackError:
     sid: int
-    xte_mode: N2kXTEMode
+    xte_mode: types.N2kXTEMode
     navigation_terminated: bool
     xte: float
 
@@ -2408,7 +2412,7 @@ def parse_n2k_cross_track_error(msg: Message) -> CrossTrackError:
 
     sid = msg.get_byte_uint(index)
     vb = msg.get_byte_uint(index)
-    xte_mode = N2kXTEMode(vb & 0x0F)
+    xte_mode = types.N2kXTEMode(vb & 0x0F)
     navigation_terminated = bool((vb >> 6) & 0x01)
     xte = msg.get_4_byte_double(0.01, index)
 
@@ -2425,10 +2429,10 @@ def parse_n2k_cross_track_error(msg: Message) -> CrossTrackError:
 class NavigationInfo:
     sid: int
     distance_to_waypoint: float
-    bearing_reference: N2kHeadingReference
+    bearing_reference: types.N2kHeadingReference
     perpendicular_crossed: bool
     arrival_circle_entered: bool
-    calculation_type: N2kDistanceCalculationType
+    calculation_type: types.N2kDistanceCalculationType
     eta_time: float
     eta_date: int
     bearing_origin_to_destination_waypoint: float
@@ -2491,10 +2495,10 @@ def parse_n2k_navigation_info(msg: Message) -> NavigationInfo:
     sid = msg.get_byte_uint(index)
     distance_to_waypoint = msg.get_4_byte_udouble(0.01, index)
     vb = msg.get_byte_uint(index)
-    bearing_reference = N2kHeadingReference(vb & 0x03)
+    bearing_reference = types.N2kHeadingReference(vb & 0x03)
     perpendicular_crossed = bool((vb >> 2) & 0x01)
     arrival_circle_entered = bool((vb >> 4) & 0x01)
-    calculation_type = N2kDistanceCalculationType((vb >> 6) & 0x01)
+    calculation_type = types.N2kDistanceCalculationType((vb >> 6) & 0x01)
 
     return NavigationInfo(
         sid=sid,
@@ -2521,10 +2525,10 @@ class RouteWaypointInformation:
     start: int
     database: int
     route: int
-    nav_direction: N2kNavigationDirection
+    nav_direction: types.N2kNavigationDirection
     route_name: str
-    supplementary_data: N2kGenericStatusPair
-    waypoints: list[Waypoint]
+    supplementary_data: types.N2kGenericStatusPair
+    waypoints: list[types.Waypoint]
 
 
 def set_n2k_route_waypoint_information(data: RouteWaypointInformation) -> Message:
@@ -2584,14 +2588,14 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
     database = msg.get_2_byte_uint(index)
     route = msg.get_2_byte_uint(index)
     vb = msg.get_byte_uint(index)
-    supplementary_data = N2kGenericStatusPair((vb >> 3) & 0x03)
-    nav_direction = N2kNavigationDirection(vb & 0x07)
+    supplementary_data = types.N2kGenericStatusPair((vb >> 3) & 0x03)
+    nav_direction = types.N2kNavigationDirection(vb & 0x07)
     route_name = with_fallback(msg.get_var_str(index), "")
     msg.get_byte_uint(index)  # Reserved
     waypoints = []
     while index.value < msg.data_len:
         waypoints.append(
-            Waypoint(
+            types.Waypoint(
                 id=msg.get_2_byte_uint(index),
                 name=with_fallback(msg.get_var_str(index), ""),
                 latitude=msg.get_4_byte_double(1e-7, index),
@@ -2616,8 +2620,8 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
 @dataclass
 class GNSSDOPData:
     sid: int
-    desired_mode: N2kGNSSDOPmode
-    actual_mode: N2kGNSSDOPmode
+    desired_mode: types.N2kGNSSDOPmode
+    actual_mode: types.N2kGNSSDOPmode
     hdop: float
     vdop: float
     tdop: float
@@ -2657,8 +2661,8 @@ def parse_n2k_gnss_dop(msg: Message) -> GNSSDOPData:
 
     return GNSSDOPData(
         sid=sid,
-        desired_mode=N2kGNSSDOPmode(modes & 0x07),
-        actual_mode=N2kGNSSDOPmode((modes >> 3) & 0x07),
+        desired_mode=types.N2kGNSSDOPmode(modes & 0x07),
+        actual_mode=types.N2kGNSSDOPmode((modes >> 3) & 0x07),
         hdop=msg.get_2_byte_double(0.01, index),
         vdop=msg.get_2_byte_double(0.01, index),
         tdop=msg.get_2_byte_double(0.01, index),
@@ -2674,8 +2678,8 @@ MAX_SATELLITE_INFO_COUNT = 18  # Maximum amount of satellites that fit into fast
 @dataclass
 class GNSSSatellitesInView:
     sid: int
-    mode: N2kRangeResidualMode
-    satellites: list[SatelliteInfo]
+    mode: types.N2kRangeResidualMode
+    satellites: list[types.SatelliteInfo]
 
 
 def set_n2k_gnss_satellites_in_view(data: GNSSSatellitesInView) -> Message:
@@ -2716,7 +2720,7 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
-    mode = N2kRangeResidualMode(msg.get_byte_uint(index) & 0x03)
+    mode = types.N2kRangeResidualMode(msg.get_byte_uint(index) & 0x03)
     number_of_satellites = msg.get_byte_uint(index)
     satellites = []
 
@@ -2726,13 +2730,15 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
     else:
         for _i in range(number_of_satellites):
             satellites.append(
-                SatelliteInfo(
+                types.SatelliteInfo(
                     prn=msg.get_byte_uint(index),
                     elevation=msg.get_2_byte_double(1e-4, index),
                     azimuth=msg.get_2_byte_udouble(1e-4, index),
                     snr=msg.get_2_byte_double(1e-2, index),
                     range_residuals=msg.get_4_byte_double(1e-5, index),
-                    usage_status=N2kPRNUsageStatus(msg.get_byte_uint(index) & 0x0F),
+                    usage_status=types.N2kPRNUsageStatus(
+                        msg.get_byte_uint(index) & 0x0F
+                    ),
                 )
             )
 
@@ -2747,7 +2753,7 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
 @dataclass
 class AISClassAStaticData:
     message_id: int
-    repeat: N2kAISRepeat
+    repeat: types.N2kAISRepeat
     user_id: int
     imo_number: int
     callsign: str
@@ -2761,10 +2767,10 @@ class AISClassAStaticData:
     eta_time: float
     draught: float
     destination: str
-    ais_version: N2kAISVersion
-    gnss_type: N2kGNSSType
-    dte: N2kAISDTE
-    ais_info: N2kAISTransceiverInformation
+    ais_version: types.N2kAISVersion
+    gnss_type: types.N2kGNSSType
+    dte: types.N2kAISDTE
+    ais_info: types.N2kAISTransceiverInformation
     sid: int
 
 
@@ -2837,7 +2843,7 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3F
-    repeat = N2kAISRepeat((vb >> 6) & 0x03)
+    repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     imo_number = msg.get_4_byte_uint(index)
     callsign = msg.get_str(7, index)
@@ -2852,10 +2858,10 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
     draught = msg.get_2_byte_double(0.01, index)
     destination = msg.get_str(20, index)
     vb = msg.get_byte_uint(index)
-    ais_version = N2kAISVersion(vb & 0x03)
-    gnss_type = N2kGNSSType((vb >> 2) & 0x0F)
-    dte = N2kAISDTE((vb >> 6) & 0x1F)
-    ais_info = N2kAISTransceiverInformation(msg.get_byte_uint(index) & 0x1F)
+    ais_version = types.N2kAISVersion(vb & 0x03)
+    gnss_type = types.N2kGNSSType((vb >> 2) & 0x0F)
+    dte = types.N2kAISDTE((vb >> 6) & 0x1F)
+    ais_info = types.N2kAISTransceiverInformation(msg.get_byte_uint(index) & 0x1F)
     sid = msg.get_byte_uint(index)
 
     return AISClassAStaticData(
@@ -2886,10 +2892,10 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
 @dataclass
 class AISClassBStaticDataPartA:
     message_id: int
-    repeat: N2kAISRepeat
+    repeat: types.N2kAISRepeat
     user_id: int
     name: str
-    ais_info: N2kAISTransceiverInformation
+    ais_info: types.N2kAISTransceiverInformation
     sid: int
 
 
@@ -2923,11 +2929,11 @@ def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDat
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3F
-    repeat = N2kAISRepeat((vb >> 6) & 0x03)
+    repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     name = msg.get_str(20, index)
     vb = msg.get_byte_uint(index)
-    ais_info = N2kAISTransceiverInformation(vb & 0x1F)
+    ais_info = types.N2kAISTransceiverInformation(vb & 0x1F)
     sid = msg.get_byte_uint(index)
 
     return AISClassBStaticDataPartA(
@@ -2944,7 +2950,7 @@ def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDat
 @dataclass
 class AISClassBStaticDataPartB:
     message_id: int
-    repeat: N2kAISRepeat
+    repeat: types.N2kAISRepeat
     user_id: int
     vessel_type: int
     vendor: str
@@ -2954,7 +2960,7 @@ class AISClassBStaticDataPartB:
     pos_ref_stbd: float
     pos_ref_bow: float
     mothership_id: int
-    ais_info: N2kAISTransceiverInformation
+    ais_info: types.N2kAISTransceiverInformation
     sid: int
 
 
@@ -3006,7 +3012,7 @@ def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDat
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3F
-    repeat = N2kAISRepeat((vb >> 6) & 0x03)
+    repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     vessel_type = msg.get_byte_uint(index)
     vendor = msg.get_str(7, index)
@@ -3018,7 +3024,7 @@ def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDat
     mothership_id = msg.get_4_byte_uint(index)
     msg.get_byte_uint(index)  # 2-reserved, 6-spare
     vb = msg.get_byte_uint(index)
-    ais_info = N2kAISTransceiverInformation(vb & 0x1F)
+    ais_info = types.N2kAISTransceiverInformation(vb & 0x1F)
     sid = msg.get_byte_uint(index)
 
     return AISClassBStaticDataPartB(
@@ -3044,7 +3050,7 @@ class WaypointList:
     start: int
     num_waypoints: int
     database: int
-    waypoints: list[Waypoint]
+    waypoints: list[types.Waypoint]
 
 
 def set_n2k_waypoint_list(
@@ -3105,7 +3111,7 @@ def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
     waypoints = []
     while index.value < msg.data_len:
         waypoints.append(
-            Waypoint(
+            types.Waypoint(
                 id=msg.get_2_byte_uint(index),
                 name=with_fallback(msg.get_var_str(index), ""),
                 latitude=msg.get_4_byte_double(1e-7, index),
@@ -3129,7 +3135,7 @@ class WindSpeed:
     sid: int
     wind_speed: float
     wind_angle: float
-    wind_reference: N2kWindReference
+    wind_reference: types.N2kWindReference
 
 
 def set_n2k_wind_speed(data: WindSpeed) -> Message:
@@ -3169,7 +3175,7 @@ def parse_n2k_wind_speed(msg: Message) -> WindSpeed:
         sid=msg.get_byte_uint(index),
         wind_speed=msg.get_2_byte_udouble(0.01, index),
         wind_angle=msg.get_2_byte_udouble(0.0001, index),
-        wind_reference=N2kWindReference(msg.get_byte_uint(index) & 0x07),
+        wind_reference=types.N2kWindReference(msg.get_byte_uint(index) & 0x07),
     )
 
 
@@ -3244,33 +3250,35 @@ def set_n2k_iso_address_claim_by_name(msg: Message, name: int) -> None:
 # Product Information (PGN 126996)
 def set_n2k_product_information(
     msg: Message,
-    data: ProductInformation,
+    data: types.ProductInformation,
 ) -> None:
     msg.pgn = PGN.ProductInformation
     msg.priority = 6
     msg.add_2_byte_uint(data.n2k_version)
     msg.add_2_byte_uint(data.product_code)
-    msg.add_str(data.n2k_model_id, MAX_N2K_MODEL_ID_LEN)
-    msg.add_str(data.n2k_sw_code, MAX_N2K_SW_CODE_LEN)
-    msg.add_str(data.n2k_model_version, MAX_N2K_MODEL_VERSION_LEN)
-    msg.add_str(data.n2k_model_serial_code, MAX_N2K_MODEL_SERIAL_CODE_LEN)
+    msg.add_str(data.n2k_model_id, constants.MAX_N2K_MODEL_ID_LEN)
+    msg.add_str(data.n2k_sw_code, constants.MAX_N2K_SW_CODE_LEN)
+    msg.add_str(data.n2k_model_version, constants.MAX_N2K_MODEL_VERSION_LEN)
+    msg.add_str(data.n2k_model_serial_code, constants.MAX_N2K_MODEL_SERIAL_CODE_LEN)
     msg.add_byte_uint(data.certification_level)
     msg.add_byte_uint(data.load_equivalency)
 
 
 # TODO: parser
-def parse_n2k_pgn_product_information(msg: Message) -> ProductInformation:
+def parse_n2k_pgn_product_information(msg: Message) -> types.ProductInformation:
     if msg.pgn != PGN.ProductInformation:
         raise ValueError()
 
     index = IntRef(0)
-    return ProductInformation(
+    return types.ProductInformation(
         n2k_version=msg.get_2_byte_uint(index),
         product_code=msg.get_2_byte_uint(index),
-        n2k_model_id=msg.get_str(MAX_N2K_MODEL_ID_LEN, index),
-        n2k_sw_code=msg.get_str(MAX_N2K_SW_CODE_LEN, index),
-        n2k_model_version=msg.get_str(MAX_N2K_MODEL_VERSION_LEN, index),
-        n2k_model_serial_code=msg.get_str(MAX_N2K_MODEL_SERIAL_CODE_LEN, index),
+        n2k_model_id=msg.get_str(constants.MAX_N2K_MODEL_ID_LEN, index),
+        n2k_sw_code=msg.get_str(constants.MAX_N2K_SW_CODE_LEN, index),
+        n2k_model_version=msg.get_str(constants.MAX_N2K_MODEL_VERSION_LEN, index),
+        n2k_model_serial_code=msg.get_str(
+            constants.MAX_N2K_MODEL_SERIAL_CODE_LEN, index
+        ),
         certification_level=msg.get_byte_uint(index),
         load_equivalency=msg.get_byte_uint(index),
     )
@@ -3278,18 +3286,21 @@ def parse_n2k_pgn_product_information(msg: Message) -> ProductInformation:
 
 # Configuration Information (PGN: 126998)
 def set_n2k_configuration_information(
-    msg: Message, data: ConfigurationInformation
+    msg: Message, data: types.ConfigurationInformation
 ) -> None:
     total_len = 0
     max_len = msg.max_data_len - 6  # each field has 2 extra bytes
     man_info_len = min(
-        len(data.manufacturer_information), Max_N2K_CONFIGURATION_INFO_FIELD_LEN
+        len(data.manufacturer_information),
+        constants.Max_N2K_CONFIGURATION_INFO_FIELD_LEN,
     )
     inst_desc1_len = min(
-        len(data.installation_description1), Max_N2K_CONFIGURATION_INFO_FIELD_LEN
+        len(data.installation_description1),
+        constants.Max_N2K_CONFIGURATION_INFO_FIELD_LEN,
     )
     inst_desc2_len = min(
-        len(data.installation_description2), Max_N2K_CONFIGURATION_INFO_FIELD_LEN
+        len(data.installation_description2),
+        constants.Max_N2K_CONFIGURATION_INFO_FIELD_LEN,
     )
 
     if total_len + man_info_len > max_len:
@@ -3322,13 +3333,15 @@ def set_n2k_configuration_information(
 
 
 # TODO: parser
-def parse_n2k_pgn_configuration_information(msg: Message) -> ConfigurationInformation:
+def parse_n2k_pgn_configuration_information(
+    msg: Message,
+) -> types.ConfigurationInformation:
     if msg.pgn != PGN.ConfigurationInformation:
         raise ValueError()
 
     index = IntRef(0)
 
-    return ConfigurationInformation(
+    return types.ConfigurationInformation(
         installation_description1=msg.get_var_str(index) or "",
         installation_description2=msg.get_var_str(index) or "",
         manufacturer_information=msg.get_var_str(index) or "",

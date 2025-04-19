@@ -5,7 +5,7 @@ import struct
 from binascii import hexlify
 from typing import TYPE_CHECKING
 
-from n2k.constants import *
+from n2k import constants
 from n2k.n2k import PGN
 from n2k.utils import IntRef, clamp_int, millis
 
@@ -86,100 +86,108 @@ class Message:
         return max(0, self.max_data_len - len(self.data))
 
     # Data Insertion
-    def add_float(self, v: float, undef_val: float = N2K_FLOAT_NA) -> None:
+    def add_float(self, v: float, undef_val: float = constants.N2K_FLOAT_NA) -> None:
         if v != undef_val:
             self.data.extend(struct.pack("<f", v))
         else:
-            self.data.extend(struct.pack("<i", N2K_INT32_NA))
+            self.data.extend(struct.pack("<i", constants.N2K_INT32_NA))
         self.data_len += 4
 
     def add_1_byte_udouble(
-        self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA
+        self, v: float, precision: float, undef_val: float = constants.N2K_DOUBLE_NA
     ) -> None:
         if v != undef_val:
-            v = clamp_int(0, round(v / precision), N2K_UINT8_OR)
+            v = clamp_int(0, round(v / precision), constants.N2K_UINT8_OR)
             self.data.extend(struct.pack("<B", v))
         else:
-            self.data.extend(struct.pack("<B", N2K_UINT8_NA))
+            self.data.extend(struct.pack("<B", constants.N2K_UINT8_NA))
         self.data_len += 1
 
     def add_1_byte_double(
-        self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA
+        self, v: float, precision: float, undef_val: float = constants.N2K_DOUBLE_NA
     ) -> None:
         if v != undef_val:
-            v = clamp_int(N2K_INT8_MIN, round(v / precision), N2K_INT8_OR)
+            v = clamp_int(
+                constants.N2K_INT8_MIN, round(v / precision), constants.N2K_INT8_OR
+            )
             self.data.extend(struct.pack("<b", v))
         else:
-            self.data.extend(struct.pack("<b", N2K_INT8_NA))
+            self.data.extend(struct.pack("<b", constants.N2K_INT8_NA))
         self.data_len += 1
 
     def add_2_byte_udouble(
-        self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA
+        self, v: float, precision: float, undef_val: float = constants.N2K_DOUBLE_NA
     ) -> None:
         if v != undef_val:
-            v = clamp_int(0, round(v / precision), N2K_UINT16_OR)
+            v = clamp_int(0, round(v / precision), constants.N2K_UINT16_OR)
             self.data.extend(struct.pack("<H", v))
         else:
-            self.data.extend(struct.pack("<H", N2K_UINT16_NA))
+            self.data.extend(struct.pack("<H", constants.N2K_UINT16_NA))
         self.data_len += 2
 
     def add_2_byte_double(
-        self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA
+        self, v: float, precision: float, undef_val: float = constants.N2K_DOUBLE_NA
     ) -> None:
         if v != undef_val:
-            v = clamp_int(N2K_INT16_MIN, round(v / precision), N2K_INT16_OR)
+            v = clamp_int(
+                constants.N2K_INT16_MIN, round(v / precision), constants.N2K_INT16_OR
+            )
             self.data.extend(struct.pack("<h", v))
         else:
-            self.data.extend(struct.pack("<h", N2K_INT16_NA))
+            self.data.extend(struct.pack("<h", constants.N2K_INT16_NA))
         self.data_len += 2
 
     def add_3_byte_udouble(
-        self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA
+        self, v: float, precision: float, undef_val: float = constants.N2K_DOUBLE_NA
     ) -> None:
         if v != undef_val:
-            v = clamp_int(0, round(v / precision), N2K_UINT24_OR)
+            v = clamp_int(0, round(v / precision), constants.N2K_UINT24_OR)
             self.data.extend(struct.pack("<I", v)[:3])
         else:
-            self.data.extend(struct.pack("<I", N2K_UINT24_NA)[:3])
+            self.data.extend(struct.pack("<I", constants.N2K_UINT24_NA)[:3])
         self.data_len += 3
 
     def add_3_byte_double(
-        self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA
+        self, v: float, precision: float, undef_val: float = constants.N2K_DOUBLE_NA
     ) -> None:
         if v != undef_val:
-            v = clamp_int(N2K_INT24_MIN, round(v / precision), N2K_INT24_OR)
+            v = clamp_int(
+                constants.N2K_INT24_MIN, round(v / precision), constants.N2K_INT24_OR
+            )
             self.data.extend(struct.pack("<i", v)[:3])
         else:
-            self.data.extend(struct.pack("<i", N2K_INT24_NA)[:3])
+            self.data.extend(struct.pack("<i", constants.N2K_INT24_NA)[:3])
         self.data_len += 3
 
     def add_4_byte_udouble(
-        self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA
+        self, v: float, precision: float, undef_val: float = constants.N2K_DOUBLE_NA
     ) -> None:
         if v != undef_val:
-            v = clamp_int(0, round(v / precision), N2K_UINT32_OR)
+            v = clamp_int(0, round(v / precision), constants.N2K_UINT32_OR)
             self.data.extend(struct.pack("<I", v))
         else:
-            self.data.extend(struct.pack("<I", N2K_UINT32_NA))
+            self.data.extend(struct.pack("<I", constants.N2K_UINT32_NA))
         self.data_len += 4
 
     def add_4_byte_double(
-        self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA
+        self, v: float, precision: float, undef_val: float = constants.N2K_DOUBLE_NA
     ) -> None:
         if v != undef_val:
-            v = clamp_int(N2K_INT32_MIN, round(v / precision), N2K_INT32_OR)
+            v = clamp_int(
+                constants.N2K_INT32_MIN, round(v / precision), constants.N2K_INT32_OR
+            )
             self.data.extend(struct.pack("<i", v))
         else:
-            self.data.extend(struct.pack("<i", N2K_INT32_NA))
+            self.data.extend(struct.pack("<i", constants.N2K_INT32_NA))
         self.data_len += 4
 
     def add_8_byte_double(
-        self, v: float, precision: float, undef_val: float = N2K_DOUBLE_NA
+        self, v: float, precision: float, undef_val: float = constants.N2K_DOUBLE_NA
     ) -> None:
         if v != undef_val:
             self.data.extend(struct.pack("<q", int(v / precision)))
         else:
-            self.data.extend(struct.pack("<q", N2K_INT64_NA))
+            self.data.extend(struct.pack("<q", constants.N2K_INT64_NA))
         self.data_len += 8
 
     def add_byte_uint(self, v: int) -> None:
@@ -239,13 +247,15 @@ class Message:
             self.add_byte_uint(b)
 
     # Data Retrieval
-    def get_float(self, index: IntRef, default: float = N2K_FLOAT_NA) -> float:
+    def get_float(
+        self, index: IntRef, default: float = constants.N2K_FLOAT_NA
+    ) -> float:
         length = 4
         if index.value + length > self.data_len:
             return default
         if (
             struct.unpack("<i", self.data[index.value : index.value + length])[0]
-            == N2K_INT32_NA
+            == constants.N2K_INT32_NA
         ):
             index.value += length
             return default
@@ -254,81 +264,81 @@ class Message:
         return v
 
     def get_1_byte_udouble(
-        self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA
+        self, precision: float, index: IntRef, default: float = constants.N2K_DOUBLE_NA
     ) -> float:
         v = self.get_byte_uint(index)
-        if v == N2K_UINT8_NA:
+        if v == constants.N2K_UINT8_NA:
             return default
         return v * precision
 
     def get_1_byte_double(
-        self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA
+        self, precision: float, index: IntRef, default: float = constants.N2K_DOUBLE_NA
     ) -> float:
         v = self.get_byte_int(index)
-        if v == N2K_INT8_NA:
+        if v == constants.N2K_INT8_NA:
             return default
         return v * precision
 
     def get_2_byte_udouble(
-        self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA
+        self, precision: float, index: IntRef, default: float = constants.N2K_DOUBLE_NA
     ) -> float:
         v = self.get_2_byte_uint(index)
-        if v == N2K_UINT16_NA:
+        if v == constants.N2K_UINT16_NA:
             return default
         return v * precision
 
     def get_2_byte_double(
-        self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA
+        self, precision: float, index: IntRef, default: float = constants.N2K_DOUBLE_NA
     ) -> float:
         v = self.get_2_byte_int(index)
-        if v == N2K_INT16_NA:
+        if v == constants.N2K_INT16_NA:
             return default
         return v * precision
 
     def get_3_byte_udouble(
-        self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA
+        self, precision: float, index: IntRef, default: float = constants.N2K_DOUBLE_NA
     ) -> float:
         v = self.get_3_byte_uint(index)
-        if v == N2K_UINT24_NA:
+        if v == constants.N2K_UINT24_NA:
             return default
         return v * precision
 
     def get_3_byte_double(
-        self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA
+        self, precision: float, index: IntRef, default: float = constants.N2K_DOUBLE_NA
     ) -> float:
         v = self.get_3_byte_int(index)
-        if v == N2K_INT24_NA:
+        if v == constants.N2K_INT24_NA:
             return default
         return v * precision
 
     def get_4_byte_udouble(
-        self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA
+        self, precision: float, index: IntRef, default: float = constants.N2K_DOUBLE_NA
     ) -> float:
         v = self.get_4_byte_uint(index)
-        if v == N2K_UINT32_NA:
+        if v == constants.N2K_UINT32_NA:
             return default
         return v * precision
 
     def get_4_byte_double(
-        self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA
+        self, precision: float, index: IntRef, default: float = constants.N2K_DOUBLE_NA
     ) -> float:
         v = self.get_4_byte_int(index)
-        if v == N2K_INT32_NA:
+        if v == constants.N2K_INT32_NA:
             return default
         return v * precision
 
     def get_8_byte_double(
-        self, precision: float, index: IntRef, default: float = N2K_DOUBLE_NA
+        self, precision: float, index: IntRef, default: float = constants.N2K_DOUBLE_NA
     ) -> float:
         v = self.get_8_byte_int(index)
-        if v == N2K_INT64_NA:
+        if v == constants.N2K_INT64_NA:
             return default
         return v * precision
 
     def get_byte_uint(self, index: IntRef) -> int:
         length = 1
         if index.value + length > self.data_len:
-            return N2K_UINT8_NA
+            return constants.N2K_UINT8_NA
         v = struct.unpack("<B", self.data[index.value : index.value + length])[0]
         index.value += length
         return v
@@ -336,12 +346,14 @@ class Message:
     def get_byte_int(self, index: IntRef) -> int:
         length = 1
         if index.value + length > self.data_len:
-            return N2K_INT8_NA
+            return constants.N2K_INT8_NA
         v = struct.unpack("<b", self.data[index.value : index.value + length])[0]
         index.value += length
         return v
 
-    def get_2_byte_uint(self, index: IntRef, default: int = N2K_UINT16_NA) -> int:
+    def get_2_byte_uint(
+        self, index: IntRef, default: int = constants.N2K_UINT16_NA
+    ) -> int:
         length = 2
         if index.value + length > self.data_len:
             return default
@@ -349,7 +361,9 @@ class Message:
         index.value += length
         return v
 
-    def get_2_byte_int(self, index: IntRef, default: int = N2K_INT16_NA) -> int:
+    def get_2_byte_int(
+        self, index: IntRef, default: int = constants.N2K_INT16_NA
+    ) -> int:
         length = 2
         if index.value + length > self.data_len:
             return default
@@ -357,7 +371,9 @@ class Message:
         index.value += length
         return v
 
-    def get_3_byte_uint(self, index: IntRef, default: int = N2K_UINT24_NA) -> int:
+    def get_3_byte_uint(
+        self, index: IntRef, default: int = constants.N2K_UINT24_NA
+    ) -> int:
         length = 3
         if index.value + length > self.data_len:
             return default
@@ -367,7 +383,9 @@ class Message:
         index.value += length
         return v
 
-    def get_3_byte_int(self, index: IntRef, default: int = N2K_INT24_NA) -> int:
+    def get_3_byte_int(
+        self, index: IntRef, default: int = constants.N2K_INT24_NA
+    ) -> int:
         length = 3
         if index.value + length > self.data_len:
             return default
@@ -377,7 +395,9 @@ class Message:
         index.value += length
         return v
 
-    def get_4_byte_uint(self, index: IntRef, default: int = N2K_UINT32_NA) -> int:
+    def get_4_byte_uint(
+        self, index: IntRef, default: int = constants.N2K_UINT32_NA
+    ) -> int:
         length = 4
         if index.value + length > self.data_len:
             return default
@@ -385,7 +405,9 @@ class Message:
         index.value += length
         return v
 
-    def get_4_byte_int(self, index: IntRef, default: int = N2K_UINT32_NA) -> int:
+    def get_4_byte_int(
+        self, index: IntRef, default: int = constants.N2K_UINT32_NA
+    ) -> int:
         length = 4
         if index.value + length > self.data_len:
             return default
@@ -393,7 +415,7 @@ class Message:
         index.value += length
         return v
 
-    def get_uint_64(self, index: IntRef, default: int = N2K_UINT64_NA) -> int:
+    def get_uint_64(self, index: IntRef, default: int = constants.N2K_UINT64_NA) -> int:
         length = 8
         if index.value + length > self.data_len:
             return default
@@ -401,7 +423,9 @@ class Message:
         index.value += length
         return v
 
-    def get_8_byte_int(self, index: IntRef, default: int = N2K_INT64_NA) -> int:
+    def get_8_byte_int(
+        self, index: IntRef, default: int = constants.N2K_INT64_NA
+    ) -> int:
         length = 8
         if index.value + length > self.data_len:
             return default

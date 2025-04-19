@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import n2k.device
 import n2k.messages
-from n2k.constants import *
-from n2k.message import N2K_UINT16_NA, N2K_UINT32_NA, Message
+from n2k import constants
+from n2k.message import Message
 from n2k.message_handler import MessageHandler
 from n2k.n2k import PGN
 from n2k.types import N2kPGNList
@@ -19,7 +19,7 @@ class DeviceList(MessageHandler):
     def __init__(self, node: n2k.node.Node):
         """Initialize Device List"""
         super().__init__(0, node)
-        self.sources = [None] * N2K_MAX_BUS_DEVICES
+        self.sources = [None] * constants.N2K_MAX_BUS_DEVICES
         self.max_devices = 0
         self.list_updated = False
         self.has_pending_requests = True
@@ -89,7 +89,7 @@ class DeviceList(MessageHandler):
 
         # verify source is valid and check if we already have a device at that address
         if (
-            0 <= msg.source < N2K_MAX_BUS_DEVICES
+            0 <= msg.source < constants.N2K_MAX_BUS_DEVICES
             and self.sources[msg.source] is not None
         ):
             # set current device to stored device
@@ -151,7 +151,7 @@ class DeviceList(MessageHandler):
 
     def _handle_product_information(self, msg: Message) -> None:
         # Check if device exists in our list
-        if not 0 <= msg.source < N2K_MAX_BUS_DEVICES:
+        if not 0 <= msg.source < constants.N2K_MAX_BUS_DEVICES:
             return
         dev: n2k.device.Device | None = self.sources[msg.source]
         if dev is None:
@@ -171,7 +171,7 @@ class DeviceList(MessageHandler):
 
     def _handle_configuration_information(self, msg: Message) -> None:
         # Check if device exists in our list
-        if not 0 <= msg.source < N2K_MAX_BUS_DEVICES:
+        if not 0 <= msg.source < constants.N2K_MAX_BUS_DEVICES:
             return
         dev: n2k.device.Device | None = self.sources[msg.source]
         if dev is None:
@@ -190,7 +190,7 @@ class DeviceList(MessageHandler):
 
     def _handle_supported_pgn_list(self, msg: Message) -> None:
         # Check if device exists in our list
-        if not 0 <= msg.source < N2K_MAX_BUS_DEVICES:
+        if not 0 <= msg.source < constants.N2K_MAX_BUS_DEVICES:
             return
         dev: n2k.device.Device | None = self.sources[msg.source]
         if dev is None:
@@ -225,7 +225,7 @@ class DeviceList(MessageHandler):
 
     def _handle_other(self, msg: Message) -> None:
         # assert that source is valid (0<=s<254), 254 = null, 255 = broadcast
-        if not 0 <= msg.source < N2K_MAX_BUS_DEVICES:
+        if not 0 <= msg.source < constants.N2K_MAX_BUS_DEVICES:
             return
 
         # if has_pending_requests is false we already know everything we want, therefore we can return early
@@ -371,7 +371,7 @@ class DeviceList(MessageHandler):
 
     def _save_device(self, dev: n2k.device.Device, source: int) -> None:
         # assert that source id is valid
-        if not 0 <= source <= N2K_MAX_BUS_DEVICES:
+        if not 0 <= source <= constants.N2K_MAX_BUS_DEVICES:
             return
 
         # update source on device
@@ -383,7 +383,7 @@ class DeviceList(MessageHandler):
             self.max_devices = source + 1
 
     def find_device_by_source(self, source: int) -> n2k.device.Device | None:
-        if source >= N2K_MAX_BUS_DEVICES:
+        if source >= constants.N2K_MAX_BUS_DEVICES:
             return None
         return self.sources[source]
 
@@ -396,16 +396,23 @@ class DeviceList(MessageHandler):
     def find_device_by_ids(
         self, manufacturer_code: int, unique_number: int
     ) -> n2k.device.Device | None:
-        if manufacturer_code == N2K_UINT16_NA or unique_number == N2K_UINT32_NA:
+        if (
+            manufacturer_code == constants.N2K_UINT16_NA
+            or unique_number == constants.N2K_UINT32_NA
+        ):
             return None
 
         for source in self.sources:
             if (
                 source is not None
                 and (
-                    manufacturer_code in (N2K_UINT16_NA, source.dev_i.manufacturer_code)
+                    manufacturer_code
+                    in (constants.N2K_UINT16_NA, source.dev_i.manufacturer_code)
                 )
-                and (unique_number in (N2K_UINT32_NA, source.dev_i.unique_number))
+                and (
+                    unique_number
+                    in (constants.N2K_UINT32_NA, source.dev_i.unique_number)
+                )
             ):
                 return source
 
@@ -424,7 +431,7 @@ class DeviceList(MessageHandler):
         :param source:
         :return:
         """
-        if N2K_UINT16_NA in (manufacturer_code, product_code):
+        if constants.N2K_UINT16_NA in (manufacturer_code, product_code):
             return None
 
         # TODO: Why do we do this source manipulation and discard devices with a lower source number?

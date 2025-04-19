@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import math
 from time import time
-from typing import Generic, TypeVar
+from typing import TypeVar
 
-from n2k.constants import *
+from n2k import constants
 from n2k.types import N2kBinaryStatus, N2kOnOff
 
 
@@ -132,43 +132,43 @@ def clamp_int(min_val: int, val: int, max_val: int) -> int:
 
 
 def n2k_double_is_na(v: float) -> bool:
-    return v == N2K_DOUBLE_NA
+    return v == constants.N2K_DOUBLE_NA
 
 
 def n2k_float_is_na(v: float) -> bool:
-    return v == N2K_FLOAT_NA
+    return v == constants.N2K_FLOAT_NA
 
 
 def n2k_uint8_is_na(v: float) -> bool:
-    return v == N2K_UINT8_NA
+    return v == constants.N2K_UINT8_NA
 
 
 def n2k_int8_is_na(v: float) -> bool:
-    return v == N2K_INT8_NA
+    return v == constants.N2K_INT8_NA
 
 
 def n2k_uint16_is_na(v: float) -> bool:
-    return v == N2K_UINT16_NA
+    return v == constants.N2K_UINT16_NA
 
 
 def n2k_int16_is_na(v: float) -> bool:
-    return v == N2K_INT16_NA
+    return v == constants.N2K_INT16_NA
 
 
 def n2k_uint32_is_na(v: float) -> bool:
-    return v == N2K_UINT32_NA
+    return v == constants.N2K_UINT32_NA
 
 
 def n2k_int32_is_na(v: float) -> bool:
-    return v == N2K_INT32_NA
+    return v == constants.N2K_INT32_NA
 
 
 def n2k_uint64_is_na(v: float) -> bool:
-    return v == N2K_UINT64_NA
+    return v == constants.N2K_UINT64_NA
 
 
 def n2k_int64_is_na(v: float) -> bool:
-    return v == N2K_INT64_NA
+    return v == constants.N2K_INT64_NA
 
 
 def rad_to_deg(v: float) -> float:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import n2k.device_information
 import n2k.device_list
+from n2k import constants
 from n2k.types import ConfigurationInformation, ProductInformation
 from n2k.utils import millis
 
@@ -71,9 +72,8 @@ class Device:
         return (
             self.should_request_product_information()
             and millis() - self.prod_i_requested
-            > n2k.device_list.N2K_DL_TIME_BETWEEN_PI_REQUEST
-            and millis() - self.create_time
-            > n2k.device_list.N2K_DL_TIME_FOR_FIRST_REQUEST
+            > constants.N2K_DL_TIME_BETWEEN_PI_REQUEST
+            and millis() - self.create_time > constants.N2K_DL_TIME_FOR_FIRST_REQUEST
         )
 
     def set_product_information_requested(self) -> None:
@@ -92,9 +92,8 @@ class Device:
         return (
             self.should_request_configuration_information()
             and millis() - self.conf_i_requested
-            > n2k.device_list.N2K_DL_TIME_BETWEEN_CI_REQUEST
-            and millis() - self.create_time
-            > n2k.device_list.N2K_DL_TIME_FOR_FIRST_REQUEST
+            > constants.N2K_DL_TIME_BETWEEN_CI_REQUEST
+            and millis() - self.create_time > constants.N2K_DL_TIME_FOR_FIRST_REQUEST
         )
 
     def set_configuration_information_requested(self) -> None:
@@ -114,6 +113,5 @@ class Device:
         return (
             self.should_request_pgn_list()
             and millis() - self.pgns_requested > 1000
-            and millis() - self.create_time
-            > n2k.device_list.N2K_DL_TIME_FOR_FIRST_REQUEST
+            and millis() - self.create_time > constants.N2K_DL_TIME_FOR_FIRST_REQUEST
         )

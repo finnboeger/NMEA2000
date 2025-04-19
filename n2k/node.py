@@ -10,9 +10,9 @@ from typing import TYPE_CHECKING, Callable
 import can
 
 import n2k
+from n2k import constants
 from n2k.can_message_buffer import N2kCANMessageBuffer
 from n2k.can_tools import MsgHeader, can_id_to_n2k, n2k_id_to_can
-from n2k.constants import *
 from n2k.device_information import DeviceInformation
 from n2k.device_list import DeviceList
 from n2k.message import Message
@@ -79,7 +79,7 @@ class Node(can.Listener):
     pending_product_information: int | None = None  # unsigned long
     pending_configuration_information: int | None = None  # unsigned long
     address_claim_started: int = 0  # unsigned long
-    address_claim_end_source: int = N2K_MAX_CAN_BUS_ADDRESS  # uint8_t
+    address_claim_end_source: int = constants.N2K_MAX_CAN_BUS_ADDRESS  # uint8_t
 
     transmit_messages: list[int]
     receive_messages: list[int]
@@ -137,7 +137,7 @@ class Node(can.Listener):
         if self.address_claim_end_source > 0:
             self.address_claim_end_source -= 1
         else:
-            self.address_claim_end_source = N2K_MAX_CAN_BUS_ADDRESS
+            self.address_claim_end_source = constants.N2K_MAX_CAN_BUS_ADDRESS
 
     ### End Internal Device ###
 
@@ -275,10 +275,12 @@ class Node(can.Listener):
         self.product_information = ProductInformation(
             n2k_version=2101,
             product_code=product_code,
-            n2k_model_id=name[:MAX_N2K_MODEL_ID_LEN],
-            n2k_sw_code=firmware_version[:MAX_N2K_SW_CODE_LEN],
-            n2k_model_version=model_version[:MAX_N2K_MODEL_VERSION_LEN],
-            n2k_model_serial_code=model_serial_code[:MAX_N2K_MODEL_SERIAL_CODE_LEN],
+            n2k_model_id=name[: constants.MAX_N2K_MODEL_ID_LEN],
+            n2k_sw_code=firmware_version[: constants.MAX_N2K_SW_CODE_LEN],
+            n2k_model_version=model_version[: constants.MAX_N2K_MODEL_VERSION_LEN],
+            n2k_model_serial_code=model_serial_code[
+                : constants.MAX_N2K_MODEL_SERIAL_CODE_LEN
+            ],
             certification_level=certification_level,
             load_equivalency=load_equivalency,
         )
@@ -300,13 +302,13 @@ class Node(can.Listener):
         """
         self.configuration_information = ConfigurationInformation(
             manufacturer_information=manufacturer_information[
-                :Max_N2K_CONFIGURATION_INFO_FIELD_LEN
+                : constants.Max_N2K_CONFIGURATION_INFO_FIELD_LEN
             ],
             installation_description1=installation_description1[
-                :Max_N2K_CONFIGURATION_INFO_FIELD_LEN
+                : constants.Max_N2K_CONFIGURATION_INFO_FIELD_LEN
             ],
             installation_description2=installation_description2[
-                :Max_N2K_CONFIGURATION_INFO_FIELD_LEN
+                : constants.Max_N2K_CONFIGURATION_INFO_FIELD_LEN
             ],
         )
 
@@ -581,7 +583,7 @@ class Node(can.Listener):
     #    raise NotImplementedError()
 
     def _start_address_claim(self) -> None:
-        if self.n2k_source == N2K_NULL_CAN_BUS_ADDRESS:
+        if self.n2k_source == constants.N2K_NULL_CAN_BUS_ADDRESS:
             self._get_next_address(restart_at_end=True)
         self.address_claim_started = 0
         self.send_iso_address_claim()
@@ -590,7 +592,8 @@ class Node(can.Listener):
     def _is_address_claim_started(self) -> bool:
         if (
             self.address_claim_started != 0
-            and self.address_claim_started + N2K_ADDRESS_CLAIM_TIMEOUT < millis()
+            and self.address_claim_started + constants.N2K_ADDRESS_CLAIM_TIMEOUT
+            < millis()
         ):
             self.address_claim_started = 0
             # We have claimed our address. Save end source for next possible claim run.
@@ -600,7 +603,10 @@ class Node(can.Listener):
         return self.address_claim_started != 0
 
     def _handle_iso_address_claim(self, msg: Message) -> None:
-        if msg.source == N2K_NULL_CAN_BUS_ADDRESS or msg.source != self.n2k_source:
+        if (
+            msg.source == constants.N2K_NULL_CAN_BUS_ADDRESS
+            or msg.source != self.n2k_source
+        ):
             # Not claiming our address, so we don't care
             return
 
@@ -648,7 +654,7 @@ class Node(can.Listener):
             self.address_changed = True
 
     def _get_next_address(self, restart_at_end: bool = False):
-        if self.n2k_source == N2K_NULL_CAN_BUS_ADDRESS:
+        if self.n2k_source == constants.N2K_NULL_CAN_BUS_ADDRESS:
             if restart_at_end:
                 # For Null address start at beginning
                 self.n2k_source = 14
@@ -657,11 +663,11 @@ class Node(can.Listener):
                 return
         elif self.n2k_source != self.address_claim_end_source:
             self.n2k_source += 1
-            if self.n2k_source > N2K_MAX_CAN_BUS_ADDRESS:
+            if self.n2k_source > constants.N2K_MAX_CAN_BUS_ADDRESS:
                 self.n2k_source = 0
         else:
             # Cannot claim address
-            self.n2k_source = N2K_NULL_CAN_BUS_ADDRESS
+            self.n2k_source = constants.N2K_NULL_CAN_BUS_ADDRESS
 
         self.address_changed = True
         return
@@ -892,7 +898,10 @@ class Node(can.Listener):
         msg.check_destination()
         msg.source = self.n2k_source
 
-        if msg.source > N2K_MAX_CAN_BUS_ADDRESS and msg.pgn != PGN.IsoAddressClaim:
+        if (
+            msg.source > constants.N2K_MAX_CAN_BUS_ADDRESS
+            and msg.pgn != PGN.IsoAddressClaim
+        ):
             # CAN bus address range is 0-251. Allow ISO Address claim messages nevertheless. TODO: why?
             return False
 
