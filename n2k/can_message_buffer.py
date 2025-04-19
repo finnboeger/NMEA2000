@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List, Optional
 
 from n2k import N2kCANMessage
@@ -18,7 +20,7 @@ class N2kCANMessageBuffer:
 
     def find_free_slot(
         self, pgn: int = 0, source: int = 0, destination: int = 0, tp_msg: bool = False
-    ) -> Optional[N2kCANMessage]:
+    ) -> N2kCANMessage | None:
         cur_time = millis()
         oldest_msg_time = millis()
         oldest_msg: N2kCANMessage = self._buffer[0]
@@ -41,7 +43,7 @@ class N2kCANMessageBuffer:
         # TODO: log warning to either increase buffer size or reduce message age grace period
         return None
 
-    def find_matching(self, pgn: int, source: int) -> Optional[N2kCANMessage]:
+    def find_matching(self, pgn: int, source: int) -> N2kCANMessage | None:
         for msg in self._buffer:
             if (
                 msg.n2k_msg.pgn == pgn and msg.n2k_msg.source == source

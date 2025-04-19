@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List, Optional
 
 import n2k.device
@@ -11,12 +13,12 @@ from n2k.utils import IntRef, millis
 
 
 class DeviceList(MessageHandler):
-    sources: List[Optional["n2k.device.Device"]]
+    sources: List[n2k.device.Device | None]
     max_devices: int
     list_updated: bool
     has_pending_requests: bool
 
-    def __init__(self, node: "n2k.node.Node"):
+    def __init__(self, node: n2k.node.Node):
         """Initialize Device List"""
         super().__init__(0, node)
         self.sources = [None] * N2K_MAX_BUS_DEVICES
@@ -85,7 +87,7 @@ class DeviceList(MessageHandler):
         # get NAME from message. TODO: verify order
         caller_name: int = msg.get_uint_64(index)
 
-        dev: Optional[n2k.device.Device] = None
+        dev: n2k.device.Device | None = None
 
         # verify source is valid and check if we already have a device at that address
         if (
@@ -153,7 +155,7 @@ class DeviceList(MessageHandler):
         # Check if device exists in our list
         if not 0 <= msg.source < N2K_MAX_BUS_DEVICES:
             return
-        dev: Optional[n2k.device.Device] = self.sources[msg.source]
+        dev: n2k.device.Device | None = self.sources[msg.source]
         if dev is None:
             return
 
@@ -173,7 +175,7 @@ class DeviceList(MessageHandler):
         # Check if device exists in our list
         if not 0 <= msg.source < N2K_MAX_BUS_DEVICES:
             return
-        dev: Optional[n2k.device.Device] = self.sources[msg.source]
+        dev: n2k.device.Device | None = self.sources[msg.source]
         if dev is None:
             return
 
@@ -192,7 +194,7 @@ class DeviceList(MessageHandler):
         # Check if device exists in our list
         if not 0 <= msg.source < N2K_MAX_BUS_DEVICES:
             return
-        dev: Optional[n2k.device.Device] = self.sources[msg.source]
+        dev: n2k.device.Device | None = self.sources[msg.source]
         if dev is None:
             return
 
@@ -207,7 +209,7 @@ class DeviceList(MessageHandler):
             raise AssertionError(rem)
 
         # Clear the corresponding list and select it
-        pgn_list: Optional[List] = None
+        pgn_list: List | None = None
         if n2k_pgn_list == N2kPGNList.transmit:
             dev.transmit_pgns = []
             pgn_list = dev.transmit_pgns
@@ -369,7 +371,7 @@ class DeviceList(MessageHandler):
             self._save_device(n2k.device.Device(0), source)
             self.has_pending_requests = True
 
-    def _save_device(self, dev: "n2k.device.Device", source: int) -> None:
+    def _save_device(self, dev: n2k.device.Device, source: int) -> None:
         # assert that source id is valid
         if not 0 <= source <= N2K_MAX_BUS_DEVICES:
             return
@@ -382,12 +384,12 @@ class DeviceList(MessageHandler):
         if source >= self.max_devices:
             self.max_devices = source + 1
 
-    def find_device_by_source(self, source: int) -> Optional["n2k.device.Device"]:
+    def find_device_by_source(self, source: int) -> n2k.device.Device | None:
         if source >= N2K_MAX_BUS_DEVICES:
             return None
         return self.sources[source]
 
-    def find_device_by_name(self, name: int) -> Optional["n2k.device.Device"]:
+    def find_device_by_name(self, name: int) -> n2k.device.Device | None:
         for source in self.sources:
             if source is not None and source.dev_i.name == name:
                 return source
@@ -395,7 +397,7 @@ class DeviceList(MessageHandler):
 
     def find_device_by_ids(
         self, manufacturer_code: int, unique_number: int
-    ) -> Optional["n2k.device.Device"]:
+    ) -> n2k.device.Device | None:
         if manufacturer_code == N2K_UINT16_NA or unique_number == N2K_UINT32_NA:
             return None
 
@@ -413,7 +415,7 @@ class DeviceList(MessageHandler):
 
     def find_device_by_product(
         self, manufacturer_code: int, product_code: int, source: int = 0xFF
-    ) -> Optional["n2k.device.Device"]:
+    ) -> n2k.device.Device | None:
         """
         Look for the next device with a given manufacturer_code and product_code behind the provided source.
          This means to find the first device by code you would need to provide source >= max_devices.

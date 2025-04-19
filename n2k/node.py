@@ -1,21 +1,21 @@
+from __future__ import annotations
+
 import struct
 import time
 import traceback
 from binascii import hexlify
 from collections import deque
-from typing import Callable, Deque, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Callable, Deque, List, Optional, Set, Tuple
 
 import can
 
 import n2k
-from n2k.can_message import N2kCANMessage
 from n2k.can_message_buffer import N2kCANMessageBuffer
 from n2k.can_tools import MsgHeader, can_id_to_n2k, n2k_id_to_can
 from n2k.constants import *
 from n2k.device_information import DeviceInformation
 from n2k.device_list import DeviceList
 from n2k.message import Message
-from n2k.message_handler import MessageHandler
 from n2k.messages import (
     parse_n2k_pgn_iso_request,
     set_n2k_configuration_information,
@@ -44,6 +44,10 @@ from n2k.types import (
 )
 from n2k.utils import IntRef, millis
 
+if TYPE_CHECKING:
+    from n2k.can_message import N2kCANMessage
+    from n2k.message_handler import MessageHandler
+
 
 class Node(can.Listener):
     # Connect to CAN Bus via python-can
@@ -71,9 +75,9 @@ class Node(can.Listener):
         2101, 666, "", "", "", "", 0, 1
     )
     manufacturer_serial_code: str = ""
-    pending_iso_address_claim: Optional[int] = None  # unsigned long
-    pending_product_information: Optional[int] = None  # unsigned long
-    pending_configuration_information: Optional[int] = None  # unsigned long
+    pending_iso_address_claim: int | None = None  # unsigned long
+    pending_product_information: int | None = None  # unsigned long
+    pending_configuration_information: int | None = None  # unsigned long
     address_claim_started: int = 0  # unsigned long
     address_claim_end_source: int = N2K_MAX_CAN_BUS_ADDRESS  # uint8_t
 
@@ -81,7 +85,7 @@ class Node(can.Listener):
     receive_messages: List[int]
 
     max_pgn_sequence_counters: int = 0  # size_t
-    pgn_sequence_counters: Optional[List[int]] = None  # unsigned long | array pointer?
+    pgn_sequence_counters: List[int] | None = None  # unsigned long | array pointer?
 
     # ISO Multi Packet Support
     # pending_tp_msg: N2kMessage
@@ -342,8 +346,8 @@ class Node(can.Listener):
         # TODO: device_instance, system_instance
 
     message_handlers: Set[MessageHandler]
-    address_changed_callback: Callable[["Node"], None]
-    device_information_changed_callback: Callable[["Node"], None]
+    address_changed_callback: Callable[[Node], None]
+    device_information_changed_callback: Callable[[Node], None]
     address_changed: bool = False
     device_information_changed: bool = False
 
@@ -352,8 +356,8 @@ class Node(can.Listener):
         "", "", ""
     )
 
-    custom_single_frame_messages: Optional[List[int]] = None
-    custom_fast_packet_messages: Optional[List[int]] = None
+    custom_single_frame_messages: List[int] | None = None
+    custom_fast_packet_messages: List[int] | None = None
 
     # buffer for received messages
     _n2k_can_msg_buf: List[Message]  # TODO: init if we keep it
@@ -367,7 +371,7 @@ class Node(can.Listener):
 
     # TODO: Message Handler for normal messages
     # TODO: Message Handler for request messages
-    _request_handler: Optional[Callable[[int, int], bool]] = None
+    _request_handler: Callable[[int, int], bool] | None = None
 
     # TODO: Message Handler for group functions
 

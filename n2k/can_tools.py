@@ -1,5 +1,7 @@
 # convert can message to usable format somehow
 # e.g. by converting id
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -34,7 +36,7 @@ def can_id_to_n2k(can_id: int) -> MsgHeader:
 
 def n2k_id_to_can(
     data: MsgHeader,
-) -> Optional[int]:
+) -> int | None:
     priority = data.priority & 0xFF
     pgn = data.pgn & 0xFFFFFFFF
     source = data.source & 0xFFFFFFFF

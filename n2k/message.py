@@ -1,12 +1,16 @@
 # N2kMsg.h
+from __future__ import annotations
+
 import struct
 from binascii import hexlify
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from n2k.constants import *
 from n2k.n2k import PGN
-from n2k.stream import Stream
 from n2k.utils import IntRef, clamp_int, millis
+
+if TYPE_CHECKING:
+    from n2k.stream import Stream
 
 default_bytearray = bytearray()
 
@@ -422,7 +426,7 @@ class Message:
         index.value += length - (i + 1)
         return ret.decode("utf-8")
 
-    def get_var_str(self, index: IntRef) -> Optional[str]:
+    def get_var_str(self, index: IntRef) -> str | None:
         length = self.get_byte_uint(index) - 2
         if length < 0:
             return None  # invalid length
