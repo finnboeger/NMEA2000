@@ -2,10 +2,12 @@
 # https://www.nmea.org/Assets/20140109%20nmea-2000-corrigendum-tc201401031%20pgn%20126208.pdf
 
 from enum import IntEnum
-from typing import Tuple
+from typing import Tuple, TYPE_CHECKING
 
-import n2k.node
 from n2k.message import Message
+
+if TYPE_CHECKING:
+    import n2k.node
 
 
 class N2kGroupFunctionCode(IntEnum):

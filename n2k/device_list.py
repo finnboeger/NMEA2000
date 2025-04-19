@@ -17,9 +17,7 @@ class DeviceList(MessageHandler):
     has_pending_requests: bool
 
     def __init__(self, node: "n2k.node.Node"):
-        """
-        Initialize Device List
-        """
+        """Initialize Device List"""
         super().__init__(0, node)
         self.sources = [None] * N2K_MAX_BUS_DEVICES
         self.max_devices = 0
@@ -219,9 +217,9 @@ class DeviceList(MessageHandler):
 
         if pgn_list is not None:
             # Add all PGNs to the list
-            for i in range(pgn_count):
+            for _i in range(pgn_count):
                 pgn_list.append(msg.get_3_byte_uint(index))
-            pgn_list.append(0)  # Todo: why does the original code do this?
+            pgn_list.append(0)  # TODO: why does the original code do this?
 
         self.list_updated = True
 
@@ -405,13 +403,9 @@ class DeviceList(MessageHandler):
             if (
                 source is not None
                 and (
-                    manufacturer_code == N2K_UINT16_NA
-                    or source.dev_i.manufacturer_code == manufacturer_code
+                    manufacturer_code in (N2K_UINT16_NA, source.dev_i.manufacturer_code)
                 )
-                and (
-                    unique_number == N2K_UINT32_NA
-                    or source.dev_i.unique_number == unique_number
-                )
+                and (unique_number in (N2K_UINT32_NA, source.dev_i.unique_number))
             ):
                 return source
 
@@ -421,8 +415,7 @@ class DeviceList(MessageHandler):
         self, manufacturer_code: int, product_code: int, source: int = 0xFF
     ) -> Optional["n2k.device.Device"]:
         """
-        This function seems to look for the next device with a given manufacturer_code and product_code behind
-         the provided source.
+        Look for the next device with a given manufacturer_code and product_code behind the provided source.
          This means to find the first device by code you would need to provide source >= max_devices.
          As this is weird behavior it is subject to change and source will be probably renamed to starting_source, ...
 
@@ -431,7 +424,7 @@ class DeviceList(MessageHandler):
         :param source:
         :return:
         """
-        if manufacturer_code == N2K_UINT16_NA or product_code == N2K_UINT16_NA:
+        if N2K_UINT16_NA in (manufacturer_code, product_code):
             return None
 
         # TODO: Why do we do this source manipulation and discard devices with a lower source number?

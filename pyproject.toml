@@ -61,12 +61,21 @@ target-version = "py39"
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["F405","E501","D101","D102","D103","COM812","ARG001","D212","ARG002","D400","D415","FIX002",
-          "TD002","TD003","T201","ERA001","ANN204","PLR2004","PLR0913","ANN001","FBT001","D100","D107",
-          "FA100","UP006","ANN201","D105","F401","I001","ANN202","RET505","TD004","FBT002","TD005","D205",
-          "D301","N815","S101","UP035","B007","F403","PLR1714","C901","D401","B008","TD006","D202","EM103",
-          "RSE102","TC001","D200","PLR0911","PLR0912","UP032","FBT003","A001","INP001","PIE790","SIM102",
-          "SIM105","PTH100","PERF401","D104","D404","RUF002","UP007","D203"]
+ignore = [
+    # Doc style rules where we have chosen a different style
+    "D203", # 1 blank line required before class docstring
+    "D212", # Multi-line docstring summary should be on the first line
+
+    # Rules I don't agree with
+    "SIM105", # use `contextlib.suppress` instead of try/except/pass
+    "PERF401", # use list.extend(list comprehension) instead of list.append in a loop
+    "D301", # Escape Sequences in Docstrings. Triggers on \n which are required to tell sphinx to add a newline
+    # rules to be evaluated and fixed bit by bit
+    "F405","E501","D101","D102","D103","COM812","ARG001","ARG002","D400","D415","FIX002","RSE102",
+    "TD002","TD003","T201","ERA001","ANN204","PLR2004","PLR0913","ANN001","FBT001","D100","D107",
+    "FA100","UP006","ANN201","D105","F401","I001","ANN202","RET505","TD004","FBT002","TD005","D205",
+    "PLR0911", "PLR0912", "D104", "D401", "N815", "UP035", "F403", "C901", "B007",
+]
 
 [tool.ruff.format]
 quote-style = "double"

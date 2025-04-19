@@ -1,12 +1,14 @@
 from __future__ import annotations
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
-from n2k.device_information import DeviceInformation
 from n2k.n2k import PGN
 from n2k.message import Message
 from n2k.types import *
 from n2k.constants import *
 from n2k.utils import IntRef, with_fallback
+
+if TYPE_CHECKING:
+    from n2k.device_information import DeviceInformation
 
 
 # System Date/Time (PGN 126992)
@@ -409,7 +411,6 @@ def parse_n2k_heading(msg: Message) -> Heading:
     :param msg: NMEA2000 Message with PGN 127250
     :return: Dictionary containing the parsed information
     """
-
     index = IntRef(0)
 
     return Heading(
@@ -472,7 +473,7 @@ def set_n2k_heave(
 
     :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
         different messages to indicate that they are measured at same time
-    :param heave: Vertical displacement perpendicular to the earth’s surface in meters
+    :param heave: Vertical displacement perpendicular to the earth's surface in meters
     :param delay: Delay added by calculations in seconds
     :param delay_source: Delay Source, see type
     :return: NMEA2000 Message, ready to be sent
@@ -560,7 +561,6 @@ def set_n2k_magnetic_variation(data: MagneticVariation) -> Message:
     :param variation: Variation in radians, positive values represent Easterly, negative values a Westerly variation.
     :return: NMEA2000 message ready to be sent
     """
-
     msg = Message()
     msg.pgn = PGN.MagneticVariation
     msg.priority = 6
@@ -1815,9 +1815,9 @@ class GNSSPositionData:
     pdop: float
     geoidal_separation: float
     n_reference_station: int
-    reference_station_type: Optional[N2kGNSSType]
-    reference_station_id: Optional[int]
-    age_of_correction: Optional[float]
+    reference_station_type: N2kGNSSType | None
+    reference_station_id: int | None
+    age_of_correction: float | None
 
 
 # TODO: check if seconds since midnight is UTC or timezone specific
@@ -2553,11 +2553,8 @@ def set_n2k_route_waypoint_information(data: RouteWaypointInformation) -> Messag
     for i, waypoint in enumerate(data.waypoints):
         available_data_len -= base_waypoint_len + len(waypoint.name)
         if available_data_len < 0:
-            raise ValueError(
-                "Buffer size exceeded, only the first {:d} waypoints fit in the data buffer".format(
-                    i
-                )
-            )
+            error = f"Buffer size exceeded, only the first {i:d} waypoints fit in the data buffer"
+            raise ValueError(error)
 
     msg.add_2_byte_uint(data.start)
     msg.add_2_byte_uint(len(data.waypoints))
@@ -2726,7 +2723,7 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
         # TODO: Log warning
         pass
     else:
-        for i in range(number_of_satellites):
+        for _i in range(number_of_satellites):
             satellites.append(
                 SatelliteInfo(
                     prn=msg.get_byte_uint(index),
@@ -3075,11 +3072,8 @@ def set_n2k_waypoint_list(
     for i, waypoint in enumerate(data.waypoints):
         available_data_len -= base_waypoint_len + len(waypoint.name or "\x00")
         if available_data_len < 0:
-            raise ValueError(
-                "Buffer size exceeded, only the first {:d} waypoints fit in the data buffer".format(
-                    i
-                )
-            )
+            error = f"Buffer size exceeded, only the first {i:d} waypoints fit in the data buffer"
+            raise ValueError(error)
 
     msg.add_2_byte_uint(data.start)
     msg.add_2_byte_uint(len(data.waypoints))
@@ -3348,7 +3342,7 @@ def set_n2k_pgn_iso_request(msg: Message, destination: int, requested_pgn: int) 
     msg.add_3_byte_int(requested_pgn)
 
 
-def parse_n2k_pgn_iso_request(msg: Message) -> Optional[int]:
+def parse_n2k_pgn_iso_request(msg: Message) -> int | None:
     if 3 <= msg.data_len <= 8:
         return msg.get_3_byte_uint(IntRef(0))
     return None

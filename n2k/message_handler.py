@@ -1,5 +1,8 @@
 from n2k.message import Message
-import n2k
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import n2k
 
 
 class MessageHandler:

@@ -28,7 +28,7 @@ class Handler(n2k.MessageHandler):
         super().__init__(0, node)
 
     def handle_msg(self, msg: n2k.Message) -> None:
-        if not (msg.pgn == n2k.PGN.WindSpeed or msg.pgn == n2k.PGN.VesselHeading):
+        if msg.pgn not in (n2k.PGN.WindSpeed, n2k.PGN.VesselHeading):
             return
         if msg.pgn == n2k.PGN.WindSpeed:
             print(msg)

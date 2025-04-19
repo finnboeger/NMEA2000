@@ -13,7 +13,7 @@ class N2kCANMessageBuffer:
             raise ValueError(size)
 
         self._buffer = []
-        for i in range(size):
+        for _i in range(size):
             self._buffer.append(N2kCANMessage())
 
     def find_free_slot(

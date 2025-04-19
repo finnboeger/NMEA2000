@@ -238,7 +238,7 @@ class Node(can.Listener):
             if n2k_can_msg.ready:
                 self._handle_received_system_message(n2k_can_msg)
                 for handler in self.message_handlers:
-                    if handler.pgn == 0 or handler.pgn == n2k_can_msg.n2k_msg.pgn:
+                    if handler.pgn in (0, n2k_can_msg.n2k_msg.pgn):
                         handler.handle_msg(n2k_can_msg.n2k_msg)
                 n2k_can_msg.free_message()
 
@@ -416,7 +416,6 @@ class Node(can.Listener):
                     + " "
                     + str(hexlify(buf, sep=" "))
                 )
-                pass
             return False
         return True
 
@@ -579,7 +578,7 @@ class Node(can.Listener):
 
     def _start_address_claim(self) -> None:
         if self.n2k_source == N2K_NULL_CAN_BUS_ADDRESS:
-            self._get_next_address(True)
+            self._get_next_address(restart_at_end=True)
         self.address_claim_started = 0
         self.send_iso_address_claim()
         self.address_claim_started = millis()
@@ -783,7 +782,6 @@ class Node(can.Listener):
         :param delay:
         :return:
         """
-
         if delay > 0:
             self.set_pending_iso_address_claim(delay)
             return
@@ -810,7 +808,7 @@ class Node(can.Listener):
     # void SendTxPGNList(unsigned char Destination, int DeviceIndex, bool UseTP=false);
     # void SendRxPGNList(unsigned char Destination, int DeviceIndex, bool UseTP=false);
 
-    def send_tx_pgn_list(self, destination: int) -> None:  # todo: use_tp
+    def send_tx_pgn_list(self, destination: int) -> None:  # TODO: use_tp
         msg = Message(self.n2k_source)
         msg.destination = destination
         msg.pgn = PGN.SupportedPGNList
@@ -821,7 +819,7 @@ class Node(can.Listener):
             msg.add_3_byte_int(supported_pgn)
         self.send_msg(msg)
 
-    def send_rx_pgn_list(self, destination: int) -> None:  # todo: use_tp
+    def send_rx_pgn_list(self, destination: int) -> None:  # TODO: use_tp
         msg = Message(self.n2k_source)
         msg.destination = destination
         msg.pgn = PGN.SupportedPGNList

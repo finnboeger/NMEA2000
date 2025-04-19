@@ -8,6 +8,8 @@ from n2k.utils import millis, IntRef, clamp_int
 from n2k.stream import Stream
 from n2k.constants import *
 
+default_bytearray = bytearray()
+
 
 # WARNING: The round method employed by python differs from the one written in the ported C code
 #  However this is the correct method for IEEE floating point numbers
@@ -30,7 +32,7 @@ class Message:
         source: int = 15,
         priority: int = 6,
         pgn: int = 0,
-        data: bytearray = bytearray(),
+        data: bytearray = default_bytearray,
     ) -> None:
         self.source = source
         self.destination = 255
@@ -209,7 +211,7 @@ class Message:
         for b in encoded:
             self.add_byte_uint(b)
         # fill up to length using 0xff. Garmin instead uses 0x00 to fill but both seems to work.
-        for b in range(length - len(encoded)):
+        for _b in range(length - len(encoded)):
             self.add_byte_uint(0xFF)
 
     def add_var_str(self, v: str) -> None:
@@ -224,7 +226,7 @@ class Message:
         validated = [c if 32 <= c <= 95 else ord("?") for c in encoded]
         for b in validated:
             self.add_byte_uint(b)
-        for b in range(length - len(validated)):
+        for _b in range(length - len(validated)):
             self.add_byte_uint(ord("@"))  # '@' is the AIS null character
 
     def add_buf(self, v: bytearray) -> None:

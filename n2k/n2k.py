@@ -212,7 +212,7 @@ def is_single_frame_system_message(pgn: int) -> bool:
 
 
 def is_fast_packet_system_message(pgn: int) -> bool:
-    return pgn == PGN.CommandedAddress or pgn == PGN.RequestGroupFunction
+    return pgn in (PGN.CommandedAddress, PGN.RequestGroupFunction)
 
 
 def is_default_single_frame_message(pgn: int) -> bool:

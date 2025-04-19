@@ -1,8 +1,9 @@
-import os
+# noqa: INP001
+from pathlib import Path
 import sys
 from typing import List
 
-sys.path.insert(0, os.path.abspath("../../"))
+sys.path.insert(0, str(Path("../../").resolve()))
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -13,7 +14,7 @@ sys.path.insert(0, os.path.abspath("../../"))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "NMEA2000"
-copyright = "2022, Finn Böger"
+copyright = "2022, Finn Böger"  # noqa: A001
 author = "Finn Böger"
 
 # -- General configuration ---------------------------------------------------

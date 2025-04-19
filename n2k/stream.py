@@ -1,9 +1,7 @@
 # I/O stream used in the NMEA2000 libraries.
 class Stream:
     def read(self) -> int:
-        """
-        :return: First byte of incoming data or -1 if no data
-        """
+        """:return: First byte of incoming data or -1 if no data"""
         return 0
 
     def peek(self) -> int:
