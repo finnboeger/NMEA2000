@@ -5,7 +5,7 @@ import time
 import traceback
 from binascii import hexlify
 from collections import deque
-from typing import TYPE_CHECKING, Callable, Deque, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Callable
 
 import can
 
@@ -81,11 +81,11 @@ class Node(can.Listener):
     address_claim_started: int = 0  # unsigned long
     address_claim_end_source: int = N2K_MAX_CAN_BUS_ADDRESS  # uint8_t
 
-    transmit_messages: List[int]
-    receive_messages: List[int]
+    transmit_messages: list[int]
+    receive_messages: list[int]
 
     max_pgn_sequence_counters: int = 0  # size_t
-    pgn_sequence_counters: List[int] | None = None  # unsigned long | array pointer?
+    pgn_sequence_counters: list[int] | None = None  # unsigned long | array pointer?
 
     # ISO Multi Packet Support
     # pending_tp_msg: N2kMessage
@@ -345,7 +345,7 @@ class Node(can.Listener):
         self.device_information.industry_group = 4
         # TODO: device_instance, system_instance
 
-    message_handlers: Set[MessageHandler]
+    message_handlers: set[MessageHandler]
     address_changed_callback: Callable[[Node], None]
     device_information_changed_callback: Callable[[Node], None]
     address_changed: bool = False
@@ -356,14 +356,14 @@ class Node(can.Listener):
         "", "", ""
     )
 
-    custom_single_frame_messages: List[int] | None = None
-    custom_fast_packet_messages: List[int] | None = None
+    custom_single_frame_messages: list[int] | None = None
+    custom_fast_packet_messages: list[int] | None = None
 
     # buffer for received messages
-    _n2k_can_msg_buf: List[Message]  # TODO: init if we keep it
+    _n2k_can_msg_buf: list[Message]  # TODO: init if we keep it
     _max_n2k_can_msgs: int  # uint8_t
 
-    _can_send_frame_buf: Deque[can.message.Message]
+    _can_send_frame_buf: deque[can.message.Message]
     _max_can_send_frames: int = 40
     _can_send_frame_buffer_write: int  # uint16_t
     _can_send_frame_buffer_read: int  # uint16_t
@@ -461,7 +461,7 @@ class Node(can.Listener):
             return False
         return self._is_fast_packet_pgn(msg.pgn)
 
-    def _check_known_message(self, pgn: int) -> Tuple[bool, bool, bool]:
+    def _check_known_message(self, pgn: int) -> tuple[bool, bool, bool]:
         # TODO: refactor
         system_message = False
         fast_packet = False

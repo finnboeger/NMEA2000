@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 from n2k.constants import *
 from n2k.message import Message
@@ -2524,7 +2524,7 @@ class RouteWaypointInformation:
     nav_direction: N2kNavigationDirection
     route_name: str
     supplementary_data: N2kGenericStatusPair
-    waypoints: List[Waypoint]
+    waypoints: list[Waypoint]
 
 
 def set_n2k_route_waypoint_information(data: RouteWaypointInformation) -> Message:
@@ -2675,7 +2675,7 @@ MAX_SATELLITE_INFO_COUNT = 18  # Maximum amount of satellites that fit into fast
 class GNSSSatellitesInView:
     sid: int
     mode: N2kRangeResidualMode
-    satellites: List[SatelliteInfo]
+    satellites: list[SatelliteInfo]
 
 
 def set_n2k_gnss_satellites_in_view(data: GNSSSatellitesInView) -> Message:
@@ -3044,7 +3044,7 @@ class WaypointList:
     start: int
     num_waypoints: int
     database: int
-    waypoints: List[Waypoint]
+    waypoints: list[Waypoint]
 
 
 def set_n2k_waypoint_list(
@@ -3353,7 +3353,7 @@ def parse_n2k_pgn_iso_request(msg: Message) -> int | None:
 
 
 # PGN List (Transmit and Receive)
-def set_n2k_pgn_transmit_list(msg: Message, destination: int, pgns: List[int]):
+def set_n2k_pgn_transmit_list(msg: Message, destination: int, pgns: list[int]):
     print("NotImplemented set_n2k_pgn_transmit_list")
 
 

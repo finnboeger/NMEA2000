@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Optional
-
 import n2k.device
 import n2k.messages
 from n2k.constants import *
@@ -13,7 +11,7 @@ from n2k.utils import IntRef, millis
 
 
 class DeviceList(MessageHandler):
-    sources: List[n2k.device.Device | None]
+    sources: list[n2k.device.Device | None]
     max_devices: int
     list_updated: bool
     has_pending_requests: bool
@@ -209,7 +207,7 @@ class DeviceList(MessageHandler):
             raise AssertionError(rem)
 
         # Clear the corresponding list and select it
-        pgn_list: List | None = None
+        pgn_list: list | None = None
         if n2k_pgn_list == N2kPGNList.transmit:
             dev.transmit_pgns = []
             pgn_list = dev.transmit_pgns

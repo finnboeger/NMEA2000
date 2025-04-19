@@ -2,7 +2,7 @@
 # https://www.nmea.org/Assets/20140109%20nmea-2000-corrigendum-tc201401031%20pgn%20126208.pdf
 
 from enum import IntEnum
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
 
 from n2k.message import Message
 
@@ -48,7 +48,7 @@ class N2kGroupFunctionParameterErrorCode(IntEnum):
     ReadOrWriteIsNotSupported = 6
 
 
-def match_request_field(field_val, match_val, mask) -> Tuple[bool, int]:
+def match_request_field(field_val, match_val, mask) -> tuple[bool, int]:
     if field_val & mask != match_val:
         return (
             False,
@@ -57,7 +57,7 @@ def match_request_field(field_val, match_val, mask) -> Tuple[bool, int]:
     return True, N2kGroupFunctionParameterErrorCode.Acknowledge
 
 
-def match_request_field_str(field_val, match_val) -> Tuple[bool, int]:
+def match_request_field_str(field_val, match_val) -> tuple[bool, int]:
     match = field_val == match_val
     if match:
         return True, N2kGroupFunctionParameterErrorCode.Acknowledge

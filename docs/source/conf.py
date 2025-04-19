@@ -1,7 +1,6 @@
 # noqa: INP001
 import sys
 from pathlib import Path
-from typing import List
 
 sys.path.insert(0, str(Path("../../").resolve()))
 
@@ -42,7 +41,7 @@ autodoc_default_options = {
 always_document_param_types = True
 typehints_defaults = "comma"
 templates_path = ["_templates"]
-exclude_patterns: List[str] = []
+exclude_patterns: list[str] = []
 
 
 # -- Options for HTML output -------------------------------------------------

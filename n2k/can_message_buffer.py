@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from typing import List, Optional
-
 from n2k import N2kCANMessage
 from n2k.constants import MAX_N2K_MSG_BUF_TIME
 from n2k.utils import millis
 
 
 class N2kCANMessageBuffer:
-    _buffer: List[N2kCANMessage]
+    _buffer: list[N2kCANMessage]
 
     def __init__(self, size: int):
         if size <= 0:

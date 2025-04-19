@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import struct
 from binascii import hexlify
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 from n2k.constants import *
 from n2k.n2k import PGN

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List, Optional
-
 import n2k.device_information
 import n2k.device_list
 from n2k.types import ConfigurationInformation, ProductInformation
@@ -16,8 +14,8 @@ class Device:
     prod_i_loaded: bool = False
     conf_i: ConfigurationInformation
     conf_i_loaded: bool = False
-    transmit_pgns: List[int] | None = None
-    receive_pgns: List[int] | None = None
+    transmit_pgns: list[int] | None = None
+    receive_pgns: list[int] | None = None
 
     n_name_requested: int = 0  # How often we have requested the name
     prod_i_requested: int = (
