@@ -1,13 +1,13 @@
-from typing import Optional, List
+from typing import List, Optional
 
 import n2k.device
-from n2k.message import Message, N2K_UINT16_NA, N2K_UINT32_NA
-from n2k.message_handler import MessageHandler
 import n2k.messages
+from n2k.constants import *
+from n2k.message import N2K_UINT16_NA, N2K_UINT32_NA, Message
+from n2k.message_handler import MessageHandler
 from n2k.n2k import PGN
 from n2k.types import N2kPGNList
 from n2k.utils import IntRef, millis
-from n2k.constants import *
 
 
 class DeviceList(MessageHandler):

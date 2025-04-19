@@ -1,7 +1,9 @@
 from __future__ import annotations
-from time import time
+
 import math
+from time import time
 from typing import Generic, TypeVar
+
 from n2k.constants import *
 from n2k.types import N2kBinaryStatus, N2kOnOff
 

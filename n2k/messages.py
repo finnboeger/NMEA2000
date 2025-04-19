@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import List, Optional, TYPE_CHECKING
 
-from n2k.n2k import PGN
-from n2k.message import Message
-from n2k.types import *
+from typing import TYPE_CHECKING, List, Optional
+
 from n2k.constants import *
+from n2k.message import Message
+from n2k.n2k import PGN
+from n2k.types import *
 from n2k.utils import IntRef, with_fallback
 
 if TYPE_CHECKING:

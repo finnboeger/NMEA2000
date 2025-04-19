@@ -1,12 +1,12 @@
 # N2kMsg.h
-from typing import List, Optional
 import struct
 from binascii import hexlify
+from typing import List, Optional
 
-from n2k.n2k import PGN
-from n2k.utils import millis, IntRef, clamp_int
-from n2k.stream import Stream
 from n2k.constants import *
+from n2k.n2k import PGN
+from n2k.stream import Stream
+from n2k.utils import IntRef, clamp_int, millis
 
 default_bytearray = bytearray()
 

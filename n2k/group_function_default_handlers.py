@@ -1,5 +1,5 @@
-from n2k.group_function import N2kGroupFunctionHandler
 import n2k.node
+from n2k.group_function import N2kGroupFunctionHandler
 from n2k.message import Message
 
 

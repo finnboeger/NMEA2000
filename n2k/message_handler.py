@@ -1,5 +1,6 @@
-from n2k.message import Message
 from typing import TYPE_CHECKING
+
+from n2k.message import Message
 
 if TYPE_CHECKING:
     import n2k

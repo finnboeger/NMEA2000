@@ -1,10 +1,10 @@
+import logging
+import time
 from math import radians
 
 import can
-import time
-import n2k
-import logging
 
+import n2k
 from n2k.messages import WindSpeed
 
 bus = can.Bus("can0", interface="socketcan")

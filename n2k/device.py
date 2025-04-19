@@ -1,9 +1,9 @@
 from typing import List, Optional
 
-import n2k.device_list
-from n2k.types import ProductInformation, ConfigurationInformation
-from n2k.utils import millis
 import n2k.device_information
+import n2k.device_list
+from n2k.types import ConfigurationInformation, ProductInformation
+from n2k.utils import millis
 
 
 class Device:

@@ -1,8 +1,8 @@
 from typing import List, Optional
 
 from n2k import N2kCANMessage
-from n2k.utils import millis
 from n2k.constants import MAX_N2K_MSG_BUF_TIME
+from n2k.utils import millis
 
 
 class N2kCANMessageBuffer:

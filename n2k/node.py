@@ -1,48 +1,48 @@
 import struct
 import time
-from collections import deque
-from binascii import hexlify
-
 import traceback
+from binascii import hexlify
+from collections import deque
+from typing import Callable, Deque, List, Optional, Set, Tuple
+
 import can
-from typing import Optional, List, Callable, Set, Deque, Tuple
 
 import n2k
+from n2k.can_message import N2kCANMessage
 from n2k.can_message_buffer import N2kCANMessageBuffer
 from n2k.can_tools import MsgHeader, can_id_to_n2k, n2k_id_to_can
-from n2k.device_list import DeviceList
+from n2k.constants import *
 from n2k.device_information import DeviceInformation
+from n2k.device_list import DeviceList
 from n2k.message import Message
 from n2k.message_handler import MessageHandler
-from n2k.can_message import N2kCANMessage
 from n2k.messages import (
-    set_n2k_iso_address_claim,
     parse_n2k_pgn_iso_request,
+    set_n2k_configuration_information,
+    set_n2k_iso_address_claim,
     set_n2k_pgn_iso_acknowledgement,
     set_n2k_product_information,
-    set_n2k_configuration_information,
 )
 from n2k.n2k import (
-    is_fast_packet_first_frame,
-    DefaultTransmitMessages,
-    DefaultReceiveMessages,
-    is_default_single_frame_message,
-    is_mandatory_fast_packet_message,
-    is_default_fast_packet_message,
-    is_fast_packet_system_message,
-    is_single_frame_system_message,
-    is_proprietary_fast_packet_message,
     PGN,
+    DefaultReceiveMessages,
+    DefaultTransmitMessages,
     is_broadcast,
+    is_default_fast_packet_message,
+    is_default_single_frame_message,
+    is_fast_packet_first_frame,
+    is_fast_packet_system_message,
+    is_mandatory_fast_packet_message,
+    is_proprietary_fast_packet_message,
+    is_single_frame_system_message,
 )
 from n2k.types import (
-    ProductInformation,
     CANSendFrame,
     ConfigurationInformation,
     N2kPGNList,
+    ProductInformation,
 )
-from n2k.utils import millis, IntRef
-from n2k.constants import *
+from n2k.utils import IntRef, millis
 
 
 class Node(can.Listener):

@@ -1,6 +1,6 @@
 # noqa: INP001
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import List
 
 sys.path.insert(0, str(Path("../../").resolve()))
