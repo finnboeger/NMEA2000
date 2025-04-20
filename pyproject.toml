@@ -71,7 +71,7 @@ ignore = [
     "PERF401", # use list.extend(list comprehension) instead of list.append in a loop
     "D301", # Escape Sequences in Docstrings. Triggers on \n which are required to tell sphinx to add a newline
     # rules to be evaluated and fixed bit by bit
-    "E501","D101","D102","D103","COM812","ARG001","ARG002","D400","D415","FIX002","RSE102",
+    "E501","D101","D102","D103","ARG001","ARG002","D400","D415","FIX002","RSE102",
     "TD002","TD003","T201","ERA001","ANN204","PLR2004","PLR0913","ANN001","FBT001","D100","D107",
     "ANN201","D105","ANN202","TD004","FBT002","TD005","D205",
     "PLR0911", "PLR0912", "D104", "D401", "N815", "UP035", "F403", "C901", "B007",

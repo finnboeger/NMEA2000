@@ -52,14 +52,15 @@ debug_console_handler.setFormatter(
         + "" * (23 + 3)
         + "{message:s}",
         style="{",
-    )
+    ),
 )
 
 
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(
     logging.Formatter(
-        "[{asctime:s}] - {levelname:<8s} - {name:s} - {message:s}", style="{"
-    )
+        "[{asctime:s}] - {levelname:<8s} - {name:s} - {message:s}",
+        style="{",
+    ),
 )
 log.addHandler(console_handler)

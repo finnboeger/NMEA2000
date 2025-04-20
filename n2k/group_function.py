@@ -70,7 +70,8 @@ class N2kGroupFunctionHandler:
     n2k_node: "n2k.node.Node"
 
     def _get_request_group_function_transmission_or_priority_error_code(
-        self, transmission_interval: int
+        self,
+        transmission_interval: int,
     ) -> N2kGroupFunctionTransmissionOrPriorityErrorCode:
         raise NotImplementedError()
 
@@ -84,7 +85,10 @@ class N2kGroupFunctionHandler:
         raise NotImplementedError()
 
     def _handle_command(
-        self, msg: Message, priority_setting: int, number_of_parameter_pairs: int
+        self,
+        msg: Message,
+        priority_setting: int,
+        number_of_parameter_pairs: int,
     ) -> bool:
         raise NotImplementedError()
 
@@ -160,7 +164,9 @@ def start_parse_request_pair_parameters(msg: Message, index: int) -> bool:
 
 
 def parse_command_params(
-    msg: Message, priority_setting: int, number_of_parameter_pairs: int
+    msg: Message,
+    priority_setting: int,
+    number_of_parameter_pairs: int,
 ) -> bool:
     raise NotImplementedError()
 
@@ -234,7 +240,8 @@ def set_start_acknowledge(
 
 
 def change_pgn_error_code(
-    msg: Message, pgn_error_code: N2kGroupFunctionPGNErrorCode
+    msg: Message,
+    pgn_error_code: N2kGroupFunctionPGNErrorCode,
 ) -> None:
     print("NotImplemented change_pgn_error_code")
 

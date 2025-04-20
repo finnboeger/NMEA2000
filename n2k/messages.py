@@ -110,7 +110,7 @@ def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadca
         repeat=types.N2kAISRepeat((vb >> 6) & 0x03),
         source_id=msg.get_4_byte_uint(index) & 0x3FFFFFFF,
         ais_transceiver_information=types.N2kAISTransceiverInformation(
-            msg.get_byte_uint(index) & 0x1F
+            msg.get_byte_uint(index) & 0x1F,
         ),
         safety_related_text=msg.get_var_str(index),
     )
@@ -200,7 +200,7 @@ def parse_n2k_mob_notification(msg: Message) -> MOBNotification:
         sog=msg.get_2_byte_udouble(0.01, index),
         mmsi=msg.get_4_byte_uint(index),
         mob_emitter_battery_status=types.N2kMOBEmitterBatteryStatus(
-            msg.get_byte_uint(index) & 0x07
+            msg.get_byte_uint(index) & 0x07,
         ),
     )
 
@@ -259,12 +259,12 @@ def set_n2k_heading_track_control(
         (data.rudder_limit_exceeded & 0x03) << 0
         | (data.off_heading_limit_exceeded & 0x03) << 2
         | (data.off_track_limit_exceeded & 0x03) << 4
-        | (data.override & 0x03) << 6
+        | (data.override & 0x03) << 6,
     )
     msg.add_byte_uint(
         (data.steering_mode & 0x07) << 0
         | (data.turn_mode & 0x07) << 3
-        | (data.heading_reference & 0x03) << 6
+        | (data.heading_reference & 0x03) << 6,
     )
     msg.add_byte_uint((data.commanded_rudder_direction & 0x07) << 5 | 0x1F)
     msg.add_2_byte_double(data.commanded_rudder_angle, 0.0001)
@@ -305,7 +305,7 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
         turn_mode=turn_mode,
         heading_reference=heading_reference,
         commanded_rudder_direction=types.N2kRudderDirectionOrder(
-            (msg.get_byte_uint(index) >> 5) & 0x07
+            (msg.get_byte_uint(index) >> 5) & 0x07,
         ),
         commanded_rudder_angle=msg.get_2_byte_double(0.0001, index),
         heading_to_steer_course=msg.get_2_byte_udouble(0.0001, index),
@@ -363,7 +363,7 @@ def parse_n2k_rudder(msg: Message) -> Rudder:
     return Rudder(
         instance=msg.get_byte_uint(index),
         rudder_direction_order=types.N2kRudderDirectionOrder(
-            msg.get_byte_uint(index) & 0x07
+            msg.get_byte_uint(index) & 0x07,
         ),
         angle_order=msg.get_2_byte_double(0.0001, index),
         rudder_position=msg.get_2_byte_double(0.0001, index),
@@ -616,7 +616,7 @@ def set_n2k_engine_parameters_rapid(data: EngineParametersRapid) -> Message:
     msg.add_2_byte_udouble(data.engine_speed, 0.25)
     msg.add_2_byte_udouble(data.engine_boost_pressure, 100)
     msg.add_byte_uint(
-        data.engine_tilt_trim
+        data.engine_tilt_trim,
     )  # TODO: this is probably incorrect and should instead be add_byte_int. Verify with Garmin Display
     msg.add_byte_uint(0xFF)  # reserved
     msg.add_byte_uint(0xFF)  # reserved
@@ -781,7 +781,7 @@ def parse_n2k_transmission_parameters_dynamic(
         oil_pressure=msg.get_2_byte_udouble(100, index),
         oil_temperature=msg.get_2_byte_udouble(0.1, index),
         discrete_status1=types.N2kTransmissionDiscreteStatus1(
-            msg.get_byte_uint(index) & 0x1F
+            msg.get_byte_uint(index) & 0x1F,
         ),
     )
 
@@ -1038,7 +1038,7 @@ def set_n2k_charger_status(data: ChargerStatus) -> Message:
     msg.add_byte_uint(data.battery_instance)
     msg.add_byte_uint((data.charger_mode & 0x0F) << 4 | (data.charge_state & 0x0F))
     msg.add_byte_uint(
-        0x0F << 4 | (data.equalization_pending & 0x03) << 2 | (data.enabled & 0x03)
+        0x0F << 4 | (data.equalization_pending & 0x03) << 2 | (data.enabled & 0x03),
     )
     msg.add_2_byte_udouble(data.equalization_time_remaining, 1)
     return msg
@@ -1150,12 +1150,12 @@ def set_n2k_charger_configuration_status(data: ChargerConfigurationStatus) -> Me
     msg.add_byte_uint(data.enable & 0x03)
     msg.add_byte_uint(data.charge_current_limit)  # 0 - 252%
     msg.add_byte_uint(
-        (data.charger_mode & 0x0F) << 4 | (data.charging_algorithm & 0x0F)
+        (data.charger_mode & 0x0F) << 4 | (data.charging_algorithm & 0x0F),
     )
     msg.add_byte_uint(
         (data.over_charge_enable & 0x03) << 6
         | (data.equalization_enabled & 0x03) << 4
-        | (data.battery_temperature & 0x0F)
+        | (data.battery_temperature & 0x0F),
     )
     msg.add_2_byte_uint(data.equalization_time_remaining)
     return msg
@@ -1226,10 +1226,10 @@ def set_n2k_battery_configuration_status(data: BatteryConfigurationStatus) -> Me
     msg.priority = 6
     msg.add_byte_uint(data.battery_instance)
     msg.add_byte_uint(
-        0xC0 | ((data.supports_equal & 0x03) << 4) | (data.battery_type & 0x0F)
+        0xC0 | ((data.supports_equal & 0x03) << 4) | (data.battery_type & 0x0F),
     )  # BatType (4 bit), SupportsEqual (2 bit), Reserved (2 bit)
     msg.add_byte_uint(
-        ((data.battery_chemistry & 0x0F) << 4) | (data.battery_nominal_voltage & 0x0F)
+        ((data.battery_chemistry & 0x0F) << 4) | (data.battery_nominal_voltage & 0x0F),
     )
     msg.add_2_byte_double(data.battery_capacity, 3600)
     msg.add_byte_uint(data.battery_temperature_coefficient)
@@ -1308,7 +1308,7 @@ def set_n2k_converter_status(data: ConverterStatus) -> Message:
         (data.ripple_state & 0x03) << 6
         | (data.low_dc_voltage_state & 0x03) << 4
         | (data.overload_state & 0x03) << 2
-        | (data.temperature_state & 0x03)
+        | (data.temperature_state & 0x03),
     )
     msg.add_4_byte_uint(0xFFFFFFFF)  # Reserved
     return msg
@@ -1320,7 +1320,7 @@ def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
     sid = msg.get_byte_uint(index)
     connection_number = msg.get_byte_uint(index)
     operating_state = types.N2kConvMode(
-        msg.get_byte_uint(index)
+        msg.get_byte_uint(index),
     )  # might be N2kChargeState
     vb = msg.get_byte_uint(index)
     ripple_state = types.N2kRippleState((vb >> 6) & 0x03)
@@ -1373,7 +1373,8 @@ def parse_n2k_leeway(msg: Message) -> Leeway:
     index = IntRef(0)
 
     return Leeway(
-        sid=msg.get_byte_uint(index), leeway=msg.get_2_byte_double(0.0001, index)
+        sid=msg.get_byte_uint(index),
+        leeway=msg.get_2_byte_double(0.0001, index),
     )
 
 
@@ -1548,14 +1549,14 @@ def set_n2k_anchor_windlass_control_status(
         0x03 << 6
         | (data.speed_control_type & 0x03) << 4
         | (data.anchor_docking_control & 0x03) << 2
-        | (data.windlass_direction_control & 0x03)
+        | (data.windlass_direction_control & 0x03),
     )
     msg.add_byte_uint(data.speed_control)
     msg.add_byte_uint(
         (data.anchor_light & 0x03) << 6
         | (data.deck_and_anchor_wash & 0x03) << 4
         | (data.mechanical_lock & 0x03) << 2
-        | (data.power_enable & 0x03)
+        | (data.power_enable & 0x03),
     )
     msg.add_1_byte_udouble(data.command_timeout, 0.005)
     msg.add_byte_uint(data.windlass_control_events.events)
@@ -1635,13 +1636,13 @@ def set_n2k_anchor_windlass_operating_status(
     msg.add_byte_uint(
         0xF0
         | ((data.rode_type_status & 0x03) << 2)
-        | (data.windlass_motion_status & 0x03)
+        | (data.windlass_motion_status & 0x03),
     )
     msg.add_2_byte_udouble(data.rode_counter_value, 0.1)
     msg.add_2_byte_udouble(data.windlass_line_speed, 0.01)
     msg.add_byte_uint(
         (data.windlass_operating_events.event << 2)
-        | (data.anchor_docking_status & 0x03)
+        | (data.anchor_docking_status & 0x03),
     )
     return msg
 
@@ -1721,7 +1722,7 @@ def parse_n2k_anchor_windlass_monitoring_status(
         sid=msg.get_byte_uint(index),
         windlass_identifier=msg.get_byte_uint(index),
         windlass_monitoring_events=types.N2kWindlassMonitoringEvents(
-            msg.get_byte_uint(index)
+            msg.get_byte_uint(index),
         ),
         controller_voltage=msg.get_1_byte_udouble(0.2, index),
         motor_current=msg.get_1_byte_udouble(1.0, index),
@@ -1868,14 +1869,15 @@ def set_n2k_gnss_data(data: GNSSPositionData) -> Message:
     msg.add_4_byte_double(data.geoidal_separation, 0.01)
     if 0 < data.n_reference_station < 0xFF:
         msg.add_byte_uint(
-            1
+            1,
         )  # Note that we have values for only one reference station, so pass only one values.
         msg.add_2_byte_int(
             (with_fallback(data.reference_station_type, types.N2kGNSSType.GPS) & 0x0F)
-            | with_fallback(data.reference_station_id, constants.N2K_INT16_NA) << 4
+            | with_fallback(data.reference_station_id, constants.N2K_INT16_NA) << 4,
         )
         msg.add_2_byte_udouble(
-            with_fallback(data.age_of_correction, constants.N2K_DOUBLE_NA), 0.01
+            with_fallback(data.age_of_correction, constants.N2K_DOUBLE_NA),
+            0.01,
         )
     else:
         msg.add_byte_uint(data.n_reference_station)
@@ -2030,7 +2032,7 @@ def set_n2k_ais_class_a_position(data: AISClassAPositionReport) -> Message:
     msg.add_4_byte_double(data.longitude, 1e-7)
     msg.add_4_byte_double(data.latitude, 1e-7)
     msg.add_byte_uint(
-        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01)
+        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01),
     )
     msg.add_2_byte_udouble(data.cog, 1e-4)
     msg.add_2_byte_udouble(data.sog, 0.01)
@@ -2152,7 +2154,7 @@ def set_n2k_ais_class_b_position(data: AISClassBPositionReport) -> Message:
     msg.add_4_byte_double(data.longitude, 1e-7)
     msg.add_4_byte_double(data.latitude, 1e-7)
     msg.add_byte_uint(
-        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01)
+        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01),
     )
     msg.add_2_byte_udouble(data.cog, 1e-4)
     msg.add_2_byte_udouble(data.sog, 0.01)
@@ -2167,7 +2169,7 @@ def set_n2k_ais_class_b_position(data: AISClassBPositionReport) -> Message:
         | (data.band & 0x01) << 5
         | (data.dsc & 0x01) << 4
         | (data.display & 0x01) << 3
-        | (data.unit & 0x01) << 2
+        | (data.unit & 0x01) << 2,
     )
     msg.add_byte_uint(0xFE | (data.state & 0x01))
     msg.add_byte_uint(data.sid)
@@ -2301,7 +2303,7 @@ def set_n2k_ais_aids_to_navigation_report(data: AISAtoNReportData) -> Message:
     msg.add_4_byte_double(data.longitude, 1e-7)
     msg.add_4_byte_double(data.latitude, 1e-7)
     msg.add_byte_uint(
-        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01)
+        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01),
     )
     msg.add_2_byte_udouble(data.length, 0.1)
     msg.add_2_byte_udouble(data.beam, 0.1)
@@ -2311,7 +2313,7 @@ def set_n2k_ais_aids_to_navigation_report(data: AISAtoNReportData) -> Message:
         (data.assigned_mode_flag & 0x01) << 7
         | (data.virtual_a_to_n_flag & 0x01) << 6
         | (data.off_position_reference_indicator & 0x01) << 5
-        | (data.a_to_n_type & 0x1F)
+        | (data.a_to_n_type & 0x1F),
     )
     msg.add_byte_uint(0xE0 | (data.gnss_type & 0x0F) << 1)
     msg.add_byte_uint(data.a_to_n_status)
@@ -2348,7 +2350,7 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
     gnss_type = types.N2kGNSSType((msg.get_byte_uint(index) >> 1) & 0x0F)
     a_to_n_status = msg.get_byte_uint(index)
     n2k_ais_transceiver_information = types.N2kAISTransceiverInformation(
-        msg.get_byte_uint(index) & 0x1F
+        msg.get_byte_uint(index) & 0x1F,
     )
     a_to_n_name = msg.get_var_str(index)
 
@@ -2475,7 +2477,7 @@ def set_n2k_navigation_info(data: NavigationInfo) -> Message:
         (data.calculation_type & 0x01) << 6
         | (data.arrival_circle_entered & 0x01) << 4
         | (data.perpendicular_crossed & 0x01) << 2
-        | (data.bearing_reference & 0x03)
+        | (data.bearing_reference & 0x03),
     )
     msg.add_4_byte_udouble(data.eta_time, 1e-4)
     msg.add_2_byte_uint(data.eta_date)
@@ -2566,14 +2568,14 @@ def set_n2k_route_waypoint_information(data: RouteWaypointInformation) -> Messag
     msg.add_2_byte_uint(data.database)
     msg.add_2_byte_uint(data.route)
     msg.add_byte_uint(
-        0xE0 | (data.supplementary_data & 0x03) << 3 | (data.nav_direction & 0x07)
+        0xE0 | (data.supplementary_data & 0x03) << 3 | (data.nav_direction & 0x07),
     )
     msg.add_var_str(data.route_name)
     msg.add_byte_uint(0xFF)  # Reserved
     for waypoint in data.waypoints:
         msg.add_2_byte_uint(waypoint.id)
         msg.add_var_str(
-            waypoint.name
+            waypoint.name,
         )  # TODO: How is it, that empty string is treated differently here from 130074?
         msg.add_4_byte_double(waypoint.latitude, 1e-7)
         msg.add_4_byte_double(waypoint.longitude, 1e-7)
@@ -2600,7 +2602,7 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
                 name=with_fallback(msg.get_var_str(index), ""),
                 latitude=msg.get_4_byte_double(1e-7, index),
                 longitude=msg.get_4_byte_double(1e-7, index),
-            )
+            ),
         )
     if len(waypoints) != waypoints_len:
         raise AssertionError()
@@ -2645,7 +2647,7 @@ def set_n2k_gnss_dop(data: GNSSDOPData) -> Message:
     msg.priority = 6
     msg.add_byte_uint(data.sid)
     msg.add_byte_uint(
-        0xC0 | ((data.actual_mode & 0x07) << 3) | (data.desired_mode & 0x07)
+        0xC0 | ((data.actual_mode & 0x07) << 3) | (data.desired_mode & 0x07),
     )
     msg.add_2_byte_double(data.hdop, 0.01)
     msg.add_2_byte_double(data.vdop, 0.01)
@@ -2737,9 +2739,9 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
                     snr=msg.get_2_byte_double(1e-2, index),
                     range_residuals=msg.get_4_byte_double(1e-5, index),
                     usage_status=types.N2kPRNUsageStatus(
-                        msg.get_byte_uint(index) & 0x0F
+                        msg.get_byte_uint(index) & 0x0F,
                     ),
-                )
+                ),
             )
 
     return GNSSSatellitesInView(
@@ -2831,7 +2833,7 @@ def set_n2k_ais_class_a_static_data(data: AISClassAStaticData) -> Message:
     msg.add_byte_uint(
         (data.dte & 0x01) << 6
         | (data.gnss_type & 0x0F) << 2
-        | (data.ais_version & 0x03)
+        | (data.ais_version & 0x03),
     )
     msg.add_byte_uint(0xE0 | (data.ais_info & 0x1F))
     msg.add_byte_uint(data.sid)
@@ -3092,7 +3094,7 @@ def set_n2k_waypoint_list(
     for waypoint in data.waypoints:
         msg.add_2_byte_uint(waypoint.id)
         msg.add_var_str(
-            waypoint.name or "\x00"
+            waypoint.name or "\x00",
         )  # Instead of empty string, add a var string containing a null-byte
         msg.add_4_byte_double(waypoint.latitude, 1e-7)
         msg.add_4_byte_double(waypoint.longitude, 1e-7)
@@ -3116,7 +3118,7 @@ def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
                 name=with_fallback(msg.get_var_str(index), ""),
                 latitude=msg.get_4_byte_double(1e-7, index),
                 longitude=msg.get_4_byte_double(1e-7, index),
-            )
+            ),
         )
     if len(waypoints) != waypoints_len:
         raise AssertionError()
@@ -3221,7 +3223,10 @@ def parse_n2k_wind_speed(msg: Message) -> WindSpeed:
 
 # ISO Acknowledgement (PGN 59392)
 def set_n2k_pgn_iso_acknowledgement(
-    msg: Message, control: int, group_function: int, pgn: int
+    msg: Message,
+    control: int,
+    group_function: int,
+    pgn: int,
 ) -> None:
     msg.pgn = PGN.IsoAcknowledgement
     msg.priority = 6
@@ -3277,7 +3282,8 @@ def parse_n2k_pgn_product_information(msg: Message) -> types.ProductInformation:
         n2k_sw_code=msg.get_str(constants.MAX_N2K_SW_CODE_LEN, index),
         n2k_model_version=msg.get_str(constants.MAX_N2K_MODEL_VERSION_LEN, index),
         n2k_model_serial_code=msg.get_str(
-            constants.MAX_N2K_MODEL_SERIAL_CODE_LEN, index
+            constants.MAX_N2K_MODEL_SERIAL_CODE_LEN,
+            index,
         ),
         certification_level=msg.get_byte_uint(index),
         load_equivalency=msg.get_byte_uint(index),
@@ -3286,7 +3292,8 @@ def parse_n2k_pgn_product_information(msg: Message) -> types.ProductInformation:
 
 # Configuration Information (PGN: 126998)
 def set_n2k_configuration_information(
-    msg: Message, data: types.ConfigurationInformation
+    msg: Message,
+    data: types.ConfigurationInformation,
 ) -> None:
     total_len = 0
     max_len = msg.max_data_len - 6  # each field has 2 extra bytes

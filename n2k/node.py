@@ -72,7 +72,14 @@ class Node(can.Listener):
     n2k_source: int = 0  # uint8_t
     device_information: DeviceInformation
     product_information: ProductInformation = ProductInformation(
-        2101, 666, "", "", "", "", 0, 1
+        2101,
+        666,
+        "",
+        "",
+        "",
+        "",
+        0,
+        1,
     )
     manufacturer_serial_code: str = ""
     pending_iso_address_claim: int | None = None  # unsigned long
@@ -176,7 +183,7 @@ class Node(can.Listener):
         # if self._test_handle_tp_message(msg_header.pgn, msg_header.source, msg_header.destination, len(msg_header.data)):
         if True:
             known_message, system_message, fast_packet = self._check_known_message(
-                msg_header.pgn
+                msg_header.pgn,
             )
             # TODO: assert msg.data is not empty
             if msg.data is None:
@@ -208,7 +215,8 @@ class Node(can.Listener):
             else:
                 # This is not the first frame of a fast_packet, therefore we have to find the previous frames
                 n2k_can_msg = self.can_msg_buffer.find_matching(
-                    pgn=msg_header.pgn, source=msg_header.source
+                    pgn=msg_header.pgn,
+                    source=msg_header.source,
                 )
                 if n2k_can_msg is not None:
                     if n2k_can_msg.last_frame + 1 == msg.data[0]:
@@ -355,7 +363,9 @@ class Node(can.Listener):
 
     # Configuration Information
     configuration_information: ConfigurationInformation = ConfigurationInformation(
-        "", "", ""
+        "",
+        "",
+        "",
     )
 
     custom_single_frame_messages: list[int] | None = None
@@ -400,7 +410,7 @@ class Node(can.Listener):
                 + " "
                 + str(length)
                 + " "
-                + str(hexlify(buf, sep=" "))
+                + str(hexlify(buf, sep=" ")),
             )
         except can.CanOperationError:
             if len(self._can_send_frame_buf) < self._max_can_send_frames:
@@ -410,7 +420,7 @@ class Node(can.Listener):
                     + " "
                     + str(length)
                     + " "
-                    + str(hexlify(buf, sep=" "))
+                    + str(hexlify(buf, sep=" ")),
                 )
                 self._can_send_frame_buf.append(can_msg)
             else:
@@ -420,7 +430,7 @@ class Node(can.Listener):
                     + " "
                     + str(length)
                     + " "
-                    + str(hexlify(buf, sep=" "))
+                    + str(hexlify(buf, sep=" ")),
                 )
             return False
         return True
@@ -438,7 +448,11 @@ class Node(can.Listener):
     # ISO Multi Packet Support
     # def _find_free_can_msg_index(self, pgn: int, source: int, destination: int, tp_msg: bool, msg_index: int) -> None:
     def _find_free_can_msg_index(
-        self, pgn: int, source: int, destination: int, msg_index: int
+        self,
+        pgn: int,
+        source: int,
+        destination: int,
+        msg_index: int,
     ) -> None:
         raise NotImplementedError()
 
@@ -551,7 +565,7 @@ class Node(can.Listener):
             if self._request_handler is not None:
                 # Do not respond to broadcast request for some messages
                 if is_broadcast(msg.destination) and ignore_broadcast_iso_request(
-                    msg.pgn
+                    msg.pgn,
                 ):
                     return
                 if self._request_handler(requested_pgn, msg.source):
@@ -841,7 +855,8 @@ class Node(can.Listener):
         self.send_msg(msg)
 
     def send_product_information(
-        self, destination: int = 0xFF
+        self,
+        destination: int = 0xFF,
     ) -> bool:  # use_tp: bool = False
         msg = Message(self.n2k_source)
         msg.destination = destination
@@ -858,7 +873,8 @@ class Node(can.Listener):
         return False
 
     def send_configuration_information(
-        self, destination=0xFF
+        self,
+        destination=0xFF,
     ) -> bool:  #  use_tp: bool = False
         msg = Message(self.n2k_source)
         msg.destination = destination
@@ -911,7 +927,7 @@ class Node(can.Listener):
                 pgn=msg.pgn,
                 source=msg.source,
                 destination=msg.destination,
-            )
+            ),
         )
 
         if can_id is None or msg.pgn == 0:
@@ -960,7 +976,8 @@ class Node(can.Listener):
         self.message_handlers.remove(msg_handler)
 
     def set_iso_request_handler(
-        self, request_handler: Callable[[int, int], bool]
+        self,
+        request_handler: Callable[[int, int], bool],
     ) -> None:
         self._request_handler = request_handler
 

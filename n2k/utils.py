@@ -26,7 +26,7 @@ class IntRef:
         raise TypeError(
             "unsupported operand type(s) for +: 'IntRef' and '"
             + type(other).__name__
-            + "'"
+            + "'",
         )
 
     def __radd__(self, other):
@@ -37,7 +37,7 @@ class IntRef:
         raise TypeError(
             "unsupported operand type(s) for +: '"
             + type(other).__name__
-            + "' and 'IntRef'"
+            + "' and 'IntRef'",
         )
 
     def __sub__(self, other):
@@ -48,7 +48,7 @@ class IntRef:
         raise TypeError(
             "unsupported operand type(s) for -: 'IntRef' and '"
             + type(other).__name__
-            + "'"
+            + "'",
         )
 
     def __rsub__(self, other):
@@ -59,7 +59,7 @@ class IntRef:
         raise TypeError(
             "unsupported operand type(s) for +: '"
             + type(other).__name__
-            + "' and 'IntRef'"
+            + "' and 'IntRef'",
         )
 
     def __mult__(self, other):
@@ -70,7 +70,7 @@ class IntRef:
         raise TypeError(
             "unsupported operand type(s) for *: 'IntRef' and '"
             + type(other).__name__
-            + "'"
+            + "'",
         )
 
     def __floordiv__(self, other):
@@ -81,7 +81,7 @@ class IntRef:
         raise TypeError(
             "unsupported operand type(s) for //: 'IntRef' and '"
             + type(other).__name__
-            + "'"
+            + "'",
         )
 
     def __rfloordiv__(self, other):
@@ -92,7 +92,7 @@ class IntRef:
         raise TypeError(
             "unsupported operand type(s) for +: '"
             + type(other).__name__
-            + "' and 'IntRef'"
+            + "' and 'IntRef'",
         )
 
     def __truediv__(self, other):
@@ -103,7 +103,7 @@ class IntRef:
         raise TypeError(
             "unsupported operand type(s) for /: 'IntRef' and '"
             + type(other).__name__
-            + "'"
+            + "'",
         )
 
     def __rtruediv__(self, other):
@@ -114,7 +114,7 @@ class IntRef:
         raise TypeError(
             "unsupported operand type(s) for +: '"
             + type(other).__name__
-            + "' and 'IntRef'"
+            + "' and 'IntRef'",
         )
 
     def __repr__(self):
@@ -274,7 +274,8 @@ def n2k_reset_binary_status() -> int:
 
 
 def n2k_get_status_on_binary_status(
-    bank_status: N2kBinaryStatus, item_index: int = 1
+    bank_status: N2kBinaryStatus,
+    item_index: int = 1,
 ) -> N2kOnOff:
     """
     Get single status of full binary bank status returned by :py:func:`parse_n2k_binary_status`.
@@ -291,7 +292,9 @@ def n2k_get_status_on_binary_status(
 
 
 def n2k_set_status_binary_on_status(
-    bank_status: N2kBinaryStatus, item_status: N2kOnOff, item_index: int = 1
+    bank_status: N2kBinaryStatus,
+    item_status: N2kOnOff,
+    item_index: int = 1,
 ) -> N2kBinaryStatus:
     """
     Set single status to full binary bank status.

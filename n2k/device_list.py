@@ -394,7 +394,9 @@ class DeviceList(MessageHandler):
         return None
 
     def find_device_by_ids(
-        self, manufacturer_code: int, unique_number: int
+        self,
+        manufacturer_code: int,
+        unique_number: int,
     ) -> n2k.device.Device | None:
         if (
             manufacturer_code == constants.N2K_UINT16_NA
@@ -419,7 +421,10 @@ class DeviceList(MessageHandler):
         return None
 
     def find_device_by_product(
-        self, manufacturer_code: int, product_code: int, source: int = 0xFF
+        self,
+        manufacturer_code: int,
+        product_code: int,
+        source: int = 0xFF,
     ) -> n2k.device.Device | None:
         """
         Look for the next device with a given manufacturer_code and product_code behind the provided source.

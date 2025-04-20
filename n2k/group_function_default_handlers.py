@@ -14,7 +14,10 @@ class N2kGroupFunctionHandlerForPGN60928(N2kGroupFunctionHandler):
         raise NotImplementedError()
 
     def _handle_command(
-        self, msg: Message, priority_setting: int, number_of_parameter_pairs: int
+        self,
+        msg: Message,
+        priority_setting: int,
+        number_of_parameter_pairs: int,
     ) -> bool:
         raise NotImplementedError()
 
@@ -75,7 +78,10 @@ class N2kGroupFunctionHandlerForPGN126998(N2kGroupFunctionHandler):
         raise NotImplementedError()
 
     def _handle_command(
-        self, msg: Message, priority_setting: int, number_of_parameter_pairs: int
+        self,
+        msg: Message,
+        priority_setting: int,
+        number_of_parameter_pairs: int,
     ) -> bool:
         raise NotImplementedError()
 

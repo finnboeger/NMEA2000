@@ -17,7 +17,11 @@ class N2kCANMessageBuffer:
             self._buffer.append(N2kCANMessage())
 
     def find_free_slot(
-        self, pgn: int = 0, source: int = 0, destination: int = 0, tp_msg: bool = False
+        self,
+        pgn: int = 0,
+        source: int = 0,
+        destination: int = 0,
+        tp_msg: bool = False,
     ) -> N2kCANMessage | None:
         cur_time = millis()
         oldest_msg_time = millis()
