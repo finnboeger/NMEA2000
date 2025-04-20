@@ -2320,7 +2320,7 @@ def set_n2k_ais_aids_to_navigation_report(data: AISAtoNReportData) -> Message:
     msg.add_byte_uint(0xE0 | (data.n2k_ais_transceiver_information & 0x1F))
     a_to_n_name = with_fallback(data.a_to_n_name, "")
     if len(a_to_n_name) > 34:
-        raise ValueError()
+        raise ValueError
     msg.add_var_str(a_to_n_name)
 
     return msg
@@ -2605,7 +2605,7 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
             ),
         )
     if len(waypoints) != waypoints_len:
-        raise AssertionError()
+        raise AssertionError
 
     return RouteWaypointInformation(
         start=start,
@@ -3121,7 +3121,7 @@ def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
             ),
         )
     if len(waypoints) != waypoints_len:
-        raise AssertionError()
+        raise AssertionError
 
     return WaypointList(
         start=start,
@@ -3272,7 +3272,7 @@ def set_n2k_product_information(
 # TODO: parser
 def parse_n2k_pgn_product_information(msg: Message) -> types.ProductInformation:
     if msg.pgn != PGN.ProductInformation:
-        raise ValueError()
+        raise ValueError
 
     index = IntRef(0)
     return types.ProductInformation(
@@ -3344,7 +3344,7 @@ def parse_n2k_pgn_configuration_information(
     msg: Message,
 ) -> types.ConfigurationInformation:
     if msg.pgn != PGN.ConfigurationInformation:
-        raise ValueError()
+        raise ValueError
 
     index = IntRef(0)
 

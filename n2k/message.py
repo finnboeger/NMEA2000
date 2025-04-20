@@ -540,7 +540,7 @@ class Message:
         return self.get_str(length, index, b"\xff")
 
     def get_buf(self, length: int, index: IntRef) -> bytearray:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     # Data Manipulation
     def set_byte_uint(self, v: int, index: IntRef) -> bool:

@@ -95,7 +95,7 @@ class DeviceList(MessageHandler):
             # set current device to stored device
             dev = self.sources[msg.source]
             if dev is None:
-                raise AssertionError()
+                raise AssertionError
             # check if it has a name
             if dev.dev_i.name == 0:
                 # if it doesn't, check if we have a device with the current name at a different address
@@ -239,7 +239,7 @@ class DeviceList(MessageHandler):
         # (assumes a device exists at this index, as this is a condition for _handle_other to be called)
         device = self.sources[msg.source]
         if device is None:
-            raise AssertionError()
+            raise AssertionError
         if device.should_request_name() and self._request_iso_address_claim(msg.source):
             # increase requested counter
             device.n_name_requested += 1

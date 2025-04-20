@@ -73,7 +73,7 @@ class N2kGroupFunctionHandler:
         self,
         transmission_interval: int,
     ) -> N2kGroupFunctionTransmissionOrPriorityErrorCode:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _handle_request(
         self,
@@ -82,7 +82,7 @@ class N2kGroupFunctionHandler:
         transmission_interval_offset: int,
         number_of_parameter_pairs: int,
     ) -> bool:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _handle_command(
         self,
@@ -90,7 +90,7 @@ class N2kGroupFunctionHandler:
         priority_setting: int,
         number_of_parameter_pairs: int,
     ) -> bool:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _handle_acknowledge(
         self,
@@ -99,7 +99,7 @@ class N2kGroupFunctionHandler:
         transmission_or_priority_error_code: N2kGroupFunctionTransmissionOrPriorityErrorCode,
         number_of_parameter_pairs: int,
     ) -> bool:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _handle_read_fields(
         self,
@@ -110,10 +110,10 @@ class N2kGroupFunctionHandler:
         number_of_selection_pairs: int,
         number_of_parameter_pairs: int,
     ) -> bool:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _handle_read_fields_reply(self, msg: Message) -> bool:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _handle_write_fields(
         self,
@@ -124,10 +124,10 @@ class N2kGroupFunctionHandler:
         number_of_selection_pairs: int,
         number_of_parameter_pairs: int,
     ) -> bool:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _handle_write_fields_reply(self, msg: Message) -> bool:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def __init__(self, n2k_node: "n2k.node.Node", pgn: int):
         self.n2k_node = n2k_node
@@ -139,15 +139,15 @@ class N2kGroupFunctionHandler:
         group_function_code: N2kGroupFunctionCode,
         pgn_for_group_function: int,
     ) -> bool:
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 def get_pgn_for_group_function(msg: Message) -> int:
-    raise NotImplementedError()
+    raise NotImplementedError
 
 
 def parse(msg: Message, group_function_code, pgn_for_group_function) -> bool:
-    raise NotImplementedError()
+    raise NotImplementedError
 
 
 def parse_request_params(
@@ -156,11 +156,11 @@ def parse_request_params(
     transmission_interval_offset: int,
     number_of_parameter_pairs: int,
 ) -> bool:
-    raise NotImplementedError()
+    raise NotImplementedError
 
 
 def start_parse_request_pair_parameters(msg: Message, index: int) -> bool:
-    raise NotImplementedError()
+    raise NotImplementedError
 
 
 def parse_command_params(
@@ -168,11 +168,11 @@ def parse_command_params(
     priority_setting: int,
     number_of_parameter_pairs: int,
 ) -> bool:
-    raise NotImplementedError()
+    raise NotImplementedError
 
 
 def start_parse_command_pair_parameters(msg: Message, index: int) -> bool:
-    raise NotImplementedError()
+    raise NotImplementedError
 
 
 def parse_acknowledge_params(
@@ -181,11 +181,11 @@ def parse_acknowledge_params(
     transmission_or_priority_error_code: N2kGroupFunctionTransmissionOrPriorityErrorCode,
     number_of_parameter_pairs: int,
 ) -> bool:
-    raise NotImplementedError()
+    raise NotImplementedError
 
 
 def start_parse_read_or_write_parameters(msg: Message, index: int) -> bool:
-    raise NotImplementedError()
+    raise NotImplementedError
 
 
 def parse_read_or_write_params(
@@ -197,7 +197,7 @@ def parse_read_or_write_params(
     number_of_parameter_pairs: int,
     proprietary: bool = False,
 ) -> bool:
-    raise NotImplementedError()
+    raise NotImplementedError
 
 
 def set_start_read_reply(

@@ -23,10 +23,10 @@ class Stream:
         :param s:
         :return:
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def println(self, s: str) -> int:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def print_val(self, val: int, radix: int = 10) -> int:
         """
@@ -36,7 +36,7 @@ class Stream:
         :param radix:
         :return:
         """
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def println_val(self, val: int, radix: int = 10) -> int:
-        raise NotImplementedError()
+        raise NotImplementedError

@@ -187,7 +187,7 @@ class Node(can.Listener):
             )
             # TODO: assert msg.data is not empty
             if msg.data is None:
-                raise ValueError()
+                raise ValueError
             if not fast_packet or is_fast_packet_first_frame(msg.data[0]):
                 # This is the first frame of a message
                 # Find free Slot to store the CAN Msg
@@ -436,10 +436,10 @@ class Node(can.Listener):
         return True
 
     def _get_next_free_can_send_frame(self) -> CANSendFrame:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _send_pending_information(self) -> None:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _is_initialized(self) -> bool:
         print("NotImplemented _is_initialized")
@@ -454,10 +454,10 @@ class Node(can.Listener):
         destination: int,
         msg_index: int,
     ) -> None:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _set_n2k_can_buf_msg(self, can_id: int, length: int, buf: bytearray):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     def _is_fast_packet_pgn(self, pgn: int) -> bool:
         return (
@@ -713,7 +713,7 @@ class Node(can.Listener):
     # Forward Handling Code Skipped
 
     def _run_message_handlers(self, msg: Message) -> None:
-        raise NotImplementedError()
+        raise NotImplementedError
 
     # ISO Multi Packet Support
     # def _test_handle_tp_message(self, pgn: int, source: int, destination: int) -> bool:
@@ -903,7 +903,7 @@ class Node(can.Listener):
 
     # Heartbeat Support
     def send_heartbeat(self, force: bool = False):
-        raise NotImplementedError()
+        raise NotImplementedError
 
     # Send message to the bus
     def send_msg(self, msg: Message) -> bool:
