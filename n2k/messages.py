@@ -1236,10 +1236,10 @@ def set_n2k_battery_configuration_status(data: BatteryConfigurationStatus) -> Me
     # Original code was unsure if this is correct.
     # I am fairly certain it is as the exponent can't be better than 1 and shouldn't be worse than 1.5
     peukert_exponent = data.peukert_exponent - 1
-    if peukert_exponent < 0 or peukert_exponent > 0.504:
-        msg.add_byte_uint(0xFF)
-    else:
+    if 0 <= peukert_exponent <= 0.504:  # noqa: PLR2004
         msg.add_1_byte_udouble(peukert_exponent, 0.002, -1)
+    else:
+        msg.add_byte_uint(constants.N2K_UINT8_NA)
     msg.add_byte_uint(data.charge_efficiency_factor)
     return msg
 
@@ -1867,7 +1867,7 @@ def set_n2k_gnss_data(data: GNSSPositionData) -> Message:
     msg.add_2_byte_double(data.hdop, 0.01)
     msg.add_2_byte_double(data.pdop, 0.01)
     msg.add_4_byte_double(data.geoidal_separation, 0.01)
-    if 0 < data.n_reference_station < 0xFF:
+    if 0 < data.n_reference_station < constants.N2K_UINT8_NA:
         msg.add_byte_uint(
             1,
         )  # Note that we have values for only one reference station, so pass only one values.
@@ -2319,7 +2319,8 @@ def set_n2k_ais_aids_to_navigation_report(data: AISAtoNReportData) -> Message:
     msg.add_byte_uint(data.a_to_n_status)
     msg.add_byte_uint(0xE0 | (data.n2k_ais_transceiver_information & 0x1F))
     a_to_n_name = with_fallback(data.a_to_n_name, "")
-    if len(a_to_n_name) > 34:
+    name_max_length = 34
+    if len(a_to_n_name) > name_max_length:
         raise ValueError
     msg.add_var_str(a_to_n_name)
 
@@ -3364,7 +3365,9 @@ def set_n2k_pgn_iso_request(msg: Message, destination: int, requested_pgn: int) 
 
 
 def parse_n2k_pgn_iso_request(msg: Message) -> int | None:
-    if 3 <= msg.data_len <= 8:
+    iso_request_min_length = 3  # length as defined by ISO
+    iso_request_max_length = 8  # extra length allowed by ported library (https://github.com/ttlappalainen/NMEA2000/commit/fffc2323e4216a547b6b490a2147e8b19bb48157)
+    if iso_request_min_length <= msg.data_len <= iso_request_max_length:
         return msg.get_3_byte_uint(IntRef(0))
     return None
 

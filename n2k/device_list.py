@@ -26,7 +26,7 @@ class DeviceList(MessageHandler):
 
     def handle_msg(self, msg: Message) -> None:
         # assert that source is valid (0<=s<254), 254 = null, 255 = broadcast
-        if not 0 <= msg.source < 254:
+        if not 0 <= msg.source < constants.N2K_MAX_BUS_DEVICES:
             return
 
         # if message destination has not been added to our device list yet

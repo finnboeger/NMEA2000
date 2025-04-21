@@ -6,6 +6,12 @@ from n2k import constants
 from n2k.types import ConfigurationInformation, ProductInformation
 from n2k.utils import millis
 
+MAX_NAME_REQUESTS = 20
+MAX_PRODUCT_INFO_REQUESTS = 4
+MAX_CONFIG_INFO_REQUESTS = 4
+MAX_PGN_LIST_REQUESTS = 4
+MIN_PGN_LIST_REQUEST_INTERVAL = 1000
+
 
 class Device:
     source: int  # uint8_t
@@ -55,7 +61,7 @@ class Device:
         )
 
     def should_request_name(self) -> bool:
-        return self.dev_i.name == 0 and self.n_name_requested < 20
+        return self.dev_i.name == 0 and self.n_name_requested < MAX_NAME_REQUESTS
 
     def set_name_requested(self) -> None:
         self.n_name_requested += 1
@@ -66,7 +72,10 @@ class Device:
         self.n_prod_i_requested = 0
 
     def should_request_product_information(self) -> bool:
-        return not self.prod_i_loaded and self.n_prod_i_requested < 4
+        return (
+            not self.prod_i_loaded
+            and self.n_prod_i_requested < MAX_PRODUCT_INFO_REQUESTS
+        )
 
     def ready_for_request_product_information(self) -> bool:
         return (
@@ -86,7 +95,10 @@ class Device:
         self.n_conf_i_requested = 0
 
     def should_request_configuration_information(self) -> bool:
-        return not self.conf_i_loaded and self.n_conf_i_requested < 4
+        return (
+            not self.conf_i_loaded
+            and self.n_conf_i_requested < MAX_CONFIG_INFO_REQUESTS
+        )
 
     def ready_for_request_configuration_information(self) -> bool:
         return (
@@ -103,7 +115,7 @@ class Device:
     def should_request_pgn_list(self) -> bool:
         return (
             self.transmit_pgns is None or self.receive_pgns is None
-        ) and self.n_pgns_requested < 4
+        ) and self.n_pgns_requested < MAX_PGN_LIST_REQUESTS
 
     def set_pgn_list_requested(self) -> None:
         self.pgns_requested = millis()
@@ -112,6 +124,7 @@ class Device:
     def ready_for_request_pgn_list(self) -> bool:
         return (
             self.should_request_pgn_list()
-            and millis() - self.pgns_requested > 1000
+            and millis() - self.pgns_requested
+            > constants.N2K_DL_TIME_BETWEEN_PL_REQUEST
             and millis() - self.create_time > constants.N2K_DL_TIME_FOR_FIRST_REQUEST
         )

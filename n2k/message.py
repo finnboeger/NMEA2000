@@ -270,7 +270,9 @@ class Message:
     # https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1371-1-200108-S!!PDF-E.pdf (Page 42)
     def add_ais_str(self, v: str, length: int) -> None:
         encoded = v.upper().encode("ascii")[:length]
-        validated = [c if 32 <= c <= 95 else ord("?") for c in encoded]
+        ascii_min = 32
+        ascii_max = 95
+        validated = [c if ascii_min <= c <= ascii_max else ord("?") for c in encoded]
         for b in validated:
             self.add_byte_uint(b)
         for _b in range(length - len(validated)):

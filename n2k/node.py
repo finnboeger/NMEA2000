@@ -472,7 +472,8 @@ class Node(can.Listener):
         )
 
     def _is_fast_packet(self, msg: Message) -> bool:
-        if msg.priority >= 0x80:
+        priority_threshold = 0x7F
+        if msg.priority > priority_threshold:
             # Special handling for force to send message as single frame # TODO: force?
             return False
         return self._is_fast_packet_pgn(msg.pgn)
@@ -648,14 +649,18 @@ class Node(can.Listener):
 
     def _handle_commanded_address(self, msg: Message) -> None:
         # or not msg.tp_message
-        if msg.pgn != PGN.CommandedAddress or msg.data_len != 9:
+        command_address_msg_length = 9
+        if (
+            msg.pgn != PGN.CommandedAddress
+            or msg.data_len != command_address_msg_length
+        ):
             return
         if not is_broadcast(msg.destination) and msg.destination != self.n2k_source:
             return
         index = IntRef(0)
         commanded_name = msg.get_uint_64(index)
         new_address = msg.get_byte_uint(index)
-        if new_address >= 252:
+        if new_address > constants.N2K_MAX_CAN_BUS_ADDRESS:
             return
         if (
             self.device_information.name == commanded_name
@@ -696,7 +701,8 @@ class Node(can.Listener):
             if self.pgn_sequence_counters[i] & 0x00FFFFFF == pgn:
                 # found our counter
                 value = self.pgn_sequence_counters[i] >> 24 + 1
-                if value > 7:
+                max_sequence_count = 0b111  # 3 bits
+                if value > max_sequence_count:
                     value = 0
                 self.pgn_sequence_counters[i] = pgn | (value << 24)
                 return value
@@ -936,7 +942,10 @@ class Node(can.Listener):
         if self._is_address_claim_started() and msg.pgn != PGN.IsoAddressClaim:
             return False
 
-        if msg.data_len <= 8 and not self._is_fast_packet(msg):
+        if (
+            msg.data_len <= constants.MAX_CAN_FRAME_DATA_LEN
+            and not self._is_fast_packet(msg)
+        ):
             # Can be sent as a single packet
             result = self._send_frame(can_id, msg.data_len, msg.data)
         else:
@@ -944,8 +953,11 @@ class Node(can.Listener):
             # if msg.tp_message:  # TODO: iso multi packet support
             #     result = self.start_send_tp_message(msg)
             # else:
+            first_frame_max_data_len = 6
             frames: int = (
-                int((msg.data_len - 6 - 1) // 7) + 1 + 1 if msg.data_len > 6 else 1
+                int((msg.data_len - 6 - 1) // 7) + 1 + 1
+                if msg.data_len > first_frame_max_data_len
+                else 1
             )
             order = (
                 self._get_sequence_counter(msg.pgn) << 5
@@ -961,9 +973,9 @@ class Node(can.Listener):
                 else:
                     buf.extend(msg.data[cur : cur + 7])
                     cur += 7
-                    while len(buf) < 8:
+                    while len(buf) < constants.MAX_CAN_FRAME_DATA_LEN:
                         buf.append(0xFF)
-                result = self._send_frame(can_id, 8, buf)
+                result = self._send_frame(can_id, constants.MAX_CAN_FRAME_DATA_LEN, buf)
                 if not result:
                     break
 

@@ -284,9 +284,9 @@ def n2k_get_status_on_binary_status(
     :param item_index: Status item index 1-28
     :return: single status of full binary bank status
     """
-    item_index -= 1
-    if item_index > 27:
+    if item_index > constants.MAX_BINARY_STATUS_ENTRIES:
         return N2kOnOff.Unavailable
+    item_index -= 1
 
     return N2kOnOff((bank_status >> (2 * item_index)) & 0x03)
 
@@ -304,10 +304,10 @@ def n2k_set_status_binary_on_status(
     :param item_index: Index of Item to be changed
     :return: New Bank Status
     """
-    item_index -= 1
-    if item_index > 27:
+    if item_index > constants.MAX_BINARY_STATUS_ENTRIES:
         # TODO: log warning
         return bank_status
+    item_index -= 1
 
     mask = ~(0b11 << (2 * item_index))
 

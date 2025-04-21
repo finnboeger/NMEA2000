@@ -1,5 +1,7 @@
 # General (Node)
 #: :obj:`int`
+from typing import Final
+
 MAX_N2K_MODEL_ID_LEN: int = 32
 #: :obj:`int`
 MAX_N2K_SW_CODE_LEN: int = 32
@@ -13,9 +15,11 @@ MAX_N2K_PRODUCT_INFO_STR_LEN: int = 32
 #: :obj:`int`
 Max_N2K_CONFIGURATION_INFO_FIELD_LEN: int = 70
 
+MAX_CAN_FRAME_DATA_LEN = 8
+
 
 N2K_MESSAGE_GROUPS: int = 2
-N2K_MAX_CAN_BUS_ADDRESS: int = 251
+N2K_MAX_CAN_BUS_ADDRESS: Final = 251
 N2K_NULL_CAN_BUS_ADDRESS: int = 254
 N2K_BROADCAST_CAN_BUS_ADDRESS: int = 255
 
@@ -34,6 +38,9 @@ TP_CM_Abort = 255
 TP_CM_AbortBusy = 1
 TP_CM_AbortNoResources = 2
 TP_CM_AbortTimeout = 3
+
+
+MAX_BINARY_STATUS_ENTRIES = 28
 
 
 # Messages
@@ -78,6 +85,7 @@ N2K_DL_TIME_BETWEEN_PI_REQUEST = 1000  # Time in ms between product information 
 N2K_DL_TIME_BETWEEN_CI_REQUEST = (
     1000  # Time in ms between configuration information requests
 )
+N2K_DL_TIME_BETWEEN_PL_REQUEST = 1000  # Time in ms between PGN list requests
 
 
 # Can Message Buffer

@@ -34,8 +34,8 @@ def camel_case_to_sentence_case(camel: str) -> str:
         # convert word to lowercase unless it is an acronym
         if (
             len(word) == 1
-            or (len(word) == 2 and word[0].isupper() and not word.isupper())
-            or (len(word) >= 3 and word[0].isupper() and not word[:-1].isupper())
+            or (len(word) == 2 and word[0].isupper() and not word.isupper())  # noqa: PLR2004
+            or (len(word) >= 3 and word[0].isupper() and not word[:-1].isupper())  # noqa: PLR2004
         ):
             sentence += " " + word.lower()
         else:

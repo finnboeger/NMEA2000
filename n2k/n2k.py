@@ -1,9 +1,11 @@
 # static functions and helpers probably?
 from enum import IntEnum
 
+from n2k import constants
+
 
 def is_broadcast(source: int) -> bool:
-    return source == 0xFF
+    return source == constants.N2K_BROADCAST_CAN_BUS_ADDRESS
 
 
 def is_fast_packet_first_frame(byte: int):
@@ -375,7 +377,7 @@ def is_default_fast_packet_message(pgn: int) -> bool:
 
 
 def is_proprietary_fast_packet_message(pgn: int) -> bool:
-    return pgn == 126720 or 130816 <= pgn <= 131071
+    return pgn == 126720 or 130816 <= pgn <= 131071  # noqa: PLR2004
 
 
 def is_proprietary_message(pgn: int) -> bool:
@@ -386,5 +388,5 @@ def is_proprietary_message(pgn: int) -> bool:
     :return: Whether the message is part of the NMEA2000 spec
     """
     return (
-        is_proprietary_fast_packet_message(pgn) or pgn == 61184 or 65280 <= pgn <= 65535
+        is_proprietary_fast_packet_message(pgn) or pgn == 61184 or 65280 <= pgn <= 65535  # noqa: PLR2004
     )

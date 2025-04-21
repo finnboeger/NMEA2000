@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+PDU1_FORMAT_BYTE_MAX = 240
+
 
 @dataclass
 class MsgHeader:
@@ -21,7 +23,7 @@ def can_id_to_n2k(can_id: int) -> MsgHeader:
     src = (can_id >> 0) & 0xFF
     prio = (can_id >> 26) & 0x7
 
-    if can_id_pf < 240:
+    if can_id_pf < PDU1_FORMAT_BYTE_MAX:
         # PDU1 format, the PS contains the destination address
         dst = can_id_ps
         pgn = (can_id_dp << 16) | (can_id_pf << 8)
@@ -43,7 +45,7 @@ def n2k_id_to_can(
 
     can_id_pf = (pgn >> 8) & 0xFF
 
-    if can_id_pf < 240:
+    if can_id_pf < PDU1_FORMAT_BYTE_MAX:
         # PDU1 format
         if pgn & 0xFF != 0:
             # for PDU1 format, the lowest byte of the PGN has to be 0, to leave space for the destination
