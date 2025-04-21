@@ -947,37 +947,37 @@ class Node(can.Listener):
             and not self._is_fast_packet(msg)
         ):
             # Can be sent as a single packet
-            result = self._send_frame(can_id, msg.data_len, msg.data)
-        else:
-            # Has to be sent as fast packet in multiple frames
-            # if msg.tp_message:  # TODO: iso multi packet support
-            #     result = self.start_send_tp_message(msg)
-            # else:
-            first_frame_max_data_len = 6
-            frames: int = (
-                int((msg.data_len - 6 - 1) // 7) + 1 + 1
-                if msg.data_len > first_frame_max_data_len
-                else 1
-            )
-            order = (
-                self._get_sequence_counter(msg.pgn) << 5
-            )  # TODO: what is this good for?? gives us 3 bit for the front
-            result = True
-            cur = 0
-            for i in range(frames):
-                buf = bytearray([i | order])
-                if i == 0:
-                    buf.extend(struct.pack("<B", msg.data_len))
-                    buf.extend(msg.data[cur : cur + 6])
-                    cur += 6
-                else:
-                    buf.extend(msg.data[cur : cur + 7])
-                    cur += 7
-                    while len(buf) < constants.MAX_CAN_FRAME_DATA_LEN:
-                        buf.append(0xFF)
-                result = self._send_frame(can_id, constants.MAX_CAN_FRAME_DATA_LEN, buf)
-                if not result:
-                    break
+            return self._send_frame(can_id, msg.data_len, msg.data)
+
+        # Has to be sent as fast packet in multiple frames
+        # if msg.tp_message:  # TODO: iso multi packet support
+        #     result = self.start_send_tp_message(msg)
+        # else:
+        first_frame_max_data_len = 6
+        frames: int = (
+            int((msg.data_len - 6 - 1) // 7) + 1 + 1
+            if msg.data_len > first_frame_max_data_len
+            else 1
+        )
+        order = (
+            self._get_sequence_counter(msg.pgn) << 5
+        )  # TODO: what is this good for?? gives us 3 bit for the front
+        result = True
+        cur = 0
+        for i in range(frames):
+            buf = bytearray([i | order])
+            if i == 0:
+                buf.extend(struct.pack("<B", msg.data_len))
+                buf.extend(msg.data[cur : cur + 6])
+                cur += 6
+            else:
+                buf.extend(msg.data[cur : cur + 7])
+                cur += 7
+                while len(buf) < constants.MAX_CAN_FRAME_DATA_LEN:
+                    buf.append(0xFF)
+            result = self._send_frame(can_id, constants.MAX_CAN_FRAME_DATA_LEN, buf)
+            if result is False:
+                return result
 
         return result
 
