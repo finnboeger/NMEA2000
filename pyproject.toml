@@ -67,14 +67,15 @@ ignore = [
     "D212", # Multi-line docstring summary should be on the first line
 
     # Rules I don't agree with
-    "SIM105", # use `contextlib.suppress` instead of try/except/pass
-    "PERF401", # use list.extend(list comprehension) instead of list.append in a loop
     "D301", # Escape Sequences in Docstrings. Triggers on \n which are required to tell sphinx to add a newline
+    "PERF401", # use list.extend(list comprehension) instead of list.append in a loop
+    "SIM105", # use `contextlib.suppress` instead of try/except/pass
+
     # rules to be evaluated and fixed bit by bit
-    "E501","D101","D102","D103","ARG001","ARG002","D400","D415","FIX002",
-    "TD002","TD003","T201","ERA001","ANN204","PLR0913","ANN001","FBT001","D100","D107",
-    "ANN201","D105","ANN202","TD004","FBT002","TD005","D205",
-    "PLR0911", "PLR0912", "D104", "D401", "N815", "UP035", "F403", "C901", "B007",
+    "ANN001", "ANN201", "ANN202", "ANN204", "ARG001", "ARG002", "B007", "C901",
+    "D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205", "D400", "D401", "D415",
+    "E501", "ERA001", "F403", "FBT001", "FBT002", "FIX002", "N815",
+    "PLR0911", "PLR0912", "PLR0913", "T201", "TD002", "TD003", "TD004", "TD005", "UP035"
 ]
 
 [tool.ruff.format]
