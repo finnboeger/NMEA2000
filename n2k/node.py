@@ -91,8 +91,7 @@ class Node(can.Listener):
     transmit_messages: list[int]
     receive_messages: list[int]
 
-    max_pgn_sequence_counters: int = 0  # size_t
-    pgn_sequence_counters: list[int] | None = None  # unsigned long | array pointer?
+    pgn_sequence_counters: dict[int, int] | None = None
 
     # ISO Multi Packet Support
     # pending_tp_msg: N2kMessage
@@ -168,6 +167,8 @@ class Node(can.Listener):
 
         self.transmit_messages = []
         self.receive_messages = []
+
+        self.pgn_sequence_counters = {}
 
         self.device_information = device_information
 
@@ -693,20 +694,17 @@ class Node(can.Listener):
 
     def _get_sequence_counter(self, pgn: int):
         if self.pgn_sequence_counters is None:
-            # One sequence counter per outbound fast packet PGN plus one for undefined PGNs
-            self.max_pgn_sequence_counters = self._get_fast_packet_tx_pgn_count() + 1
-            self.pgn_sequence_counters = []
+            return 0
 
-        for i in range(len(self.pgn_sequence_counters)):
-            if self.pgn_sequence_counters[i] & 0x00FFFFFF == pgn:
-                # found our counter
-                value = self.pgn_sequence_counters[i] >> 24 + 1
-                max_sequence_count = 0b111  # 3 bits
-                if value > max_sequence_count:
-                    value = 0
-                self.pgn_sequence_counters[i] = pgn | (value << 24)
-                return value
-        self.pgn_sequence_counters.append(pgn)
+        if pgn in self.pgn_sequence_counters:
+            value = self.pgn_sequence_counters[pgn] + 1
+            max_sequence_count = 0b111  # 3 bits
+            if value > max_sequence_count:
+                value = 0
+            self.pgn_sequence_counters[pgn] = value
+            return value
+
+        self.pgn_sequence_counters[pgn] = 0
         return 0
 
     def _get_fast_packet_tx_pgn_count(self) -> int:
