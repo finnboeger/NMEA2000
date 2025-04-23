@@ -13,6 +13,16 @@ def millis() -> int:
 
 
 class IntRef:
+    """
+    A reference to an integer value.
+
+    This class is useful for creating a mutable integer object
+    that can be passed around and modified in place.
+
+    Implements basic arithmetic operations to allow for easy
+    manipulation of the integer value.
+    """
+
     value: int
 
     def __init__(self, value: int = 0):
@@ -278,9 +288,9 @@ def n2k_get_status_on_binary_status(
     item_index: int = 1,
 ) -> N2kOnOff:
     """
-    Get single status of full binary bank status returned by :py:func:`parse_n2k_binary_status`.
+    Get single status of full binary bank status returned by :py:func:`n2k.messages.parse_n2k_binary_status_report`.
 
-    :param bank_status: Full bank status read by :py:func:`parse_n2k_binary_status`
+    :param bank_status: Full bank status read by :py:func:`n2k.messages.parse_n2k_binary_status_report`
     :param item_index: Status item index 1-28
     :return: single status of full binary bank status
     """

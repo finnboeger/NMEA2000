@@ -22,6 +22,7 @@ Welcome to NMEA2000's documentation!
    n2k
    nmea2000_std_types
    types
+   utils
 
 
 
