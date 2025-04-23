@@ -15,9 +15,21 @@ if TYPE_CHECKING:
 # System Date/Time (PGN 126992)
 @dataclass
 class SystemTime:
+    """
+    Data for System Date/Time Message (PGN 126992)
+
+    System Time is in UTC.
+    """
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
     sid: int
+    #: Days since 1970-01-01
     system_date: int
+    # TODO: check if seconds since midnight is UTC or timezone specific
+    #: Seconds since midnight
     system_time: float
+    #: Time source, see :py:class:`n2k.types.N2kTimeSource`
     time_source: types.N2kTimeSource
 
 
@@ -25,14 +37,9 @@ def set_n2k_system_time(
     data: SystemTime,
 ) -> Message:
     """
-    Generate NMEA2000 message containing specified System Date/Time (PGN 126992). System Time is in UTC.
-    # TODO: check if seconds since midnight is UTC or timezone specific
+    Generate NMEA2000 message containing specified System Date/Time (PGN 126992).
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param system_date: Days since 1970-01-01
-    :param system_time: seconds since midnight
-    :param time_source: Time source, see :py:class:`n2k_types.N2kTimeSource`
+    :param data: See :py:class:`SystemTime`
     :return: NMEA2000 message ready to be sent.
     """
     msg = Message()
@@ -47,10 +54,10 @@ def set_n2k_system_time(
 
 def parse_n2k_system_time(msg: Message) -> SystemTime:
     """
-    Parse current system time from a PGN 126992 message
+    Parse System Time information from a PGN 126992 message.
 
     :param msg: NMEA2000 Message with PGN 126992
-    :return: Dictionary containing the parsed information.
+    :return: Object containing the parsed information.
     """
     index = IntRef(0)
     return SystemTime(
@@ -64,10 +71,19 @@ def parse_n2k_system_time(msg: Message) -> SystemTime:
 # AIS Safety Related Broadcast Message (PGN 129802)
 @dataclass
 class AISSafetyRelatedBroadcast:
+    """Data for AIS Safety Related Broadcast Message (PGN 129802)"""
+
+    #: Message Type. Identifier for AIS Safety Related Broadcast Message aka Message 14; always 14.
     message_id: int
+    #: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
+    #:
+    #: 0-3; 0 = default; 3 = do not repeat anymore
     repeat: types.N2kAISRepeat
+    #: MMSI number of source station of message
     source_id: int
+    #: see :py:class:`n2k.types.N2kAISTransceiverInformation`
     ais_transceiver_information: types.N2kAISTransceiverInformation
+    #: Maximum 121 bytes. Encoded as 6-bit ASCII (see ITU-R M.1371-1)
     safety_related_text: str | None
 
 
@@ -77,12 +93,7 @@ def set_n2k_ais_related_broadcast_msg(
     """
     Generate NMEA2000 message containing AIS Safety Related Broadcast Message. (PGN 129802)
 
-    :param message_id: Message Type. Identifier for AIS Safety Related Broadcast Message aka Message 14; always 14.
-    :param repeat: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
-        0-3; 0 = default; 3 = do not repeat anymore
-    :param source_id: MMSI number of source station of message
-    :param ais_transceiver_information: see :py:class:`n2k_types.N2kAISTransceiverInformation`
-    :param safety_related_text: Maximum 121 bytes. Encoded as 6-bit ASCII
+    :param data: See :py:class:`AISSafetyRelatedBroadcast`
     :return: NMEA2000 message ready to be sent.
     """
     msg = Message()
@@ -97,10 +108,10 @@ def set_n2k_ais_related_broadcast_msg(
 
 def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadcast:
     """
-    Parse current system time from a PGN 126992 message
+    Parse AIS Safety Related Broadcast Message from a PGN 129802 message
 
-    :param msg: NMEA2000 Message with PGN 126992
-    :return: Dictionary containing the parsed information.
+    :param msg: NMEA2000 Message with PGN 129802
+    :return: Object containing the parsed information.
     """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
@@ -119,19 +130,36 @@ def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadca
 # Man Overboard Notification (PGN 127233)
 @dataclass
 class MOBNotification:
+    """Data for Man Overboard Notification Message (PGN 127233)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
     sid: int
+    #: Identifier for each MOB emitter, unique to the vessel
     mob_emitter_id: int
+    #: MOB Status, see :py:class:`n2k.types.N2kMOBStatus`
     mob_status: types.N2kMOBStatus
+    #: Time of day (UTC) in seconds when MOB was initially activated
     activation_time: float
+    #: Position Source, see :py:class:`n2k.types.N2kMOBPositionSource`
     position_source: types.N2kMOBPositionSource
+    #: Date of MOB position in days since 1970-01-01 (UTC)
     position_date: int
+    #: Time of day of MOB position (UTC) in seconds
     position_time: float
+    #: Latitude in degrees
     latitude: float
+    #: Longitude in degrees
     longitude: float
+    #: True or Magnetic
     cog_reference: types.N2kHeadingReference
+    #: Course Over Ground in radians with a resolution of 1x10E-4 rad
     cog: float
+    #: Speed Over Ground in m/s with a resolution of 1x10E-2 m/s
     sog: float
+    #: MMSI of vessel of Origin. Can be set to `n2k.constants.N2K_INT32_NA` if unknown
     mmsi: int
+    #: see :py:class:`n2k.types.N2kMOBEmitterBatteryStatus`
     mob_emitter_battery_status: types.N2kMOBEmitterBatteryStatus
 
 
@@ -139,21 +167,7 @@ def set_n2k_mob_notification(data: MOBNotification) -> Message:
     """
     Generate NMEA2000 message containing Man Overboard Notification (PGN 127233)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        for different messages to indicate that they are measured at same time.
-    :param mob_emitter_id: Identifier for each MOB emitter, unique to the vessel
-    :param mob_status: MOB Status, see :py:class:`n2k_types.N2kMOBStatus`
-    :param activation_time: Time of day (UTC) in seconds when MOB was initially activated
-    :param position_source: Position Source, see :py:class:`n2k_types.N2kMOBPositionSource`
-    :param position_date: Date of MOB position in days since 1970-01-01 (UTC)
-    :param position_time: Time of day of MOB position (UTC) in seconds
-    :param latitude: Latitude in degrees
-    :param longitude: Longitude in degrees
-    :param cog_reference: True or Magnetic
-    :param cog: Course Over Ground in radians with a resolution of 1x10E-4 rad
-    :param sog: Speed Over Ground in m/s with a resolution of 1x10E-2 m/s
-    :param mmsi: MMSI of vessel of Origin. Can be set to 2,147,483,647 if unknown
-    :param mob_emitter_battery_status: see :py:class:`n2k_types.N2kMOBEmitterBatteryStatus`
+    :param data: See :py:class:`MOBNotification`
     :return: NMEA2000 message ready to be sent.
     """
     msg = Message()
@@ -181,7 +195,7 @@ def parse_n2k_mob_notification(msg: Message) -> MOBNotification:
     Parse Man Over Board Notification from a PGN 127233 message
 
     :param msg: NMEA2000 Message with PGN 127233
-    :return: Dictionary containing the parsed information.
+    :return: Object containing the parsed information.
     """
     index = IntRef(0)
 
@@ -208,22 +222,41 @@ def parse_n2k_mob_notification(msg: Message) -> MOBNotification:
 # Heading/Track Control (PGN 127237)
 @dataclass
 class HeadingTrackControl:
+    """Data for Heading/Track Control Message (PGN 127237)"""
+
+    #: Yes/No
     rudder_limit_exceeded: types.N2kOnOff
+    #: Yes/No
     off_heading_limit_exceeded: types.N2kOnOff
+    #: Yes/No
     off_track_limit_exceeded: types.N2kOnOff
+    #: Yes/No
     override: types.N2kOnOff
+    #: Steering Mode
     steering_mode: types.N2kSteeringMode
+    #: Turn Mode
     turn_mode: types.N2kTurnMode
+    #: True or Magnetic
     heading_reference: types.N2kHeadingReference
+    #: Port or Starboard
     commanded_rudder_direction: types.N2kRudderDirectionOrder
+    #: In radians
     commanded_rudder_angle: float
+    #: In radians
     heading_to_steer_course: float
+    #: In radians
     track: float
+    #: In radians
     rudder_limit: float
+    #: In radians
     off_heading_limit: float
+    #: In meters
     radius_of_turn_order: float
+    #: In radians/s
     rate_of_turn_order: float
+    #: In meters
     off_track_limit: float
+    #: In radians
     vessel_heading: float
 
 
@@ -231,25 +264,9 @@ def set_n2k_heading_track_control(
     data: HeadingTrackControl,
 ) -> Message:
     """
-    Generate NMEA2000 message containing Heading/Track Control information (PGN 127233)
+    Generate NMEA2000 message containing Heading/Track Control information (PGN 127237)
 
-    :param rudder_limit_exceeded: Yes/No
-    :param off_heading_limit_exceeded: Yes/No
-    :param off_track_limit_exceeded: Yes/No
-    :param override: Yes/No
-    :param steering_mode: Steering Mode
-    :param turn_mode: Turn Mode
-    :param heading_reference: True or Magnetic
-    :param commanded_rudder_direction: Port or Starboard
-    :param commanded_rudder_angle: In radians
-    :param heading_to_steer_course: In radians
-    :param track: In radians
-    :param rudder_limit: In radians
-    :param off_heading_limit: In radians
-    :param radius_of_turn_order: In meters
-    :param rate_of_turn_order: In radians/s
-    :param off_track_limit: In meters
-    :param vessel_heading: In radians
+    :param data: See :py:class:`HeadingTrackControl`
     :return: NMEA2000 message ready to be sent.
     """
     msg = Message()
@@ -284,7 +301,7 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
     Parse heading/track control information from a PGN 127237 message
 
     :param msg: NMEA2000 Message with PGN 127237
-    :return: Dictionary containing the parsed information.
+    :return: Object containing the parsed information.
     """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
@@ -322,9 +339,15 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
 # Rudder (PGN 127245)
 @dataclass
 class Rudder:
+    """Data for Rudder Message (PGN 127245)"""
+
+    #: Current rudder position in radians.
     rudder_position: float
+    #: Rudder instance.
     instance: int
+    #: Direction, where rudder should be turned.
     rudder_direction_order: types.N2kRudderDirectionOrder
+    #: Angle where rudder should be turned in radians.
     angle_order: float
 
 
@@ -332,12 +355,9 @@ def set_n2k_rudder(
     data: Rudder,
 ) -> Message:
     """
-    Rudder
+    Generate NMEA2000 message containing Rudder information (PGN 127245)
 
-    :param rudder_position: Current rudder position in radians.
-    :param instance: Rudder instance.
-    :param rudder_direction_order: Direction, where rudder should be turned.
-    :param angle_order: Angle where rudder should be turned in radians.
+    :param data: See :py:class:`Rudder`
     :return: NMEA2000 Message ready to be sent.
     """
     msg = Message()
@@ -357,7 +377,7 @@ def parse_n2k_rudder(msg: Message) -> Rudder:
     Parse rudder control information from a PGN 127245 message
 
     :param msg: NMEA2000 Message with PGN 127245
-    :return: Dictionary containing the parsed information
+    :return: Object containing the parsed information
     """
     index = IntRef(0)
     return Rudder(
@@ -373,10 +393,18 @@ def parse_n2k_rudder(msg: Message) -> Rudder:
 # Vessel Heading (PGN 127250)
 @dataclass
 class Heading:
+    """Data for Vessel Heading Message (PGN 127250)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
     sid: int
+    #: Heading in radians
     heading: float
+    #: Magnetic deviation in radians. Use `N2K_DOUBLE_NA` for undefined value.
     deviation: float
+    #: Magnetic variation in radians. Use `N2K_DOUBLE_NA` for undefined value.
     variation: float
+    #: Heading reference. Can be true or magnetic.
     ref: types.N2kHeadingReference
 
 
@@ -385,15 +413,11 @@ def set_n2k_heading(
 ) -> Message:
     """
     Vessel Heading (PGN 127250).
-    If the true heading is used, leave the deviation and variation undefined. Else if the magnetic heading is sent,
+
+    If the true heading is used, leave the deviation and variation undefined. Else, if the magnetic heading is sent,
     specify the magnetic deviation and variation.
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        for different messages to indicate that they are measured at same time.
-    :param heading: Heading in radians
-    :param deviation: Magnetic deviation in radians. Use `N2K_DOUBLE_NA` for undefined value.
-    :param variation: Magnetic variation in radians. Use `N2K_DOUBLE_NA` for undefined value.
-    :param ref: Heading reference. Can be true or magnetic.
+    :param data: See :py:class:`Heading`
     :return: NMEA2000 message ready to be sent.
     """
     msg = Message()
@@ -412,7 +436,7 @@ def parse_n2k_heading(msg: Message) -> Heading:
     Parse heading information from a PGN 127250 message
 
     :param msg: NMEA2000 Message with PGN 127250
-    :return: Dictionary containing the parsed information
+    :return: Object containing the parsed information
     """
     index = IntRef(0)
 
@@ -428,7 +452,12 @@ def parse_n2k_heading(msg: Message) -> Heading:
 # Rate of Turn (PGN 127251)
 @dataclass
 class RateOfTurn:
+    """Data for Rate of Turn Message (PGN 127251)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
     sid: int
+    #: Rate of turn in radians per second
     rate_of_turn: float
 
 
@@ -436,9 +465,7 @@ def set_n2k_rate_of_turn(data: RateOfTurn) -> Message:
     """
     Rate of Turn (PGN 127251)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        for different messages to indicate that they are measured at same time.
-    :param rate_of_turn: Rate of turn in radians per second
+    :param data: See :py:class:`RateOfTurn`
     :return:
     """
     msg = Message()
@@ -452,6 +479,12 @@ def set_n2k_rate_of_turn(data: RateOfTurn) -> Message:
 
 
 def parse_n2k_rate_of_turn(msg: Message) -> RateOfTurn:
+    """
+    Parse rate of turn information from a PGN 127251 message
+
+    :param msg: NMEA2000 Message with PGN 127251
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return RateOfTurn(
         sid=msg.get_byte_uint(index),
@@ -462,9 +495,16 @@ def parse_n2k_rate_of_turn(msg: Message) -> RateOfTurn:
 # Heave (PGN 127252)
 @dataclass
 class Heave:
+    """Data for Heave Message (PGN 127252)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Vertical displacement perpendicular to the earth's surface in meters
     heave: float
+    #: Delay added by calculations in seconds
     delay: float
+    #: Delay Source, see type
     delay_source: types.N2kDelaySource
 
 
@@ -474,11 +514,7 @@ def set_n2k_heave(
     """
     Heave (PGN 127252)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param heave: Vertical displacement perpendicular to the earth's surface in meters
-    :param delay: Delay added by calculations in seconds
-    :param delay_source: Delay Source, see type
+    :param data: See :py:class:`Heave`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -494,6 +530,12 @@ def set_n2k_heave(
 
 
 def parse_n2k_heave(msg: Message) -> Heave:
+    """
+    Parse heave information from a PGN 127252 message
+
+    :param msg: NMEA2000 Message with PGN 127252
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return Heave(
         sid=msg.get_byte_uint(index),
@@ -506,9 +548,16 @@ def parse_n2k_heave(msg: Message) -> Heave:
 # Attitude (PGN 127257)
 @dataclass
 class Attitude:
+    """Data for Attitude Message (PGN 127257)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
     sid: int
+    #: Heading in radians
     yaw: float
+    #: Pitch in radians. Positive, when your bow rises.
     pitch: float
+    #: Roll in radians. Positive, when tilted right.
     roll: float
 
 
@@ -516,11 +565,7 @@ def set_n2k_attitude(data: Attitude) -> Message:
     """
     Attitude (PGN 127257)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        for different messages to indicate that they are measured at same time.
-    :param yaw: Heading in radians.
-    :param pitch: Pitch in radians. Positive, when your bow rises.
-    :param roll: Roll in radians. Positive, when tilted right.
+    :param data: See :py:class:`Attitude`
     :return: NMEA2000 message ready to be sent
     """
     msg = Message()
@@ -535,6 +580,12 @@ def set_n2k_attitude(data: Attitude) -> Message:
 
 
 def parse_n2k_attitude(msg: Message) -> Attitude:
+    """
+    Parse attitude information from a PGN 127257 message
+
+    :param msg: NMEA2000 Message with PGN 127257
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return Attitude(
         sid=msg.get_byte_uint(index),
@@ -547,9 +598,16 @@ def parse_n2k_attitude(msg: Message) -> Attitude:
 # Magnetic Variation (PGN 127258)
 @dataclass
 class MagneticVariation:
+    """Data for Magnetic Variation Message (PGN 127258)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
     sid: int
+    #: How the magnetic variation for the current location has been derived
     source: types.N2kMagneticVariation
+    #: UTC Date in Days since 1970
     days_since_1970: int
+    #: Variation in radians, positive values represent Easterly, negative values a Westerly variation.
     variation: float
 
 
@@ -557,11 +615,7 @@ def set_n2k_magnetic_variation(data: MagneticVariation) -> Message:
     """
     Magnetic Variation (PGN 127258)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        for different messages to indicate that they are measured at same time.
-    :param source: How the magnetic variation for the current location has been derived
-    :param days_since_1970: UTC Date in Days since 1970
-    :param variation: Variation in radians, positive values represent Easterly, negative values a Westerly variation.
+    :param data: See :py:class:`MagneticVariation`
     :return: NMEA2000 message ready to be sent
     """
     msg = Message()
@@ -576,6 +630,12 @@ def set_n2k_magnetic_variation(data: MagneticVariation) -> Message:
 
 
 def parse_n2k_magnetic_variation(msg: Message) -> MagneticVariation:
+    """
+    Parse magnetic variation information from a PGN 127258 message
+
+    :param msg: NMEA2000 Message with PGN 127258
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return MagneticVariation(
         sid=msg.get_byte_uint(index),
@@ -588,9 +648,20 @@ def parse_n2k_magnetic_variation(msg: Message) -> MagneticVariation:
 # Engine Parameters Rapid (PGN 127488)
 @dataclass
 class EngineParametersRapid:
+    """Data for Engine Parameters Rapid Message (PGN 127488)"""
+
+    #: This field indicates the particular engine for which this data applies.
+    #: A single engine will have an instance of 0.
+    #: Engines in multi-engine boats will be numbered starting at 0 at the bow
+    #: of the boat, incrementing to n going towards the stern of the boat.
+    #: For engines at the same distance from the bow and the stern, the engines are
+    #: numbered starting from the port side and proceeding towards the starboard side.
     engine_instance: int
+    #: Rotational speed in RPM, stored at a precision of ¼ RPM
     engine_speed: float
+    #: Turbocharger boost pressure in Pascal, stored at a precision of 100 Pa
     engine_boost_pressure: float
+    #: Engine tilt or trim (positive or negative) in percent, stored as an integer.
     engine_tilt_trim: int
 
 
@@ -598,15 +669,7 @@ def set_n2k_engine_parameters_rapid(data: EngineParametersRapid) -> Message:
     """
     Engine Parameters Rapid (PGN 127488)
 
-    :param engine_instance: This field indicates the particular engine for which this
-        data applies. A single engine will have an instance of 0. Engines in multi-engine
-        boats will be numbered starting at 0 at the bow of the boat incrementing to n going
-        in towards the stern of the boat. For engines at the same distance from the bow are
-        stern, the engines are numbered starting from the port side and proceeding towards
-        the starboard side.
-    :param engine_speed: Rotational speed in RPM, stored at a precision of ¼ RPM
-    :param engine_boost_pressure: Turbocharger boost pressure in Pascal, stored at a precision of 100 Pa
-    :param engine_tilt_trim: Engine tilt or trim (positive or negative) in percent, stored as an integer.
+    :param data: See :py:class:`EngineParametersRapid`
     :return: NMEA2000 message ready to be sent
     """
     msg = Message()
@@ -624,6 +687,12 @@ def set_n2k_engine_parameters_rapid(data: EngineParametersRapid) -> Message:
 
 
 def parse_n2k_engine_parameters_rapid(msg: Message) -> EngineParametersRapid:
+    """
+    Parse engine parameters rapid information from a PGN 127488 message
+
+    :param msg: NMEA2000 Message with PGN 127488
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return EngineParametersRapid(
         engine_instance=msg.get_byte_uint(index),
@@ -636,18 +705,38 @@ def parse_n2k_engine_parameters_rapid(msg: Message) -> EngineParametersRapid:
 # Engine Parameters Dynamic (PGN 127489)
 @dataclass
 class EngineParametersDynamic:
+    """Data for Engine Parameters Dynamic Message (PGN 127489)"""
+
+    #: This field indicates the particular engine for which this data applies.
+    #: A single engine will have an instance of 0.
+    #: Engines in multi-engine boats will be numbered starting at 0 at the bow
+    #: of the boat, incrementing to n going towards the stern of the boat.
+    #: For engines at the same distance from the bow and the stern, the engines are
+    #: numbered starting from the port side and proceeding towards the starboard side.
     engine_instance: int
+    #: Oil pressure of the engine in Pascal, precision 100Pa
     engine_oil_press: float
+    #: Oil temperature of the engine in degrees Kelvin, precision 0.1°K
     engine_oil_temp: float
+    #: Engine coolant temperature in degrees Kelvin, precision 0.1°K
     engine_coolant_temp: float
+    #: Alternator voltage in Volt, precision 0.01V
     alternator_voltage: float
+    #: Fuel consumption rate in cubic meters per hour, precision 0.0001 m³/h
     fuel_rate: float
+    #: Cumulative runtime of the engine in seconds
     engine_hours: float
+    #: Engine coolant pressure in Pascal, precision 100 Pa
     engine_coolant_press: float
+    #: Fuel pressure in Pascal, precision 1000 Pa
     engine_fuel_press: float
+    #: Percent engine load, precision 1%
     engine_load: int
+    #: Percent engine torque, precision 1%
     engine_torque: int
+    #: Warning conditions part 1
     status1: types.N2kEngineDiscreteStatus1
+    #: Warning conditions part 2
     status2: types.N2kEngineDiscreteStatus2
 
 
@@ -655,24 +744,7 @@ def set_n2k_engine_parameters_dynamic(data: EngineParametersDynamic) -> Message:
     """
     Engine Parameters Dynamic (PGN 127489)
 
-    :param engine_instance: This field indicates the particular engine for which this
-        data applies. A single engine will have an instance of 0. Engines in multi-engine
-        boats will be numbered starting at 0 at the bow of the boat incrementing to n going
-        in towards the stern of the boat. For engines at the same distance from the bow are
-        stern, the engines are numbered starting from the port side and proceeding towards
-        the starboard side.
-    :param engine_oil_press: Oil pressure of the engine in Pascal, precision 100Pa
-    :param engine_oil_temp: Oil temperature of the engine in degrees Kelvin, precision 0.1°K
-    :param engine_coolant_temp: Engine coolant temperature in degrees Kelvin, precision 0.1°K
-    :param alternator_voltage: Alternator voltage in Volt, precision 0.01V
-    :param fuel_rate: Fuel consumption rate in cubic meters per hour, precision 0.0001 m³/h
-    :param engine_hours: Cumulative runtime of the engine in seconds
-    :param engine_coolant_press: Engine coolant pressure in Pascal, precision 100 Pa
-    :param engine_fuel_press: Fuel pressure in Pascal, precision 1000 Pa
-    :param engine_load: Percent engine load, precision 1%
-    :param engine_torque: Percent engine torque, precision 1%
-    :param status1: Warning conditions part 1
-    :param status2: Warning conditions part 2
+    :param data: See :py:class:`EngineParametersDynamic`
     :return:
     """
     msg = Message()
@@ -696,6 +768,12 @@ def set_n2k_engine_parameters_dynamic(data: EngineParametersDynamic) -> Message:
 
 
 def parse_n2k_engine_parameters_dynamic(msg: Message) -> EngineParametersDynamic:
+    """
+    Parse engine parameters dynamic information from a PGN 127489 message
+
+    :param msg: NMEA2000 Message with PGN 127489
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     engine_instance = msg.get_byte_uint(index)
@@ -734,10 +812,22 @@ def parse_n2k_engine_parameters_dynamic(msg: Message) -> EngineParametersDynamic
 # Transmission parameters, dynamic (PGN 127493)
 @dataclass
 class TransmissionParametersDynamic:
+    """Data for Transmission Parameters Dynamic Message (PGN 127493)"""
+
+    #: This field indicates the particular engine for which this data applies.
+    #: A single engine will have an instance of 0.
+    #: Engines in multi-engine boats will be numbered starting at 0 at the bow
+    #: of the boat, incrementing to n going towards the stern of the boat.
+    #: For engines at the same distance from the bow and the stern, the engines are
+    #: numbered starting from the port side and proceeding towards the starboard side.
     engine_instance: int
+    #: The current gear the transmission is in
     transmission_gear: types.N2kTransmissionGear
+    #: Transmission oil pressure in Pascal, precision 100 Pa
     oil_pressure: float
+    #: Transmission oil temperature in degrees Kelvin, precision 0.1°K
     oil_temperature: float
+    #: Transmission warning conditions.
     discrete_status1: types.N2kTransmissionDiscreteStatus1
 
 
@@ -747,16 +837,7 @@ def set_n2k_transmission_parameters_dynamic(
     """
     Transmission Parameters, Dynamic (PGN 127493)
 
-    :param engine_instance: This field indicates the particular engine for which this
-        data applies. A single engine will have an instance of 0. Engines in multi-engine
-        boats will be numbered starting at 0 at the bow of the boat incrementing to n going
-        in towards the stern of the boat. For engines at the same distance from the bow are
-        stern, the engines are numbered starting from the port side and proceeding towards
-        the starboard side.
-    :param transmission_gear: The current gear the transmission is in
-    :param oil_pressure: Transmission oil pressure in Pascal, precision 100 Pa
-    :param oil_temperature: Transmission oil temperature in degrees Kelvin, precision 0.1°K
-    :param discrete_status1: Transmission warning conditions.
+    :param data: See :py:class:`TransmissionParametersDynamic`
     :return:
     """
     msg = Message()
@@ -774,6 +855,12 @@ def set_n2k_transmission_parameters_dynamic(
 def parse_n2k_transmission_parameters_dynamic(
     msg: Message,
 ) -> TransmissionParametersDynamic:
+    """
+    Parse transmission parameters dynamic information from a PGN 127493 message
+
+    :param msg: NMEA2000 Message with PGN 127493
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return TransmissionParametersDynamic(
         engine_instance=msg.get_byte_uint(index),
@@ -789,10 +876,22 @@ def parse_n2k_transmission_parameters_dynamic(
 # Trip Parameters, Engine (PGN 127497)
 @dataclass
 class TripFuelConsumptionEngine:
+    """Data for Trip Fuel Consumption by Engine Message (PGN 127497)"""
+
+    #: This field indicates the particular engine for which this data applies.
+    #: A single engine will have an instance of 0.
+    #: Engines in multi-engine boats will be numbered starting at 0 at the bow
+    #: of the boat, incrementing to n going towards the stern of the boat.
+    #: For engines at the same distance from the bow and the stern, the engines are
+    #: numbered starting from the port side and proceeding towards the starboard side.
     engine_instance: int
+    #: Fuel used by this engine during the trip in Litres, precision 1L
     trip_fuel_used: float
+    #: Fuel used on average by this engine in Litres per hour, precision 0.1L/h
     fuel_rate_average: float
+    #: Unknown? Litres per hour, precision 0.1L/h
     fuel_rate_economy: float
+    #: Fuel used at this moment by this engine in Litres per hour, precision 0.1L/h
     instantaneous_fuel_economy: float
 
 
@@ -800,16 +899,7 @@ def set_n2k_trip_parameters_engine(data: TripFuelConsumptionEngine) -> Message:
     """
     Trip Fuel Consumption by Engine (PGN 127497)
 
-    :param engine_instance: This field indicates the particular engine for which this
-        data applies. A single engine will have an instance of 0. Engines in multi-engine
-        boats will be numbered starting at 0 at the bow of the boat incrementing to n going
-        in towards the stern of the boat. For engines at the same distance from the bow are
-        stern, the engines are numbered starting from the port side and proceeding towards
-        the starboard side.
-    :param trip_fuel_used: Fuel used by this engine during the trip in Litres, precision 1L
-    :param fuel_rate_average: Fuel used on average by this engine in Litres per hour, precision 0.1L/h
-    :param fuel_rate_economy: in Litres per hour, precision 0.1L/h
-    :param instantaneous_fuel_economy: in Litres per hour, precision 0.1L/h
+    :param data: See :py:class:`TripFuelConsumptionEngine`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -824,6 +914,12 @@ def set_n2k_trip_parameters_engine(data: TripFuelConsumptionEngine) -> Message:
 
 
 def parse_n2k_trip_parameters_engine(msg: Message) -> TripFuelConsumptionEngine:
+    """
+    Parse trip fuel consumption by engine information from a PGN 127497 message
+
+    :param msg: NMEA2000 Message with PGN 127497
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return TripFuelConsumptionEngine(
         engine_instance=msg.get_byte_uint(index),
@@ -837,7 +933,11 @@ def parse_n2k_trip_parameters_engine(msg: Message) -> TripFuelConsumptionEngine:
 # Binary status report (PGN 127501)
 @dataclass
 class BinaryStatusReport:
+    """Data for Binary Status Report Message (PGN 127501)"""
+
+    #: Device or Bank Instance. This is the instance number of the device that is being reported on.
     device_bank_instance: int
+    #: Full bank status. Read single status by using :py:func:`n2k.utils.n2k_get_status_on_binary_status`
     bank_status: types.N2kBinaryStatus
 
 
@@ -845,8 +945,7 @@ def set_n2k_binary_status_report(data: BinaryStatusReport) -> Message:
     """
     Binary Status Report (PGN 127501)
 
-    :param device_bank_instance: Device or Bank Instance
-    :param bank_status: Full bank status. Read single status by using :py:func:`n2k_get_status_on_binary_status`
+    :param data: See :py:class:`BinaryStatusReport`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -857,6 +956,12 @@ def set_n2k_binary_status_report(data: BinaryStatusReport) -> Message:
 
 
 def parse_n2k_binary_status_report(msg: Message) -> BinaryStatusReport:
+    """
+    Parse binary status report information from a PGN 127501 message
+
+    :param msg: NMEA2000 Message with PGN 127501
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     vb = msg.get_uint_64(index)
     return BinaryStatusReport(
@@ -868,7 +973,13 @@ def parse_n2k_binary_status_report(msg: Message) -> BinaryStatusReport:
 # Switch Bank Control (PGN 127502)
 @dataclass
 class SwitchBankControl:
+    """Data for Switch Bank Control Message (PGN 127502)"""
+
+    #: Instance number of the switch bank that was targeted by this switch bank control message.
     target_bank_instance: int
+    #: The binary status component of the switch bank control containing the commanded state of channels on the target switch bank
+    #:
+    #: Use :py:func:`n2k.utils.n2k_get_status_on_binary_status` to get single status
     bank_status: types.N2kBinaryStatus
 
 
@@ -885,14 +996,13 @@ def set_n2k_switch_bank_control(
     When you create a tN2kBinaryStatus object for use with this function you should ensure that you only command (that is set ON or OFF) those channels which you intend to operate.
     Channels in which you have no interest should not be commanded but set not available.
 
-    Review :py:func:`n2k_reset_binary_status`, :py:func:`n2k_set_status_binary_on_status` and the documentation of :py:class:`N2kOnOff` for information on how to set up bank status.
+    Review :py:func:`n2k.utils.n2k_reset_binary_status`, :py:func:`n2k.utils.n2k_set_status_binary_on_status` and the documentation of :py:class:`n2k.types.N2kOnOff` for information on how to set up bank status.
 
     Remember as well, that transmission of a PGN 127502 message is equivalent to issuing a command, so do not send the same message repeatedly: once should be enough.
     You can always check that the target switch bank has responded by checking its PGN 127501 broadcasts.
 
-    :param target_bank_instance: Instance number of the switch bank that was targeted by this switch bank control message.
-    :param bank_status: The binary status component of the switch bank control containing the commanded state of channels on the target switch bank\n
-        Use :py:func:`n2k_get_status_on_binary_status` to get single status
+    :param data: See :py:class:`SwitchBankControl`
+    :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
     msg.pgn = PGN.SwitchBankControl
@@ -902,6 +1012,12 @@ def set_n2k_switch_bank_control(
 
 
 def parse_n2k_switch_bank_control(msg: Message) -> SwitchBankControl:
+    """
+    Parse switch bank control information from a PGN 127502 message
+
+    :param msg: NMEA2000 Message with PGN 127502
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     vb = msg.get_uint_64(index)
     return SwitchBankControl(
@@ -913,9 +1029,15 @@ def parse_n2k_switch_bank_control(msg: Message) -> SwitchBankControl:
 # Fluid level (PGN 127505)
 @dataclass
 class FluidLevel:
+    """Data for Fluid Level Message (PGN 127505)"""
+
+    #: Tank instance. Different devices handles this a bit differently.
     instance: int
+    #: Type of fluid.
     fluid_type: types.N2kFluidType
+    #: Tank level in % of full tank, precision 0.004%
     level: float
+    #: Tank capacity in litres, precision 0.1L
     capacity: float
 
 
@@ -923,10 +1045,7 @@ def set_n2k_fluid_level(data: FluidLevel) -> Message:
     """
     Fluid Level (PGN 127505)
 
-    :param instance: Tank instance. Different devices handles this a bit differently.
-    :param fluid_type: Type of fluid.
-    :param level: Tank level in % of full tank, precision 0.004%
-    :param capacity: Tank capacity in litres, precision 0.1L
+    :param data: See :py:class:`FluidLevel`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -939,6 +1058,12 @@ def set_n2k_fluid_level(data: FluidLevel) -> Message:
 
 
 def parse_n2k_fluid_level(msg: Message) -> FluidLevel:
+    """
+    Parse fluid level information from a PGN 127505 message
+
+    :param msg: NMEA2000 Message with PGN 127505
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
 
@@ -953,13 +1078,24 @@ def parse_n2k_fluid_level(msg: Message) -> FluidLevel:
 # DC Detailed Status (PGN 127506)
 @dataclass
 class DCDetailedStatus:
+    """Data for DC Detailed Status Message (PGN 127506)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: DC Source Instance
     dc_instance: int
+    #: Type of DC Source
     dc_type: types.N2kDCType
+    #: Percent of charge
     state_of_charge: int
+    #: Percent of health
     state_of_health: int
+    #: Time remaining in seconds
     time_remaining: float
+    #: DC output voltage ripple in Volt
     ripple_voltage: float
+    #: Battery capacity in coulombs
     capacity: float
 
 
@@ -967,15 +1103,7 @@ def set_n2k_dc_detailed_status(data: DCDetailedStatus) -> Message:
     """
     DC Detailed Status (PGN 127506)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param dc_instance: DC Source Instance
-    :param dc_type: Type of DC Source
-    :param state_of_charge: Percent of charge
-    :param state_of_health: Percent of health
-    :param time_remaining: Time remaining in seconds
-    :param ripple_voltage: DC output voltage ripple in Volt
-    :param capacity: Battery capacity in coulombs
+    :param data: See :py:class:`DCDetailedStatus`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -993,6 +1121,12 @@ def set_n2k_dc_detailed_status(data: DCDetailedStatus) -> Message:
 
 
 def parse_n2k_dc_detailed_status(msg: Message) -> DCDetailedStatus:
+    """
+    Parse DC Detailed Status information from a PGN 127506 message
+
+    :param msg: NMEA2000 Message with PGN 127506
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return DCDetailedStatus(
         sid=msg.get_byte_uint(index),
@@ -1009,12 +1143,21 @@ def parse_n2k_dc_detailed_status(msg: Message) -> DCDetailedStatus:
 # Charger Status (PGN 127507)
 @dataclass
 class ChargerStatus:
+    """Data for Charger Status Message (PGN 127507)"""
+
+    #: Charger Instance
     instance: int
+    #: Battery Instance
     battery_instance: int
+    #: Operating State
     charge_state: types.N2kChargeState
+    #: Charger Mode
     charger_mode: types.N2kChargerMode
+    #: Yes/No
     enabled: types.N2kOnOff
+    #: Yes/No
     equalization_pending: types.N2kOnOff
+    #: Time remaining in seconds, precision 1s
     equalization_time_remaining: float
 
 
@@ -1022,13 +1165,7 @@ def set_n2k_charger_status(data: ChargerStatus) -> Message:
     """
     Charger Status (PGN 127507)
 
-    :param instance: Charger Instance
-    :param battery_instance: Battery Instance
-    :param charge_state: Operating State
-    :param charger_mode: Charger Mode
-    :param enabled: Yes/No
-    :param equalization_pending: Yes/No
-    :param equalization_time_remaining: in seconds, precision 1s
+    :param data: See :py:class:`ChargerStatus`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1045,6 +1182,12 @@ def set_n2k_charger_status(data: ChargerStatus) -> Message:
 
 
 def parse_n2k_charger_status(msg: Message) -> ChargerStatus:
+    """
+    Parse charger status information from a PGN 127507 message
+
+    :param msg: NMEA2000 Message with PGN 127507
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     instance = msg.get_byte_uint(index)
@@ -1071,10 +1214,18 @@ def parse_n2k_charger_status(msg: Message) -> ChargerStatus:
 # Battery Status (PGN 127508)
 @dataclass
 class BatteryStatus:
+    """Data for Battery Status Message (PGN 127508)"""
+
+    #: Battery Instance
     battery_instance: int
+    #: Battery Voltage in Volt, precision 0.01V
     battery_voltage: float
+    #: Battery Current in Ampere, precision 0.1A
     battery_current: float
+    #: Battery Temperature in Kelvin, precision 0.01K
     battery_temperature: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
 
 
@@ -1082,12 +1233,7 @@ def set_n2k_battery_status(data: BatteryStatus) -> Message:
     """
     Battery Status (PGN 127508)
 
-    :param battery_instance: Battery Instance
-    :param battery_voltage: Battery Voltage in Volt, precision 0.01V
-    :param battery_current: Battery Current in Ampere, precision 0.1A
-    :param battery_temperature: Battery Temperature in Kelvin, precision 0.01K
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
+    :param data: See :py:class:`BatteryStatus`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1102,6 +1248,12 @@ def set_n2k_battery_status(data: BatteryStatus) -> Message:
 
 
 def parse_n2k_battery_status(msg: Message) -> BatteryStatus:
+    """
+    Parse battery status information from a PGN 127508 message
+
+    :param msg: NMEA2000 Message with PGN 127508
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return BatteryStatus(
         battery_instance=msg.get_byte_uint(index),
@@ -1115,15 +1267,27 @@ def parse_n2k_battery_status(msg: Message) -> BatteryStatus:
 # Charger Configuration Status (PGN 127510)
 @dataclass
 class ChargerConfigurationStatus:
+    """Data for Charger Configuration Status Message (PGN 127510)"""
+
+    #: Charger Instance
     charger_instance: int
+    #: Battery Instance
     battery_instance: int
+    #: Enable/Disable charger
     enable: types.N2kOnOff
+    #: Charge current limit in % range 0-252 resolution 1%
     charge_current_limit: int
+    #: Charging algorithm, see type
     charging_algorithm: types.N2kChargingAlgorithm
+    #: Charger mode, see type
     charger_mode: types.N2kChargerMode
+    #: Battery temperature when no sensor
     battery_temperature: types.N2kBattTempNoSensor
+    #: Equalize one time enable/disable
     equalization_enabled: types.N2kOnOff
+    #: Enable/Disable over charge
     over_charge_enable: types.N2kOnOff
+    #: Time remaining in seconds
     equalization_time_remaining: int
 
 
@@ -1133,13 +1297,7 @@ def set_n2k_charger_configuration_status(data: ChargerConfigurationStatus) -> Me
 
     Any device capable of charging a battery can transmit this
 
-    :param charger_instance: Charger Instance
-    :param battery_instance: Battery Instance
-    :param charge_current_limit: CurrentLimit in % range 0-252 resolution 1%
-    :param battery_temperature: Battery temp when no sensor
-    :param equalization_enabled: Equalize one time enable/disable
-    :param over_charge_enable: Enable/Disable over charge
-    :param equalization_time_remaining: Time remaining in seconds
+    :param data: See :py:class:`ChargerConfigurationStatus`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1162,6 +1320,12 @@ def set_n2k_charger_configuration_status(data: ChargerConfigurationStatus) -> Me
 
 
 def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfigurationStatus:
+    """
+    Parse charger configuration status information from a PGN 127510 message
+
+    :param msg: NMEA2000 Message with PGN 127510
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     charger_instance = msg.get_byte_uint(index)
@@ -1194,14 +1358,26 @@ def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfiguration
 # Battery Configuration Status (PGN 127513)
 @dataclass
 class BatteryConfigurationStatus:
+    """Data for Battery Configuration Status Message (PGN 127513)"""
+
+    #: Battery Instance
     battery_instance: int
+    #: Battery Type, see type
     battery_type: types.N2kBatType
+    #: Whether the battery supports equalization
     supports_equal: types.N2kBatEqSupport
+    #: Battery nominal voltage, see type
     battery_nominal_voltage: types.N2kBatNomVolt
+    #: Battery chemistry, see type
     battery_chemistry: types.N2kBatChem
+    #: Battery capacity in Coulombs (aka Ampere Seconds), stored at a precision of 1Ah
     battery_capacity: float
+    #: Battery temperature coefficient in %
     battery_temperature_coefficient: int
+    #: Peukert Exponent, describing the relation between discharge rate and effective capacity.
+    #: Value between 1.0 and 1.504
     peukert_exponent: float
+    #: Charge efficiency factor
     charge_efficiency_factor: int
 
 
@@ -1209,16 +1385,7 @@ def set_n2k_battery_configuration_status(data: BatteryConfigurationStatus) -> Me
     """
     Battery Configuration Status (PGN 127513)
 
-    :param battery_instance: Battery Instance
-    :param battery_type: Battery Type, see type
-    :param supports_equal: Whether the battery supports equalization
-    :param battery_nominal_voltage: Battery nominal voltage, see type
-    :param battery_chemistry: Battery chemistry, see type
-    :param battery_capacity: Battery capacity in Coulombs (aka Ampere Seconds), stored at a precision of 1Ah
-    :param battery_temperature_coefficient: Battery temperature coefficient in %
-    :param peukert_exponent: Peukert Exponent, describing the relation between discharge rate and effective capacity.
-        Value between 1.0 and 1.504
-    :param charge_efficiency_factor: Charge efficiency factor
+    :param data: See :py:class:`BatteryConfigurationStatus`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1245,6 +1412,12 @@ def set_n2k_battery_configuration_status(data: BatteryConfigurationStatus) -> Me
 
 
 def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfigurationStatus:
+    """
+    Parse battery configuration status information from a PGN 127513 message
+
+    :param msg: NMEA2000 Message with PGN 127513
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     battery_instance = msg.get_byte_uint(index)
@@ -1271,12 +1444,22 @@ def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfiguration
 # Converter (Inverter/Charger) Status (PGN 127750)
 @dataclass
 class ConverterStatus:
+    """Data for Converter Status Message (PGN 127750)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Connection number
     connection_number: int
+    #: Operating state (see :py:class:`n2k.types.N2kConvMode`)
     operating_state: types.N2kConvMode
+    #: Temperature state (see :py:class:`n2k.types.N2kTemperatureState`)
     temperature_state: types.N2kTemperatureState
+    #: Overload state (see :py:class:`n2k.types.N2kOverloadState`)
     overload_state: types.N2kOverloadState
+    #: Low DC voltage state (see :py:class:`n2k.types.N2kDCVoltageState`)
     low_dc_voltage_state: types.N2kDCVoltageState
+    #: Ripple state (see :py:class:`n2k.types.N2kRippleState`)
     ripple_state: types.N2kRippleState
 
 
@@ -1288,14 +1471,7 @@ def set_n2k_converter_status(data: ConverterStatus) -> Message:
 
     Provides state and status information about charger/inverters
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param connection_number: Connection number
-    :param operating_state: See :py:class:`n2k.types.N2kConvMode`
-    :param temperature_state: See :py:class:`n2k.types.N2kTemperatureState`
-    :param overload_state: See :py:class:`n2k.types.N2kOverloadState`
-    :param low_dc_voltage_state: See :py:class:`n2k.types.N2kDCVoltageStat`
-    :param ripple_state: See :py:class:`n2k.types.N2kRippleState`
+    :param data: See :py:class:`ConverterStatus`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1315,6 +1491,12 @@ def set_n2k_converter_status(data: ConverterStatus) -> Message:
 
 
 def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
+    """
+    Parse converter status information from a PGN 127750 message
+
+    :param msg: NMEA2000 Message with PGN 127750
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
@@ -1342,7 +1524,13 @@ def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
 # Leeway (PGN 128000)
 @dataclass
 class Leeway:
+    """Data for Leeway Message (PGN 128000)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Positive angles indicate slippage to starboard, that is, the vessel is tracking to the right of its heading,
+    #: and negative angles indicate slippage to port. Angle in radians, stored at a precision of 0.0001rad
     leeway: float
 
 
@@ -1350,10 +1538,7 @@ def set_n2k_leeway(data: Leeway) -> Message:
     """
     Leeway (PGN 128000)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param leeway: Positive angles indicate slippage to starboard, that is, the vessel is tracking to the right of its
-        heading, and negative angles indicate slippage to port. Angle in radians, stored at a precision of 0.0001rad
+    :param data: See :py:class:`Leeway`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1370,6 +1555,12 @@ def set_n2k_leeway(data: Leeway) -> Message:
 
 
 def parse_n2k_leeway(msg: Message) -> Leeway:
+    """
+    Parse leeway information from a PGN 128000 message
+
+    :param msg: NMEA2000 Message with PGN 128000
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     return Leeway(
@@ -1381,9 +1572,16 @@ def parse_n2k_leeway(msg: Message) -> Leeway:
 # Boat Speed (PGN 128259)
 @dataclass
 class BoatSpeed:
+    """Data for Boat Speed Message (PGN 128259)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Speed through the water in meters per second, precision 0.01m/s
     water_referenced: float
+    #: Speed over ground in meters per second, precision 0.01m/s
     ground_referenced: float
+    #: Type of transducer for the water referenced speed, see type
     swrt: types.N2kSpeedWaterReferenceType
 
 
@@ -1391,11 +1589,7 @@ def set_n2k_boat_speed(data: BoatSpeed) -> Message:
     """
     Boat Speed (PGN 128259)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param water_referenced: Speed through the water in meters per second, precision 0.01m/s
-    :param ground_referenced: Speed over ground in meters per second, precision 0.01m/s
-    :param swrt: Type of transducer for the water referenced speed, see type
+    :param data: See :py:class:`BoatSpeed`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1411,6 +1605,12 @@ def set_n2k_boat_speed(data: BoatSpeed) -> Message:
 
 
 def parse_n2k_boat_speed(msg: Message) -> BoatSpeed:
+    """
+    Parse boat speed information from a PGN 128259 message
+
+    :param msg: NMEA2000 Message with PGN 128259
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return BoatSpeed(
         sid=msg.get_byte_uint(index),
@@ -1423,9 +1623,17 @@ def parse_n2k_boat_speed(msg: Message) -> BoatSpeed:
 # Water depth (PGN 128267)
 @dataclass
 class WaterDepth:
+    """Data for Water Depth Message (PGN 128267)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Water depth below transducer in meters, precision 0.01m
     depth_below_transducer: float
+    #: Distance in meters between transducer and water surface (positive) or transducer and keel (negative),
+    #: precision 0.001m
     offset: float
+    #: Maximum depth that can be measured
     max_range: float
 
 
@@ -1433,12 +1641,7 @@ def set_n2k_water_depth(data: WaterDepth) -> Message:
     """
     Water Depth (PGN 128267)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param depth_below_transducer: Water depth below transducer in meters, precision 0.01m
-    :param offset: Distance in meters between transducer and water surface (positive) or transducer and keel (negative),
-        precision 0.001m
-    :param max_range: maximum depth that can be measured
+    :param data: See :py:class:`WaterDepth`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1452,6 +1655,12 @@ def set_n2k_water_depth(data: WaterDepth) -> Message:
 
 
 def parse_n2k_water_depth(msg: Message) -> WaterDepth:
+    """
+    Parse water depth information from a PGN 128267 message
+
+    :param msg: NMEA2000 Message with PGN 128267
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return WaterDepth(
         sid=msg.get_byte_uint(index),
@@ -1464,9 +1673,16 @@ def parse_n2k_water_depth(msg: Message) -> WaterDepth:
 # Distance log (PGN 128275)
 @dataclass
 class DistanceLog:
+    """Data for Distance Log Message (PGN 128275)"""
+
+    #: Days since 1.1.1970 UTC
     days_since_1970: int
+    # TODO: are the seconds UTC?
+    #: Seconds since midnight, stored at a precision of 0.0001s
     seconds_since_midnight: float
+    #: Total distance traveled through the water since the installation of the device in meters.
     log: int
+    #: Total distance traveled through the water since the last trip reset in meters.
     trip_log: int
 
 
@@ -1474,10 +1690,7 @@ def set_n2k_distance_log(data: DistanceLog) -> Message:
     """
     Distance Log (PGN 128275)
 
-    :param days_since_1970: Days since 1.1.1970 UTC
-    :param seconds_since_midnight: Seconds since midnight, stored at a precision of 0.0001s (TODO: UTC?)
-    :param log: Total distance traveled through the water since the installation of the device in meters.
-    :param trip_log: Total distance traveled through the water since the last trip reset in meters.
+    :param data: See :py:class:`DistanceLog`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1491,6 +1704,12 @@ def set_n2k_distance_log(data: DistanceLog) -> Message:
 
 
 def parse_n2k_distance_log(msg: Message) -> DistanceLog:
+    """
+    Parse distance log information from a PGN 128275 message
+
+    :param msg: NMEA2000 Message with PGN 128275
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     return DistanceLog(
         days_since_1970=msg.get_2_byte_uint(index),
@@ -1503,17 +1722,36 @@ def parse_n2k_distance_log(msg: Message) -> DistanceLog:
 # Anchor Windlass Control Status (PGN 128776)
 @dataclass
 class AnchorWindlassControlStatus:
+    """Data for Anchor Windlass Control Status Message (PGN 128776)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Windlass Identifier
     windlass_identifier: int
+    #: Windlass Direction, see type
     windlass_direction_control: types.N2kWindlassDirectionControl
+    #: Single Speed: 0=off, 1-100=on
+    #:
+    #: Dual Speed: 0=0ff, 1-49=slow, 50-100=fast
+    #:
+    #: Proportional speed: 0=off, 1-100=speed
     speed_control: int
+    #: Speed control type, Single, Dual or Proportional
     speed_control_type: types.N2kSpeedType
+    #: Anchor Docking Control, Yes/No
     anchor_docking_control: types.N2kGenericStatusPair
+    #: Power Enable, Yes/No
     power_enable: types.N2kGenericStatusPair
+    #: Mechanical Lock, Yes/No
     mechanical_lock: types.N2kGenericStatusPair
+    #: Deck and Anchor Wash, Yes/No
     deck_and_anchor_wash: types.N2kGenericStatusPair
+    #: Anchor Light, Yes/No
     anchor_light: types.N2kGenericStatusPair
+    #: Command Timeout. Range 0.0 to 1.275 seconds, precision 0.005s
     command_timeout: float
+    #: Windlass Control Events, see type
     windlass_control_events: types.N2kWindlassControlEvents
 
 
@@ -1523,21 +1761,7 @@ def set_n2k_anchor_windlass_control_status(
     """
     Anchor Windlass Control Status (PGN 128776)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param windlass_identifier: Windlass Identifier
-    :param windlass_direction_control: Windlass Direction, see type
-    :param speed_control: Single Speed: 0=off, 1-100=on\n
-        Dual Speed: 0=0ff, 1-49=slow, 50-100=fast\n
-        Proportional speed: 0=off, 1-100=speed
-    :param speed_control_type: Speed control type, Single, Dual or Proportional
-    :param anchor_docking_control: Anchor Docking Control, Yes/No
-    :param power_enable: Power Enable, Yes/No
-    :param mechanical_lock: Mechanical Lock, Yes/No
-    :param deck_and_anchor_wash: Deck and Anchor Wash, Yes/No
-    :param anchor_light: Anchor Light, Yes/No
-    :param command_timeout: Command Timeout. Range 0.0 to 1.275 seconds, precision 0.005s
-    :param windlass_control_events: Windlass Control Events, see type
+    :param data: See :py:class:`AnchorWindlassControlStatus`
     :return:
     """
     msg = Message()
@@ -1566,6 +1790,12 @@ def set_n2k_anchor_windlass_control_status(
 def parse_n2k_anchor_windlass_control_status(
     msg: Message,
 ) -> AnchorWindlassControlStatus:
+    """
+    Parse anchor windlass control status information from a PGN 128776 message
+
+    :param msg: NMEA2000 Message with PGN 128776
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
@@ -1602,13 +1832,24 @@ def parse_n2k_anchor_windlass_control_status(
 # Anchor Windlass Operating Status (PGN 128777)
 @dataclass
 class AnchorWindlassOperatingStatus:
+    """Data for Anchor Windlass Operating Status Message (PGN 128777)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Identifier of the windlass instance
     windlass_identifier: int
+    #: Amount of rode deployed, in metres
     rode_counter_value: float
+    #: Deployment speed in metres per second
     windlass_line_speed: float
+    #: Windlass Motion Status, see type
     windlass_motion_status: types.N2kWindlassMotionStates
+    #: Rode Type Status, see type
     rode_type_status: types.N2kRodeTypeStates
+    #: Anchor Docking Status, see type
     anchor_docking_status: types.N2kAnchorDockingStates
+    #: Windlass Operating Events, see type
     windlass_operating_events: types.N2kWindlassOperatingEvents
 
 
@@ -1618,15 +1859,7 @@ def set_n2k_anchor_windlass_operating_status(
     """
     Anchor Windlass Operating Status (PGN 128777)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param windlass_identifier: Identifier of the windlass instance
-    :param rode_counter_value: Amount of rode deployed, in metres
-    :param windlass_line_speed: Deployment speed in metres per second
-    :param windlass_motion_status: see type
-    :param rode_type_status: see type
-    :param anchor_docking_status: see type
-    :param windlass_operating_events: see type
+    :param data: See :py:class:`AnchorWindlassOperatingStatus`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1650,6 +1883,12 @@ def set_n2k_anchor_windlass_operating_status(
 def parse_n2k_anchor_windlass_operating_status(
     msg: Message,
 ) -> AnchorWindlassOperatingStatus:
+    """
+    Parse anchor windlass operating status information from a PGN 128777 message
+
+    :param msg: NMEA2000 Message with PGN 128777
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
@@ -1677,11 +1916,20 @@ def parse_n2k_anchor_windlass_operating_status(
 # Anchor Windlass Monitoring Status (PGN 128778)
 @dataclass
 class AnchorWindlassMonitoringStatus:
+    """Data for Anchor Windlass Monitoring Status Message (PGN 128778)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Identifier of the windlass instance
     windlass_identifier: int
+    #: Total runtime of the motor in seconds
     total_motor_time: float
+    #: Voltage in Volts, precision 0.2V
     controller_voltage: float
+    #: Current in Amperes, precision 1A
     motor_current: float
+    #: Windlass Monitoring Events, see type
     windlass_monitoring_events: types.N2kWindlassMonitoringEvents
 
 
@@ -1691,13 +1939,7 @@ def set_n2k_anchor_windlass_monitoring_status(
     """
     Anchor Windlass Monitoring Status (PGN 128778)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param windlass_identifier: Identifier of the windlass instance
-    :param total_motor_time: Total runtime of the motor in seconds
-    :param controller_voltage: Voltage in Volts, precision 0.2V
-    :param motor_current: Current in Amperes, precision 1A
-    :param windlass_monitoring_events: see type
+    :param data: See :py:class:`AnchorWindlassMonitoringStatus`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1716,6 +1958,12 @@ def set_n2k_anchor_windlass_monitoring_status(
 def parse_n2k_anchor_windlass_monitoring_status(
     msg: Message,
 ) -> AnchorWindlassMonitoringStatus:
+    """
+    Parse anchor windlass monitoring status information from a PGN 128778 message
+
+    :param msg: NMEA2000 Message with PGN 128778
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     return AnchorWindlassMonitoringStatus(
@@ -1733,7 +1981,11 @@ def parse_n2k_anchor_windlass_monitoring_status(
 # Lat/lon rapid (PGN 129025)
 @dataclass
 class LatLonRapid:
+    """Data for Lat/Lon Rapid Message (PGN 129025)"""
+
+    #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
     latitude: float
+    #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
     longitude: float
 
 
@@ -1741,8 +1993,7 @@ def set_n2k_lat_long_rapid(data: LatLonRapid) -> Message:
     """
     Position rapid update (PGN 129025)
 
-    :param latitude: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
-    :param longitude: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
+    :param data: See :py:class:`LatLonRapid`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1754,6 +2005,12 @@ def set_n2k_lat_long_rapid(data: LatLonRapid) -> Message:
 
 
 def parse_n2k_lat_long_rapid(msg: Message) -> LatLonRapid:
+    """
+    Parse latitude and longitude from a PGN 129025 message
+
+    :param msg: NMEA2000 Message with PGN 129025
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     return LatLonRapid(
@@ -1765,9 +2022,16 @@ def parse_n2k_lat_long_rapid(msg: Message) -> LatLonRapid:
 # COG SOG rapid (PGN 129026)
 @dataclass
 class CogSogRapid:
+    """Data for COG/SOG Rapid Message (PGN 129026)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Course over Ground reference, see type
     heading_reference: types.N2kHeadingReference
+    #: Course over Ground in radians, precision 0.0001rad
     cog: float
+    #: Speed over Ground in meters per second, precision 0.01m/s
     sog: float
 
 
@@ -1775,11 +2039,7 @@ def set_n2k_cog_sog_rapid(data: CogSogRapid) -> Message:
     """
     Course and Speed over Ground, rapid update (PGN 129026)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param heading_reference: Course over Ground reference, see type
-    :param cog: Course over Ground in radians, precision 0.0001rad
-    :param sog: Speed over Ground in meters per second, precision 0.01m/s
+    :param data: See :py:class:`CogSogRapid`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1795,6 +2055,12 @@ def set_n2k_cog_sog_rapid(data: CogSogRapid) -> Message:
 
 
 def parse_n2k_cog_sog_rapid(msg: Message) -> CogSogRapid:
+    """
+    Parse course and speed over ground from a PGN 129026 message
+
+    :param msg: NMEA2000 Message with PGN 129026
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     return CogSogRapid(
@@ -1808,48 +2074,51 @@ def parse_n2k_cog_sog_rapid(msg: Message) -> CogSogRapid:
 # GNSS Position Data (PGN 129029)
 @dataclass
 class GNSSPositionData:
+    """Data for GNSS Position Data Message (PGN 129029)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Days since 1.1.1970 UTC
     days_since_1970: int
+    # TODO: check if seconds since midnight is UTC or timezone specific
+    #: Seconds since midnight, stored at a precision of 0.0001s
     seconds_since_midnight: float
+    #: Latitude in degrees, precision approx 11 pico metre  (a fifth of the diameter of a helium atom, 1e-16 deg).
+    #: Negative values indicate south, positive indicate north.
     latitude: float
+    #: Longitude in degrees, precision approx 11 pico metre at the equator (1e-16 deg)
+    #: Negative values indicate west, positive indicate east.
     longitude: float
+    #: Altitude in reference to the WGS-84 model in metres, precision 1 micrometer
     altitude: float
+    #: GNSS Type, see type
     gnss_type: types.N2kGNSSType
+    #: GNSS Method type, see type
     gnss_method: types.N2kGNSSMethod
+    #: Number of satellites used for the provided data
     n_satellites: int
+    #: Horizontal Dilution Of Precision in meters, precision 0.01m
     hdop: float
+    #: Positional Dilution Of Precision in meters, precision 0.01m
     pdop: float
+    #: Geoidal separation in meters, precision 0.01m
     geoidal_separation: float
+    #: Number of Reference Stations
     n_reference_station: int
+    #: Reference Station type, see type
     reference_station_type: types.N2kGNSSType | None
+    #: Reference Station ID
     reference_station_id: int | None
+    #: Age of DGNSS Correction
     age_of_correction: float | None
 
 
-# TODO: check if seconds since midnight is UTC or timezone specific
 def set_n2k_gnss_data(data: GNSSPositionData) -> Message:
     """
     GNSS Position Data (PGN 129029)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param days_since_1970: Days since 1.1.1970 UTC
-    :param seconds_since_midnight: Seconds since midnight, stored at a precision of 0.0001s (TODO: UTC?)
-    :param latitude: Latitude in degrees, precision approx 11 pico metre
-        (a fifth of the diameter of a helium atom, 1e-16 deg). Negative values indicate south, positive indicate north.
-    :param longitude: Longitude in degrees, precision approx 11 pico metre at the equator (1e-16 deg).
-        Negative values indicate west, positive indicate east.
-    :param altitude: Altitude in reference to the WGS-84 model in metres, precision 1 micrometer.
-    :param gnss_type: GNSS Type, see type
-    :param gnss_method: GNSS Method type, see type
-    :param n_satellites: Number of satellites used for the provided data
-    :param hdop: Horizontal Dilution Of Precision in meters, precision 0.01m
-    :param pdop: Positional Dilution Of Precision in meters, precision 0.01m
-    :param geoidal_separation: Geoidal separation in meters, precision 0.01m
-    :param n_reference_station: Number of Reference Stations
-    :param reference_station_type: Reference Station type, see type
-    :param reference_station_id: Reference Station ID
-    :param age_of_correction: Age of DGNSS Correction
+    :param data: See :py:class:`GNSSPositionData`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -1886,9 +2155,14 @@ def set_n2k_gnss_data(data: GNSSPositionData) -> Message:
 
 def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
     """
+    Parse GNSS Position Data information from a PGN 129029 message
+
     The parameters passed to ReferenceStationType, ReferenceStationID and AgeOfCorrection are set to
     :py:class:`n2k.constants.N2kGNSSType.GPS`, :py:const:`n2k.constants.N2K_INT16_NA` and :py:const:`n2k.constants.N2K_DOUBLE_NA` respectively,
     when there are no reference stations present in the message.
+
+    :param msg: NMEA2000 Message with PGN 129029
+    :return: Object containing the parsed information
     """
     index = IntRef(0)
 
@@ -1944,20 +2218,30 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
 # Date,Time & Local offset (PGN 129033, see also PGN 126992)
 @dataclass
 class DateTimeLocalOffset:
+    """
+    Data for Date, Time & Local offset Message (PGN 129033)
+
+    See also PGN 126992 (:py:class:`SystemTime`).
+    """
+
+    #: Days since 1.1.1970 UTC
     days_since_1970: int
+    # TODO: UTC?
+    #: Seconds since midnight, stored at a precision of 0.0001s
     seconds_since_midnight: float
+    #: Local offset in minutes
     local_offset: int
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
 
 
 def set_n2k_date_time_local_offset(data: DateTimeLocalOffset) -> Message:
     """
-    Date, Time & Local offset (PGN 129033), see also PGN 126992
+    Date, Time & Local offset (PGN 129033), see also PGN 126992 (:py:class:`SystemTime`)
 
-    :param days_since_1970: Days since 1.1.1970 UTC
-    :param seconds_since_midnight: Seconds since midnight, stored at a precision of 0.0001s (TODO: UTC?)
-    :param local_offset: Local offset in minutes
-    :return:
+    :param data: See :py:class:`DateTimeLocalOffset`
+    :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
     msg.pgn = PGN.DateTimeLocalOffset
@@ -1969,6 +2253,12 @@ def set_n2k_date_time_local_offset(data: DateTimeLocalOffset) -> Message:
 
 
 def parse_n2k_date_time_local_offset(msg: Message) -> DateTimeLocalOffset:
+    """
+    Parse date, time and local offset information from a PGN 129033 message
+
+    :param msg: NMEA2000 Message with PGN 129033
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     return DateTimeLocalOffset(
@@ -1982,20 +2272,46 @@ def parse_n2k_date_time_local_offset(msg: Message) -> DateTimeLocalOffset:
 # AIS position reports for Class A (PGN 129038)
 @dataclass
 class AISClassAPositionReport:
+    """Data for AIS Class A Position Report Message (PGN 129038)"""
+
+    #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
     message_id: int
+    #: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
     repeat: types.N2kAISRepeat
+    #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
     user_id: int
+    #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
     latitude: float
+    #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
     longitude: float
+    #: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
     accuracy: bool
+    #: Receiver autonomous integrity monitoring (RAIM) flag of the electronic position fixing device.
     raim: bool
+    #: UTC second when the report was generated by the EPFS (0-59).
+    #:
+    #: 60: timestamp not available, default
+    #:
+    #: 61: positioning system in manual input mode
+    #:
+    #: 62: electronic position fixing system operates in estimated (dead reckoning) mode
+    #:
+    #: 63: positioning system is inoperative
     seconds: int
+    #: Course over Ground in radians, precision 0.0001rad
     cog: float
+    #: Speed over Ground in meters per second, precision 0.01m/s
     sog: float
+    #: AIS Transceiver Information, see type
     ais_transceiver_information: types.N2kAISTransceiverInformation
+    #: Compass heading
     heading: float
+    #: Rate of Turn
     rot: float
+    #: Navigational status, see type
     nav_status: types.N2kAISNavStatus
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
 
 
@@ -2003,25 +2319,7 @@ def set_n2k_ais_class_a_position(data: AISClassAPositionReport) -> Message:
     """
     AIS Position Reports for Class A (PGN 129038)
 
-    :param message_id: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    :param repeat: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
-    :param user_id: MMSI Number
-    :param latitude: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
-    :param longitude: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
-    :param accuracy: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
-    :param raim: Receiver autonomous integrity monitoring (RAIM) flag of the electronic position fixing device.
-    :param seconds: UTC second when the report was generated by the EPFS (0-59).\n
-        60: timestamp not available, default\n
-        61: positioning system in manual input mode\n
-        62: electronic position fixing system operates in estimated (dead reckoning) mode\n
-        63: positioning system is inoperative
-    :param cog: Course over Ground in radians, precision 0.0001rad
-    :param sog: Speed over Ground in meters per second, precision 0.01m/s
-    :param ais_transceiver_information: AIS Transceiver Information, see type
-    :param heading: Compass heading
-    :param rot: Rate of Turn
-    :param nav_status: Navigational status
-    :param sid: Sequence ID
+    :param data: See :py:class:`AISClassAPositionReport`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -2048,6 +2346,12 @@ def set_n2k_ais_class_a_position(data: AISClassAPositionReport) -> Message:
 
 
 def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
+    """
+    Parse AIS Class A Position Report information from a PGN 129038 message
+
+    :param msg: NMEA2000 Message with PGN 129038
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     vb = msg.get_byte_uint(index)
@@ -2095,55 +2399,64 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
 # AIS position reports for Class B (PGN 129039)
 @dataclass
 class AISClassBPositionReport:
+    """Data for AIS Class B Position Report Message (PGN 129039)"""
+
+    #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
     message_id: int
+    #: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
     repeat: types.N2kAISRepeat
+    #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
     user_id: int
+    #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
     latitude: float
+    #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
     longitude: float
+    #: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
     accuracy: bool
+    #: Receiver autonomous integrity monitoring (RAIM) flag of the electronic position fixing device.
     raim: bool
+    #: UTC second when the report was generated by the EPFS (0-59).
+    #:
+    #: 60: timestamp not available, default
+    #:
+    #: 61: positioning system in manual input mode
+    #:
+    #: 62: electronic position fixing system operates in estimated (dead reckoning) mode
+    #:
+    #: 63: positioning system is inoperative
     seconds: int
+    #: Course over Ground in radians, precision 0.0001rad
     cog: float
+    #: Speed over Ground in meters per second, precision 0.01m/s
     sog: float
+    #: AIS Transceiver Information, see type
     ais_transceiver_information: types.N2kAISTransceiverInformation
+    #: Compass heading
     heading: float
+    #: Class B unit flag, see type
     unit: types.N2kAISUnit
+    #: Class B display flag
     display: bool
+    #: Class B DSC flag
     dsc: bool
+    #: Class B band flag
     band: bool
+    #: Class B Message22 flag
     msg22: bool
+    #: Station Operating Mode flag, see type
     mode: types.N2kAISMode
+    #: Communication State Selector flag
     state: bool
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
 
 
 def set_n2k_ais_class_b_position(data: AISClassBPositionReport) -> Message:
     """
-    AIS Position Reports for Class A (PGN 129038)
+    AIS Position Reports for Class B (PGN 129039)
 
-    :param message_id: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    :param repeat: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
-    :param user_id: MMSI Number
-    :param latitude: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
-    :param longitude: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
-    :param accuracy: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
-    :param raim: Receiver autonomous integrity monitoring (RAIM) flag of the electronic position fixing device.
-    :param seconds: UTC second when the report was generated by the EPFS (0-59).\n
-        60: timestamp not available, default\n
-        61: positioning system in manual input mode\n
-        62: electronic position fixing system operates in estimated (dead reckoning) mode\n
-        63: positioning system is inoperative
-    :param cog: Course over Ground in radians, precision 0.0001rad
-    :param sog: Speed over Ground in meters per second, precision 0.01m/s
-    :param ais_transceiver_information: AIS Transceiver Information, see type
-    :param heading: Compass Heading
-    :param unit: Class B unit flag, see type
-    :param display: Class B display flag
-    :param dsc: Class B DSC flag
-    :param band: Class B band flag
-    :param msg22: Class B Message22 flag
-    :param mode: Station Operating Mode flag, see type
-    :param state: Communication State Selector flag
+    :param data: See :py:class:`AISClassBPositionReport`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -2177,6 +2490,12 @@ def set_n2k_ais_class_b_position(data: AISClassBPositionReport) -> Message:
 
 
 def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
+    """
+    Parse AIS Class B Position Report information from a PGN 129039 message
+
+    :param msg: NMEA2000 Message with PGN 129039
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     vb = msg.get_byte_uint(index)
@@ -2235,25 +2554,70 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
 # AIS Aids to Navigation (AtoN) Report (PGN 129041)
 @dataclass
 class AISAtoNReportData:
+    """Data for AIS Aids to Navigation (AtoN) Report Message (PGN 129041)"""
+
+    #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
     message_id: int
+    #: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
     repeat: types.N2kAISRepeat
+    #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
     user_id: int
-    longitude: float
+    #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
     latitude: float
+    #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
+    longitude: float
+    #: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
     accuracy: bool
+    #: Receiver autonomous integrity monitoring (RAIM) flag of the electronic position fixing device.
     raim: bool
+    #: UTC second when the report was generated by the EPFS (0-59).
+    #:
+    #: 60: timestamp not available, default
+    #:
+    #: 61: positioning system in manual input mode
+    #:
+    #: 62: electronic position fixing system operates in estimated (dead reckoning) mode
+    #:
+    #: 63: positioning system is inoperative
     seconds: int
+    #: Structure Length/Diameter in meters
     length: float
+    #: Structure Beam/Diameter in meters
     beam: float
+    #: Position Reference Point from Starboard Structure Edge/Radius
     position_reference_starboard: float
+    #: Position Reference Point from True North facing Structure Edge/Radius
     position_reference_true_north: float
+    #: Aid to Navigation (AtoN) Type, see type
     a_to_n_type: types.N2kAISAtoNType
+    #: Off Position Indicator. For floating AtoN only
+    #:
+    #: 0: on position
+    #:
+    #: 1: off position
+    #:
+    #: Note: This flag should only be considered valid by receiving station, if the AtoN is a floatation aid,
+    #: and if the time since the report has been generated is <= 59.
     off_position_reference_indicator: bool
+    #: Virtual AtoN Flag
+    #:
+    #: 0: default = real AtoN at indicated position
+    #:
+    #: 1: virtual AtoN, does not physically exist.
     virtual_a_to_n_flag: bool
+    #: Assigned Mode Flag
+    #:
+    #: 0: default = Station operating in autonomous and continuous mode
+    #:
+    #: 1: Station operating in assigned mode
     assigned_mode_flag: bool
+    #: Type of electronic position fixing device, see type
     gnss_type: types.N2kGNSSType
+    #: AtoN Status byte. Reserved for the indication of the AtoN status.
     a_to_n_status: int
+    #: AIS Transceiver Information, see type.
     n2k_ais_transceiver_information: types.N2kAISTransceiverInformation
+    #: Name of the AtoN Object, according to https://www.itu.int/rec/R-REC-M.1371
     a_to_n_name: str | None
 
 
@@ -2261,38 +2625,7 @@ def set_n2k_ais_aids_to_navigation_report(data: AISAtoNReportData) -> Message:
     """
     AIS Aids to Navigation (AtoN) Report (PGN 129041)
 
-    :param message_id: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    :param repeat: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
-    :param user_id: MMSI Number
-    :param latitude: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
-    :param longitude: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
-    :param accuracy: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
-    :param raim: Receiver autonomous integrity monitoring (RAIM) flag of the electronic position fixing device.
-    :param seconds: UTC second when the report was generated by the EPFS (0-59).\n
-        60: timestamp not available, default\n
-        61: positioning system in manual input mode\n
-        62: electronic position fixing system operates in estimated (dead reckoning) mode\n
-        63: positioning system is inoperative
-    :param length: Structure Length/Diameter in meters
-    :param beam: Structure Beam/Diameter in meters
-    :param position_reference_starboard: Position Reference Point from Starboard Structure Edge/Radius
-    :param position_reference_true_north: Position Reference Point from True North facing Structure Edge/Radius
-    :param a_to_n_type: Ait to Navigation (AtoN) Type, see type
-    :param off_position_reference_indicator: Off Position Indicator. For floating AtoN only\n
-        - 0: on position\n
-        - 1: off position\n
-        Note: This flag should only be considered valid by receiving station, if the AtoN is a floatation aid, and if
-        the time since the report has been generated is <= 59.
-    :param virtual_a_to_n_flag: Virtual AtoN Flag\n
-        - 0: default = real AtoN at indicated position
-        - 1: virtual AtoN, does not physically exist.
-    :param assigned_mode_flag: Assigned Mode Flag\n
-        - 0: default = Station operating in autonomous and continuous mode
-        - 1: Station operating in assigned mode
-    :param gnss_type: Type of electronic position fixing device, see type
-    :param a_to_n_status: AtoN Status byte. Reserved for the indication of the AtoN status.
-    :param n2k_ais_transceiver_information: AIS Transceiver Information, see type.
-    :param a_to_n_name: Name of the AtoN Object, according to https://www.itu.int/rec/R-REC-M.1371\n
+    :param data: See :py:class:`AISAtoNReportData`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -2328,6 +2661,12 @@ def set_n2k_ais_aids_to_navigation_report(data: AISAtoNReportData) -> Message:
 
 
 def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
+    """
+    Parse AIS Aids to Navigation (AtoN) Report information from a PGN 129041 message
+
+    :param msg: NMEA2000 Message with PGN 129041
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3F
@@ -2382,9 +2721,16 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
 # Cross Track Error (PGN 129283)
 @dataclass
 class CrossTrackError:
+    """Data for Cross Track Error Message (PGN 129283)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: CrossTrackError Mode, see type
     xte_mode: types.N2kXTEMode
+    #: Navigation has been terminated
     navigation_terminated: bool
+    #: CrossTrackError in meters
     xte: float
 
 
@@ -2392,11 +2738,7 @@ def set_n2k_cross_track_error(data: CrossTrackError) -> Message:
     """
     Cross Track Error (PGN 129283)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param xte_mode: CrossTrackError Mode, see type
-    :param navigation_terminated: Navigation has been terminated
-    :param xte: CrossTrackError in meters
+    :param data: See :py:class:`CrossTrackError`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -2411,6 +2753,12 @@ def set_n2k_cross_track_error(data: CrossTrackError) -> Message:
 
 
 def parse_n2k_cross_track_error(msg: Message) -> CrossTrackError:
+    """
+    Parse Cross Track Error information from a PGN 129283 message
+
+    :param msg: NMEA2000 Message with PGN 129283
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
@@ -2430,20 +2778,38 @@ def parse_n2k_cross_track_error(msg: Message) -> CrossTrackError:
 # Navigation Info (PGN 129284)
 @dataclass
 class NavigationInfo:
+    """Data for Navigation Info Message (PGN 129284)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Distance to Destination Waypoint in meters (precision 1cm)
     distance_to_waypoint: float
+    #: Course/Bearing Reference, see type
     bearing_reference: types.N2kHeadingReference
+    #: Perpendicular Crossed
     perpendicular_crossed: bool
+    #: Arrival Circle Entered
     arrival_circle_entered: bool
+    #: Calculation Type, see type
     calculation_type: types.N2kDistanceCalculationType
+    #: Time part of Estimated Time at Arrival in seconds since midnight
     eta_time: float
+    #: Date part of Estimated Time at Arrival in Days since 1.1.1970 UTC
     eta_date: int
+    #: Bearing, From Origin to Destination Waypoint
     bearing_origin_to_destination_waypoint: float
+    #: Bearing, From current Position to Destination Waypoint
     bearing_position_to_destination_waypoint: float
+    #: Origin Waypoint Number
     origin_waypoint_number: int
+    #: Destination Waypoint Number
     destination_waypoint_number: int
+    #: Destination Waypoint Latitude
     destination_latitude: float
+    #: Destination Waypoint Longitude
     destination_longitude: float
+    #: Waypoint Closing Velocity
     waypoint_closing_velocity: float
 
 
@@ -2451,22 +2817,7 @@ def set_n2k_navigation_info(data: NavigationInfo) -> Message:
     """
     # Navigation Info (PGN 129284)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param distance_to_waypoint: Distance to Destination Waypoint in meters (precision 1cm)
-    :param bearing_reference: Course/Bearing Reference, see type
-    :param perpendicular_crossed: Perpendicular Crossed
-    :param arrival_circle_entered: Arrival Circle Entered
-    :param calculation_type: Calculation Type, see type
-    :param eta_time: Time part of Estimated Time at Arrival in seconds since midnight
-    :param eta_date: Date part of Estimated Time at Arrival in Days since 1.1.1970 UTC
-    :param bearing_origin_to_destination_waypoint: Bearing, From Origin to Destination Waypoint
-    :param bearing_position_to_destination_waypoint: Bearing, From current Position to Destination Waypoint
-    :param origin_waypoint_number: Origin Waypoint Number
-    :param destination_waypoint_number: Destination Waypoint Number
-    :param destination_latitude: Destination Waypoint Latitude
-    :param destination_longitude: Destination Waypoint Longitude
-    :param waypoint_closing_velocity: Waypoint Closing Velocity
+    :param data: See :py:class:`NavigationInfo`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -2494,6 +2845,12 @@ def set_n2k_navigation_info(data: NavigationInfo) -> Message:
 
 
 def parse_n2k_navigation_info(msg: Message) -> NavigationInfo:
+    """
+    Parse Navigation Info information from a PGN 129284 message
+
+    :param msg: NMEA2000 Message with PGN 129284
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     sid = msg.get_byte_uint(index)
     distance_to_waypoint = msg.get_4_byte_udouble(0.01, index)
@@ -2525,12 +2882,22 @@ def parse_n2k_navigation_info(msg: Message) -> NavigationInfo:
 # Route Waypoint Information (PGN 129285)
 @dataclass
 class RouteWaypointInformation:
+    """Data for Route Waypoint Information Message (PGN 129285)"""
+
+    #: The ID of the first waypoint
     start: int
+    #: Database ID
     database: int
+    #: Route ID
     route: int
+    #: Navigation Direction in Route, see type
     nav_direction: types.N2kNavigationDirection
+    #: The name of the current route
     route_name: str
+    #: Supplementary Route/WP data available
     supplementary_data: types.N2kGenericStatusPair
+    #: List of waypoints to be sent with the route.
+    #: Each consisting of an ID, Name, Latitude and Longitude.
     waypoints: list[types.Waypoint]
 
 
@@ -2538,14 +2905,7 @@ def set_n2k_route_waypoint_information(data: RouteWaypointInformation) -> Messag
     """
     Route Waypoint Information (PGN 129285)
 
-    :param start: The ID of the first waypoint
-    :param database: Database ID
-    :param route: Route ID
-    :param nav_direction: Navigation Direction in Route, see type
-    :param route_name: The name of the current route
-    :param supplementary_data: Supplementary Route/WP data available
-    :param waypoints: List of waypoints to be sent with the route.
-        Each consisting of an ID, Name, Latitude and Longitude.
+    :param data: See :py:class:`RouteWaypointInformation`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -2585,6 +2945,12 @@ def set_n2k_route_waypoint_information(data: RouteWaypointInformation) -> Messag
 
 
 def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformation:
+    """
+    Parse Route Waypoint Information from a PGN 129285 message
+
+    :param msg: NMEA2000 Message with PGN 129285
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     start = msg.get_2_byte_uint(index)
     waypoints_len = msg.get_2_byte_uint(index)
@@ -2622,11 +2988,20 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
 # GNSS DOP data (PGN 129539)
 @dataclass
 class GNSSDOPData:
+    """Data for GNSS DOP Data Message (PGN 129539)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Desired DOP Mode
     desired_mode: types.N2kGNSSDOPmode
+    #: Actual DOP Mode
     actual_mode: types.N2kGNSSDOPmode
+    #: Horizontal Dilution of Precision in meters
     hdop: float
+    #: Vertical Dilution of Precision in meters
     vdop: float
+    #: Time Dilution of Precision
     tdop: float
 
 
@@ -2634,13 +3009,7 @@ def set_n2k_gnss_dop(data: GNSSDOPData) -> Message:
     """
     GNSS DOP Data (PGN 129539)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param desired_mode: Desired DOP Mode
-    :param actual_mode: Actual DOP Mode
-    :param hdop: Horizontal Dilution of Precision in meters.
-    :param vdop: Vertical Dilution of Precision in meters.
-    :param tdop: Time Dilution of Precision
+    :param data: See :py:class:`GNSSDOPData`
     :return: NMEA2000 message, ready to be sent
     """
     msg = Message()
@@ -2657,6 +3026,12 @@ def set_n2k_gnss_dop(data: GNSSDOPData) -> Message:
 
 
 def parse_n2k_gnss_dop(msg: Message) -> GNSSDOPData:
+    """
+    Parse GNSS DOP Data information from a PGN 129539 message
+
+    :param msg: NMEA2000 Message with PGN 129539
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
@@ -2680,8 +3055,14 @@ MAX_SATELLITE_INFO_COUNT = 18  # Maximum amount of satellites that fit into fast
 
 @dataclass
 class GNSSSatellitesInView:
+    """Data for GNSS Satellites in View Message (PGN 129540)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Range Residual Mode
     mode: types.N2kRangeResidualMode
+    #: List of the info of the satellites used
     satellites: list[types.SatelliteInfo]
 
 
@@ -2689,10 +3070,7 @@ def set_n2k_gnss_satellites_in_view(data: GNSSSatellitesInView) -> Message:
     """
     GNSS Satellites in View (PGN 129540)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        different messages to indicate that they are measured at same time
-    :param mode: Range residual mode
-    :param satellites: List of the info of the satellites used
+    :param data: See :py:class:`GNSSSatellitesInView`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -2720,6 +3098,12 @@ def set_n2k_gnss_satellites_in_view(data: GNSSSatellitesInView) -> Message:
 
 
 def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
+    """
+    Parse GNSS Satellites in View information from a PGN 129540 message
+
+    :param msg: NMEA2000 Message with PGN 129540
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
@@ -2755,25 +3139,72 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
 # AIS Class A Static Data (PGN 129794)
 @dataclass
 class AISClassAStaticData:
+    """Data for AIS Class A Static Data Message (PGN 129794)"""
+
+    #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
     message_id: int
+    #: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
+    #:
+    #: 0-3; 0 = default; 3 = do not repeat anymore
     repeat: types.N2kAISRepeat
+    #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
     user_id: int
+    #: Ship identification number by IMO. [1 .. 999999999]; 0: not available = default
     imo_number: int
+    #: Call Sign. Max. 7 chars will be used. Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     callsign: str
+    #: Name of the vessel
+    #:
+    #: Maximum 20 * 6bit ASCII characters.
+    #:
+    #: For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.
+    #:
+    #: Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     name: str
+    #: Vessel Type.
+    #:
+    #: 0: not available or no ship = default
+    #:
+    #: 1-99: as defined in § 3.3.2
+    #:
+    #: 100-199: reserved, for regional use
+    #:
+    #: 200-255: reserved, for regional use
+    #:
+    #: Not applicable to SAR aircraft
     vessel_type: int
+    #: Length/Diameter in meters
     length: float
+    #: Beam/Diameter in meters
     beam: float
+    #: Position Reference Point from Starboard
     pos_ref_stbd: float
+    #: Position Reference Point from the Bow
     pos_ref_bow: float
+    #: Date part of Estimated Time at Arrival in Days since 1.1.1970 UTC
     eta_date: int
+    #: Time part of Estimated Time at Arrival in seconds since midnight
     eta_time: float
+    #: Maximum present static draught
     draught: float
+    #: Destination. Maximum of 20 6bit ASCII Characters.
+    #:
+    #: Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     destination: str
+    #: AIS Version, see type
     ais_version: types.N2kAISVersion
+    #: Type of GNSS, see type
     gnss_type: types.N2kGNSSType
+    #: Data terminal equipment (DTE) ready.
+    #:
+    #: 0: available
+    #:
+    #: 1: not available = default
     dte: types.N2kAISDTE
+    #: AIS Transceiver Information, see type
     ais_info: types.N2kAISTransceiverInformation
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
 
 
@@ -2781,37 +3212,7 @@ def set_n2k_ais_class_a_static_data(data: AISClassAStaticData) -> Message:
     """
     AIS Class A Static Data (PGN 129794)
 
-    :param message_id: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    :param repeat: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
-        0-3; 0 = default; 3 = do not repeat anymore
-    :param user_id: MMSI Number
-    :param imo_number: Ship identification number by IMO. [1 .. 999999999]; 0: not available = default
-    :param callsign: Call Sign. Max. 7 chars will be used. Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    :param name: Name of the vessel\n
-        Maximum 20 * 6bit ASCII characters.\n
-        For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.\n
-        Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    :param vessel_type: Vessel Type.\n
-        0: not available or no ship = default\n
-        1-99: as defined in § 3.3.2\n
-        100-199: reserved, for regional use\n
-        200-255: reserved, for regional use\n
-        Not applicable to SAR aircraft
-    :param length: Length/Diameter in meters
-    :param beam: Beam/Diameter in meters
-    :param pos_ref_stbd: Position Reference Point from Starboard
-    :param pos_ref_bow: Position Reference Point from the Bow
-    :param eta_date: Date part of Estimated Time at Arrival in Days since 1.1.1970 UTC
-    :param eta_time: Time part of Estimated Time at Arrival in seconds since midnight
-    :param draught: Maximum present static draught
-    :param destination: Destination. Maximum of 20 6bit ASCII Characters.\n
-        Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    :param ais_version: AIS Version, see type
-    :param gnss_type: Type of GNSS, see type
-    :param dte: Data terminal equipment (DTE) ready.\n
-        - 0: available
-        - 1: not available = default
-    :param ais_info: AIS Transceiver Information, see type
+    :param data: See :py:class:`AISClassAStaticData`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -2843,6 +3244,12 @@ def set_n2k_ais_class_a_static_data(data: AISClassAStaticData) -> Message:
 
 
 def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
+    """
+    Parse AIS Class A Static Data information from a PGN 129794 message
+
+    :param msg: NMEA2000 Message with PGN 129794
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3F
@@ -2894,26 +3301,36 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
 # AIS CLass B Static Data part A (PGN 129809)
 @dataclass
 class AISClassBStaticDataPartA:
+    """Data for AIS Class B Static Data Part A Message (PGN 129809)"""
+
+    #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
     message_id: int
+    #: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
+    #:
+    #: 0-3; 0 = default; 3 = do not repeat anymore
     repeat: types.N2kAISRepeat
+    #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
     user_id: int
+    #: Name of the vessel
+    #:
+    #: Maximum 20 characters.
+    #:
+    #: For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.
+    #:
+    #: Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     name: str
+    #: AIS Transceiver Information, see type
     ais_info: types.N2kAISTransceiverInformation
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
 
 
 def set_n2k_ais_class_b_static_data_part_a(data: AISClassBStaticDataPartA) -> Message:
     """
-    AIS CLass B Static Data part A (PGN 129809)
+    AIS Class B Static Data part A (PGN 129809)
 
-    :param message_id: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    :param repeat: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
-        0-3; 0 = default; 3 = do not repeat anymore
-    :param user_id: MMSI Number
-    :param name: Name of the vessel\n
-        Maximum 20 characters.\n
-        For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.\n
-        Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
+    :param data: See :py:class:`AISClassBStaticDataPartA`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -2929,6 +3346,12 @@ def set_n2k_ais_class_b_static_data_part_a(data: AISClassBStaticDataPartA) -> Me
 
 
 def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDataPartA:
+    """
+    Parse AIS Class B Static Data Part A information from a PGN 129809 message
+
+    :param msg: NMEA2000 Message with PGN 129809
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3F
@@ -2952,18 +3375,48 @@ def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDat
 # AIS CLass B Static Data part B (PGN 129810)
 @dataclass
 class AISClassBStaticDataPartB:
+    """Data for AIS Class B Static Data Part B Message (PGN 129810)"""
+
+    #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
     message_id: int
+    #: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
+    #:
+    #: 0-3; 0 = default; 3 = do not repeat anymore
     repeat: types.N2kAISRepeat
+    #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
     user_id: int
+    #: Vessel Type.
+    #:
+    #: 0: not available or no ship = default
+    #:
+    #: 1-99: as defined in § 3.3.2
+    #:
+    #: 100-199: reserved, for regional use
+    #:
+    #: 200-255: reserved, for regional use
+    #:
+    #: Not applicable to SAR aircraft
     vessel_type: int
+    #: Unique identification of the Unit by a number as defined by the manufacturer.
+    #:
+    #: Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     vendor: str
+    #: Call Sign. Max. 7 chars will be used. Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     callsign: str
+    #: Length/Diameter in meters
     length: float
+    #: Beam/Diameter in meters
     beam: float
+    #: Position Reference Point from Starboard
     pos_ref_stbd: float
+    #: Position Reference Point from the Bow
     pos_ref_bow: float
+    #: MMSI of the mothership
     mothership_id: int
+    #: AIS Transceiver Information, see type
     ais_info: types.N2kAISTransceiverInformation
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
 
 
@@ -2971,24 +3424,7 @@ def set_n2k_ais_class_b_static_data_part_b(data: AISClassBStaticDataPartB) -> Me
     """
     AIS CLass B Static Data part B (PGN 129810)
 
-    :param message_id: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    :param repeat: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
-        0-3; 0 = default; 3 = do not repeat anymore
-    :param user_id: MMSI Number
-    :param vessel_type: Vessel Type.\n
-        0: not available or no ship = default\n
-        1-99: as defined in § 3.3.2\n
-        100-199: reserved, for regional use\n
-        200-255: reserved, for regional use\n
-        Not applicable to SAR aircraft
-    :param vendor: Unique identification of the Unit by a number as defined by the manufacturer.\n
-        Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    :param callsign: Call Sign.  Max. 7 chars will be used. Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    :param length: Length/Diameter in meters
-    :param beam: Beam/Diameter in meters
-    :param pos_ref_stbd: Position Reference Point from Starboard
-    :param pos_ref_bow: Position Reference Point from the Bow
-    :param mothership_id: MMSI of the mothership
+    :param data: See :py:class:`AISClassBStaticDataPartB`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -3012,6 +3448,12 @@ def set_n2k_ais_class_b_static_data_part_b(data: AISClassBStaticDataPartB) -> Me
 
 
 def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDataPartB:
+    """
+    Parse AIS Class B Static Data Part B information from a PGN 129810 message
+
+    :param msg: NMEA2000 Message with PGN 129810
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
     message_id = vb & 0x3F
@@ -3050,9 +3492,16 @@ def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDat
 # Waypoint list (PGN 130074)
 @dataclass
 class WaypointList:
+    """Data for Waypoint List message (PGN 130074)"""
+
+    #: The ID of the first waypoint
     start: int
+    #: Number of valid Waypoints in the list
     num_waypoints: int
+    #: Database ID
     database: int
+    #: List of waypoints to be sent with the route.
+    #: Each consisting of an ID, Name, Latitude and Longitude.
     waypoints: list[types.Waypoint]
 
 
@@ -3062,11 +3511,7 @@ def set_n2k_waypoint_list(
     """
     Route and Waypoint Service - Waypoint List - Waypoint Name & Position (PGN 130074)
 
-    :param start: The ID of the first waypoint
-    :param num_waypoints: Number of valid Wa
-    :param database: Database ID
-    :param waypoints: List of waypoints to be sent with the route.
-        Each consisting of an ID, Name, Latitude and Longitude.
+    :param data: See :py:class:`WaypointList`
     :return: NMEA2000 Message, ready to be sent
     """
     msg = Message()
@@ -3104,6 +3549,12 @@ def set_n2k_waypoint_list(
 
 
 def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
+    """
+    Parse Waypoint List from a PGN 130074 message
+
+    :param msg: NMEA2000 Message with PGN 130074
+    :return: Object containing the parsed information
+    """
     index = IntRef(0)
     start = msg.get_2_byte_uint(index)
     waypoints_len = msg.get_2_byte_uint(index)
@@ -3135,9 +3586,19 @@ def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
 # Wind Speed (PGN 130306)
 @dataclass
 class WindSpeed:
+    """Data for Wind Speed message (PGN 130306)"""
+
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time
     sid: int
+    #: Wind Speed in meters per second
     wind_speed: float
+    #: Wind Angle in radians
     wind_angle: float
+    #: Wind Reference. Can be e.g. Theoretical Wind using True North or Magnetic North,
+    #: Apparent Wind as measured, ...
+    #:
+    #: See :py:class:`n2k.types.N2kWindReference`
     wind_reference: types.N2kWindReference
 
 
@@ -3145,13 +3606,7 @@ def set_n2k_wind_speed(data: WindSpeed) -> Message:
     """
     Wind Speed (PGN 130306)
 
-    :param sid: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-        for different messages to indicate that they are measured at same time.
-    :param wind_speed: Wind Speed in meters per second
-    :param wind_angle: Wind Angle in radians
-    :param wind_reference: Can be e.g. Theoretical Wind using True North or Magnetic North,
-        Apparent Wind as measured, ...\n
-        See :py:class:`n2k.types.N2kWindReference`
+    :param data: See :py:class:`WindSpeed`
     :return: NMEA2000 message ready to be sent.
     """
     msg = Message()
@@ -3171,7 +3626,7 @@ def parse_n2k_wind_speed(msg: Message) -> WindSpeed:
     Parse heading information from a PGN 127250 message
 
     :param msg: NMEA2000 Message with PGN 127250
-    :return: Dictionary containing the parsed information
+    :return: Object containing the parsed information
     """
     index = IntRef(0)
     return WindSpeed(

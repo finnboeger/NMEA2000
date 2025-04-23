@@ -38,7 +38,9 @@ autodoc_default_options = {
     "show-inheritance": True,
     "private-members": None,
 }
-always_document_param_types = True
+always_document_param_types = False
+typehints_use_signature = True
+typehints_use_signature_return = True
 typehints_defaults = "comma"
 templates_path = ["_templates"]
 exclude_patterns: list[str] = []
