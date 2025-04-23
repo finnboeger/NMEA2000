@@ -65,6 +65,8 @@ ignore = [
     # Doc style rules where we have chosen a different style
     "D203", # 1 blank line required before class docstring
     "D212", # Multi-line docstring summary should be on the first line
+    "D400", # First line should end with a period. Conflicts with D213.
+    "D415", # First line should end with a punctuation mark. Conflicts with D213.
 
     # Rules I don't agree with
     "D301", # Escape Sequences in Docstrings. Triggers on \n which are required to tell sphinx to add a newline
@@ -73,7 +75,7 @@ ignore = [
 
     # rules to be evaluated and fixed bit by bit
     "ANN001", "ANN201", "ANN202", "ANN204", "ARG001", "ARG002", "B007", "C901",
-    "D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205", "D400", "D401", "D415",
+    "D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205", "D401",
     "E501", "ERA001", "F403", "FBT001", "FBT002", "FIX002", "N815",
     "PLR0911", "PLR0912", "PLR0913", "T201", "TD002", "TD003", "TD004", "TD005", "UP035"
 ]
