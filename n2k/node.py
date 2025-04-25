@@ -579,7 +579,12 @@ class Node(can.Listener):
 
             ack_msg = Message()
             # No user handler or user handler returned false. Send Negative Acknowledgment
-            set_n2k_pgn_iso_acknowledgement(ack_msg, 1, 0xFF, requested_pgn)
+            ack_msg = set_n2k_pgn_iso_acknowledgement(
+                destination=msg.source,
+                control=1,
+                group_function=0xFF,
+                pgn=requested_pgn,
+            )
             # Direct the response to the original requester
             ack_msg.destination = msg.source
             self.send_msg(ack_msg)
@@ -814,11 +819,9 @@ class Node(can.Listener):
             self.set_pending_iso_address_claim(delay)
             return
 
-        msg = Message(self.n2k_source)
-        msg.destination = destination
-        set_n2k_iso_address_claim(
-            msg=msg,
-            device_information=DeviceInformation(
+        msg = set_n2k_iso_address_claim(
+            destination,
+            DeviceInformation(
                 unique_number=self.device_information.unique_number,
                 manufacturer_code=self.device_information.manufacturer_code,
                 device_function=self.device_information.device_function,
@@ -862,14 +865,12 @@ class Node(can.Listener):
         self,
         destination: int = 0xFF,
     ) -> bool:  # use_tp: bool = False
-        msg = Message(self.n2k_source)
-        msg.destination = destination
         # msg.tp_message = use_tp
-        msg.pgn = PGN.ProductInformation
-        set_n2k_product_information(
-            msg=msg,
+        msg = set_n2k_product_information(
             data=self.product_information,
+            destination=destination,
         )
+
         if self.send_msg(msg):
             self.clear_pending_product_information()
             return True
@@ -880,8 +881,6 @@ class Node(can.Listener):
         self,
         destination=0xFF,
     ) -> bool:  #  use_tp: bool = False
-        msg = Message(self.n2k_source)
-        msg.destination = destination
         # msg.tp_message = ust_tp
         if (
             self.configuration_information.manufacturer_information == ""
@@ -889,10 +888,14 @@ class Node(can.Listener):
             and self.configuration_information.installation_description2 == ""
         ):
             # No information provided
-            set_n2k_pgn_iso_acknowledgement(msg, 1, 0xFF, PGN.ConfigurationInformation)
+            msg = set_n2k_pgn_iso_acknowledgement(
+                destination=destination,
+                control=1,
+                group_function=0xFF,
+                pgn=PGN.ConfigurationInformation,
+            )
         else:
-            set_n2k_configuration_information(
-                msg=msg,
+            msg = set_n2k_configuration_information(
                 data=ConfigurationInformation(
                     manufacturer_information=self.configuration_information.manufacturer_information,
                     installation_description1=self.configuration_information.installation_description1,

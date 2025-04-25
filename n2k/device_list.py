@@ -326,8 +326,7 @@ class DeviceList(MessageHandler):
         :param source: Address of NMEA2000 Device.
         :return: Whether message was sent successfully.
         """
-        msg = Message()
-        n2k.messages.set_n2k_pgn_iso_request(msg, source, PGN.ProductInformation)
+        msg = n2k.messages.set_n2k_pgn_iso_request(source, PGN.ProductInformation)
         return self._node.send_msg(msg)
 
     def _request_configuration_information(self, source: int) -> bool:
@@ -337,8 +336,7 @@ class DeviceList(MessageHandler):
         :param source: Address of NMEA2000 Device.
         :return: Whether message was sent successfully.
         """
-        msg = Message()
-        n2k.messages.set_n2k_pgn_iso_request(msg, source, PGN.ConfigurationInformation)
+        msg = n2k.messages.set_n2k_pgn_iso_request(source, PGN.ConfigurationInformation)
         return self._node.send_msg(msg)
 
     def _request_supported_pgn_list(self, source: int) -> bool:
@@ -349,7 +347,7 @@ class DeviceList(MessageHandler):
         :return: Whether message was sent successfully.
         """
         msg = Message()
-        n2k.messages.set_n2k_pgn_iso_request(msg, source, PGN.SupportedPGNList)
+        msg = n2k.messages.set_n2k_pgn_iso_request(source, PGN.SupportedPGNList)
         return self._node.send_msg(msg)
 
     def _request_iso_address_claim(self, source: int) -> bool:
@@ -359,8 +357,7 @@ class DeviceList(MessageHandler):
         :param source: Address of NMEA2000 Device.
         :return: Whether message was sent successfully.
         """
-        msg = Message()
-        n2k.messages.set_n2k_pgn_iso_request(msg, source, PGN.IsoAddressClaim)
+        msg = n2k.messages.set_n2k_pgn_iso_request(source, PGN.IsoAddressClaim)
         return self._node.send_msg(msg)
 
     def _add_device(self, source: int) -> None:

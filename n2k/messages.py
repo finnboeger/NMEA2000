@@ -3679,13 +3679,15 @@ def parse_n2k_wind_speed(msg: Message) -> WindSpeed:
 
 # ISO Acknowledgement (PGN 59392)
 def set_n2k_pgn_iso_acknowledgement(
-    msg: Message,
+    destination: int,
     control: int,
     group_function: int,
     pgn: int,
-) -> None:
+) -> Message:
+    msg = Message()
     msg.pgn = PGN.IsoAcknowledgement
     msg.priority = 6
+    msg.destination = destination
     msg.add_byte_uint(control)
     msg.add_byte_uint(group_function)
     msg.add_byte_uint(0xFF)  # Reserved
@@ -3693,28 +3695,36 @@ def set_n2k_pgn_iso_acknowledgement(
     msg.add_byte_uint(0xFF)  # Reserved
     msg.add_3_byte_int(pgn)
 
+    return msg
+
 
 # ISO Address Claim (PGN 60928)
 def set_n2k_iso_address_claim(
-    msg: Message,
+    destination: int,
     device_information: DeviceInformation,
-) -> None:
-    set_n2k_iso_address_claim_by_name(msg, device_information.name)
+) -> Message:
+    return set_n2k_iso_address_claim_by_name(destination, device_information.name)
 
 
-def set_n2k_iso_address_claim_by_name(msg: Message, name: int) -> None:
+def set_n2k_iso_address_claim_by_name(destination: int, name: int) -> Message:
+    msg = Message()
     msg.pgn = PGN.IsoAddressClaim
     msg.priority = 6
+    msg.destination = destination
     msg.add_uint_64(name)
+
+    return msg
 
 
 # Product Information (PGN 126996)
 def set_n2k_product_information(
-    msg: Message,
     data: types.ProductInformation,
-) -> None:
+    destination: int,
+) -> Message:
+    msg = Message()
     msg.pgn = PGN.ProductInformation
     msg.priority = 6
+    msg.destination = destination
     msg.add_2_byte_uint(data.n2k_version)
     msg.add_2_byte_uint(data.product_code)
     msg.add_str(data.n2k_model_id, constants.MAX_N2K_MODEL_ID_LEN)
@@ -3723,6 +3733,8 @@ def set_n2k_product_information(
     msg.add_str(data.n2k_model_serial_code, constants.MAX_N2K_MODEL_SERIAL_CODE_LEN)
     msg.add_byte_uint(data.certification_level)
     msg.add_byte_uint(data.load_equivalency)
+
+    return msg
 
 
 # TODO: parser
@@ -3748,9 +3760,10 @@ def parse_n2k_pgn_product_information(msg: Message) -> types.ProductInformation:
 
 # Configuration Information (PGN: 126998)
 def set_n2k_configuration_information(
-    msg: Message,
     data: types.ConfigurationInformation,
-) -> None:
+) -> Message:
+    msg = Message()
+
     total_len = 0
     max_len = msg.max_data_len - 6  # each field has 2 extra bytes
     man_info_len = min(
@@ -3794,6 +3807,8 @@ def set_n2k_configuration_information(
     msg.add_byte_uint(0x01)
     msg.add_str(data.manufacturer_information, man_info_len)
 
+    return msg
+
 
 # TODO: parser
 def parse_n2k_pgn_configuration_information(
@@ -3812,11 +3827,14 @@ def parse_n2k_pgn_configuration_information(
 
 
 # ISO Request (PGN 59904)
-def set_n2k_pgn_iso_request(msg: Message, destination: int, requested_pgn: int) -> None:
+def set_n2k_pgn_iso_request(destination: int, requested_pgn: int) -> Message:
+    msg = Message()
     msg.pgn = PGN.IsoRequest
     msg.destination = destination
     msg.priority = 6
     msg.add_3_byte_int(requested_pgn)
+
+    return msg
 
 
 def parse_n2k_pgn_iso_request(msg: Message) -> int | None:
@@ -3831,11 +3849,11 @@ def parse_n2k_pgn_iso_request(msg: Message) -> int | None:
 
 
 # PGN List (Transmit and Receive)
-def set_n2k_pgn_transmit_list(msg: Message, destination: int, pgns: list[int]):
-    print("NotImplemented set_n2k_pgn_transmit_list")
+def set_n2k_pgn_transmit_list(destination: int, pgns: list[int]) -> Message:
+    raise NotImplementedError
 
 
 # Heartbeat (PGN: 126993)
 # time_interval_ms: between 10 and 655'320ms
-def set_heartbeat(msg: Message, time_interval_ms: int, status_byte: int) -> None:
-    print("NotImplemented set_heartbeat")
+def set_heartbeat(time_interval_ms: int, status_byte: int) -> Message:
+    raise NotImplementedError
