@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 from n2k import constants, types
 from n2k.message import Message
@@ -3047,7 +3047,7 @@ def parse_n2k_gnss_dop(msg: Message) -> GNSSDOPData:
     )
 
 
-MAX_SATELLITE_INFO_COUNT = 18  # Maximum amount of satellites that fit into fast packet. TODO: extend using tp message
+MAX_SATELLITE_INFO_COUNT: Final = 18  # Maximum amount of satellites that fit into fast packet. TODO: extend using tp message
 
 
 # GNSS Satellites in View (PGN 129540)

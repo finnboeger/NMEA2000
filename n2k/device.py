@@ -1,16 +1,18 @@
 from __future__ import annotations
 
+from typing import Final
+
 import n2k.device_information
 import n2k.device_list
 from n2k import constants
 from n2k.types import ConfigurationInformation, ProductInformation
 from n2k.utils import millis
 
-MAX_NAME_REQUESTS = 20
-MAX_PRODUCT_INFO_REQUESTS = 4
-MAX_CONFIG_INFO_REQUESTS = 4
-MAX_PGN_LIST_REQUESTS = 4
-MIN_PGN_LIST_REQUEST_INTERVAL = 1000
+MAX_NAME_REQUESTS: Final = 20
+MAX_PRODUCT_INFO_REQUESTS: Final = 4
+MAX_CONFIG_INFO_REQUESTS: Final = 4
+MAX_PGN_LIST_REQUESTS: Final = 4
+MIN_PGN_LIST_REQUEST_INTERVAL: Final = 1000
 
 
 class Device:

@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Final
 
-PDU1_FORMAT_BYTE_MAX = 240
+PDU1_FORMAT_BYTE_MAX: Final = 240
 
 
 @dataclass
