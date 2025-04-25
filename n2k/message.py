@@ -12,8 +12,6 @@ from n2k.utils import IntRef, clamp_int, millis
 if TYPE_CHECKING:
     from n2k.stream import Stream
 
-default_bytearray = bytearray()
-
 
 # WARNING: The round method employed by python differs from the one written in the ported C code
 #  However this is the correct method for IEEE floating point numbers
@@ -36,13 +34,15 @@ class Message:
         source: int = 15,
         priority: int = 6,
         pgn: int = 0,
-        data: bytearray = default_bytearray,
+        data: bytearray | None = None,
     ) -> None:
         self.source = source
         self.destination = 255
         self.priority = priority & 0x7
         self.pgn = pgn
         self.msg_time = millis()
+        if data is None:
+            data = bytearray()
         self.data = data[: self.max_data_len]
         self.data_len = len(data)
         # self.tp_message = False
