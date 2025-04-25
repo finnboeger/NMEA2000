@@ -17,11 +17,11 @@ from n2k.device_information import DeviceInformation
 from n2k.device_list import DeviceList
 from n2k.message import Message
 from n2k.messages import (
+    create_n2k_configuration_information_message,
+    create_n2k_iso_address_claim_message,
+    create_n2k_pgn_iso_acknowledgement_message,
+    create_n2k_product_information_message,
     parse_n2k_pgn_iso_request,
-    set_n2k_configuration_information,
-    set_n2k_iso_address_claim,
-    set_n2k_pgn_iso_acknowledgement,
-    set_n2k_product_information,
 )
 from n2k.n2k import (
     PGN,
@@ -457,7 +457,7 @@ class Node(can.Listener):
     ) -> None:
         raise NotImplementedError
 
-    def _set_n2k_can_buf_msg(self, can_id: int, length: int, buf: bytearray):
+    def _create_n2k_can_buf_msg_message(self, can_id: int, length: int, buf: bytearray):
         raise NotImplementedError
 
     def _is_fast_packet_pgn(self, pgn: int) -> bool:
@@ -579,7 +579,7 @@ class Node(can.Listener):
 
             ack_msg = Message()
             # No user handler or user handler returned false. Send Negative Acknowledgment
-            ack_msg = set_n2k_pgn_iso_acknowledgement(
+            ack_msg = create_n2k_pgn_iso_acknowledgement_message(
                 destination=msg.source,
                 control=1,
                 group_function=0xFF,
@@ -764,14 +764,20 @@ class Node(can.Listener):
     #
     # installation_description_changed: bool
 
-    def set_n2k_can_msg_buf_size(self, max_n2k_can_msgs: int) -> None:
+    def create_n2k_can_msg_buf_size_message(self, max_n2k_can_msgs: int) -> None:
         self._max_n2k_can_msgs = max_n2k_can_msgs
 
-    def set_n2k_can_send_frame_buf_size(self, max_can_send_frames: int) -> None:
+    def create_n2k_can_send_frame_buf_size_message(
+        self,
+        max_can_send_frames: int,
+    ) -> None:
         if not self._is_initialized():
             self._max_can_send_frames = max_can_send_frames
 
-    def set_n2k_can_receive_frame_buf_size(self, max_can_receive_frames) -> None:
+    def create_n2k_can_receive_frame_buf_size_message(
+        self,
+        max_can_receive_frames,
+    ) -> None:
         if not self._is_initialized():
             self._max_can_receive_frames = max_can_receive_frames
 
@@ -819,7 +825,7 @@ class Node(can.Listener):
             self.set_pending_iso_address_claim(delay)
             return
 
-        msg = set_n2k_iso_address_claim(
+        msg = create_n2k_iso_address_claim_message(
             destination,
             DeviceInformation(
                 unique_number=self.device_information.unique_number,
@@ -866,7 +872,7 @@ class Node(can.Listener):
         destination: int = 0xFF,
     ) -> bool:  # use_tp: bool = False
         # msg.tp_message = use_tp
-        msg = set_n2k_product_information(
+        msg = create_n2k_product_information_message(
             data=self.product_information,
             destination=destination,
         )
@@ -888,14 +894,14 @@ class Node(can.Listener):
             and self.configuration_information.installation_description2 == ""
         ):
             # No information provided
-            msg = set_n2k_pgn_iso_acknowledgement(
+            msg = create_n2k_pgn_iso_acknowledgement_message(
                 destination=destination,
                 control=1,
                 group_function=0xFF,
                 pgn=PGN.ConfigurationInformation,
             )
         else:
-            msg = set_n2k_configuration_information(
+            msg = create_n2k_configuration_information_message(
                 data=ConfigurationInformation(
                     manufacturer_information=self.configuration_information.manufacturer_information,
                     installation_description1=self.configuration_information.installation_description1,

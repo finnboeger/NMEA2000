@@ -33,7 +33,7 @@ class SystemTime:
     time_source: types.N2kTimeSource
 
 
-def set_n2k_system_time(
+def create_n2k_system_time_message(
     data: SystemTime,
 ) -> Message:
     """
@@ -87,7 +87,7 @@ class AISSafetyRelatedBroadcast:
     safety_related_text: str | None
 
 
-def set_n2k_ais_related_broadcast_msg(
+def create_n2k_ais_related_broadcast_msg_message(
     data: AISSafetyRelatedBroadcast,
 ) -> Message:
     """
@@ -163,7 +163,7 @@ class MOBNotification:
     mob_emitter_battery_status: types.N2kMOBEmitterBatteryStatus
 
 
-def set_n2k_mob_notification(data: MOBNotification) -> Message:
+def create_n2k_mob_notification_message(data: MOBNotification) -> Message:
     """
     Generate NMEA2000 message containing Man Overboard Notification (PGN 127233)
 
@@ -260,7 +260,7 @@ class HeadingTrackControl:
     vessel_heading: float
 
 
-def set_n2k_heading_track_control(
+def create_n2k_heading_track_control_message(
     data: HeadingTrackControl,
 ) -> Message:
     """
@@ -351,7 +351,7 @@ class Rudder:
     angle_order: float
 
 
-def set_n2k_rudder(
+def create_n2k_rudder_message(
     data: Rudder,
 ) -> Message:
     """
@@ -408,7 +408,7 @@ class Heading:
     ref: types.N2kHeadingReference
 
 
-def set_n2k_heading(
+def create_n2k_heading_message(
     data: Heading,
 ) -> Message:
     """
@@ -461,7 +461,7 @@ class RateOfTurn:
     rate_of_turn: float
 
 
-def set_n2k_rate_of_turn(data: RateOfTurn) -> Message:
+def create_n2k_rate_of_turn_message(data: RateOfTurn) -> Message:
     """
     Rate of Turn (PGN 127251)
 
@@ -508,7 +508,7 @@ class Heave:
     delay_source: types.N2kDelaySource
 
 
-def set_n2k_heave(
+def create_n2k_heave_message(
     data: Heave,
 ) -> Message:
     """
@@ -561,7 +561,7 @@ class Attitude:
     roll: float
 
 
-def set_n2k_attitude(data: Attitude) -> Message:
+def create_n2k_attitude_message(data: Attitude) -> Message:
     """
     Attitude (PGN 127257)
 
@@ -611,7 +611,7 @@ class MagneticVariation:
     variation: float
 
 
-def set_n2k_magnetic_variation(data: MagneticVariation) -> Message:
+def create_n2k_magnetic_variation_message(data: MagneticVariation) -> Message:
     """
     Magnetic Variation (PGN 127258)
 
@@ -665,7 +665,7 @@ class EngineParametersRapid:
     engine_tilt_trim: int
 
 
-def set_n2k_engine_parameters_rapid(data: EngineParametersRapid) -> Message:
+def create_n2k_engine_parameters_rapid_message(data: EngineParametersRapid) -> Message:
     """
     Engine Parameters Rapid (PGN 127488)
 
@@ -740,7 +740,9 @@ class EngineParametersDynamic:
     status2: types.N2kEngineDiscreteStatus2
 
 
-def set_n2k_engine_parameters_dynamic(data: EngineParametersDynamic) -> Message:
+def create_n2k_engine_parameters_dynamic_message(
+    data: EngineParametersDynamic,
+) -> Message:
     """
     Engine Parameters Dynamic (PGN 127489)
 
@@ -831,7 +833,7 @@ class TransmissionParametersDynamic:
     discrete_status1: types.N2kTransmissionDiscreteStatus1
 
 
-def set_n2k_transmission_parameters_dynamic(
+def create_n2k_transmission_parameters_dynamic_message(
     data: TransmissionParametersDynamic,
 ) -> Message:
     """
@@ -895,7 +897,9 @@ class TripFuelConsumptionEngine:
     instantaneous_fuel_economy: float
 
 
-def set_n2k_trip_parameters_engine(data: TripFuelConsumptionEngine) -> Message:
+def create_n2k_trip_parameters_engine_message(
+    data: TripFuelConsumptionEngine,
+) -> Message:
     """
     Trip Fuel Consumption by Engine (PGN 127497)
 
@@ -941,7 +945,7 @@ class BinaryStatusReport:
     bank_status: types.N2kBinaryStatus
 
 
-def set_n2k_binary_status_report(data: BinaryStatusReport) -> Message:
+def create_n2k_binary_status_report_message(data: BinaryStatusReport) -> Message:
     """
     Binary Status Report (PGN 127501)
 
@@ -983,7 +987,7 @@ class SwitchBankControl:
     bank_status: types.N2kBinaryStatus
 
 
-def set_n2k_switch_bank_control(
+def create_n2k_switch_bank_control_message(
     data: SwitchBankControl,
 ) -> Message:
     """
@@ -1041,7 +1045,7 @@ class FluidLevel:
     capacity: float
 
 
-def set_n2k_fluid_level(data: FluidLevel) -> Message:
+def create_n2k_fluid_level_message(data: FluidLevel) -> Message:
     """
     Fluid Level (PGN 127505)
 
@@ -1099,7 +1103,7 @@ class DCDetailedStatus:
     capacity: float
 
 
-def set_n2k_dc_detailed_status(data: DCDetailedStatus) -> Message:
+def create_n2k_dc_detailed_status_message(data: DCDetailedStatus) -> Message:
     """
     DC Detailed Status (PGN 127506)
 
@@ -1161,7 +1165,7 @@ class ChargerStatus:
     equalization_time_remaining: float
 
 
-def set_n2k_charger_status(data: ChargerStatus) -> Message:
+def create_n2k_charger_status_message(data: ChargerStatus) -> Message:
     """
     Charger Status (PGN 127507)
 
@@ -1229,7 +1233,7 @@ class BatteryStatus:
     sid: int
 
 
-def set_n2k_battery_status(data: BatteryStatus) -> Message:
+def create_n2k_battery_status_message(data: BatteryStatus) -> Message:
     """
     Battery Status (PGN 127508)
 
@@ -1291,7 +1295,9 @@ class ChargerConfigurationStatus:
     equalization_time_remaining: int
 
 
-def set_n2k_charger_configuration_status(data: ChargerConfigurationStatus) -> Message:
+def create_n2k_charger_configuration_status_message(
+    data: ChargerConfigurationStatus,
+) -> Message:
     """
     Charger Configuration Status (PGN 127510)
 
@@ -1381,7 +1387,9 @@ class BatteryConfigurationStatus:
     charge_efficiency_factor: int
 
 
-def set_n2k_battery_configuration_status(data: BatteryConfigurationStatus) -> Message:
+def create_n2k_battery_configuration_status_message(
+    data: BatteryConfigurationStatus,
+) -> Message:
     """
     Battery Configuration Status (PGN 127513)
 
@@ -1463,7 +1471,7 @@ class ConverterStatus:
     ripple_state: types.N2kRippleState
 
 
-def set_n2k_converter_status(data: ConverterStatus) -> Message:
+def create_n2k_converter_status_message(data: ConverterStatus) -> Message:
     """
     Converter (Inverter/Charger) Status (PGN 127750)
 
@@ -1534,7 +1542,7 @@ class Leeway:
     leeway: float
 
 
-def set_n2k_leeway(data: Leeway) -> Message:
+def create_n2k_leeway_message(data: Leeway) -> Message:
     """
     Leeway (PGN 128000)
 
@@ -1585,7 +1593,7 @@ class BoatSpeed:
     swrt: types.N2kSpeedWaterReferenceType
 
 
-def set_n2k_boat_speed(data: BoatSpeed) -> Message:
+def create_n2k_boat_speed_message(data: BoatSpeed) -> Message:
     """
     Boat Speed (PGN 128259)
 
@@ -1637,7 +1645,7 @@ class WaterDepth:
     max_range: float
 
 
-def set_n2k_water_depth(data: WaterDepth) -> Message:
+def create_n2k_water_depth_message(data: WaterDepth) -> Message:
     """
     Water Depth (PGN 128267)
 
@@ -1686,7 +1694,7 @@ class DistanceLog:
     trip_log: int
 
 
-def set_n2k_distance_log(data: DistanceLog) -> Message:
+def create_n2k_distance_log_message(data: DistanceLog) -> Message:
     """
     Distance Log (PGN 128275)
 
@@ -1755,7 +1763,7 @@ class AnchorWindlassControlStatus:
     windlass_control_events: types.N2kWindlassControlEvents
 
 
-def set_n2k_anchor_windlass_control_status(
+def create_n2k_anchor_windlass_control_status_message(
     data: AnchorWindlassControlStatus,
 ) -> Message:
     """
@@ -1853,7 +1861,7 @@ class AnchorWindlassOperatingStatus:
     windlass_operating_events: types.N2kWindlassOperatingEvents
 
 
-def set_n2k_anchor_windlass_operating_status(
+def create_n2k_anchor_windlass_operating_status_message(
     data: AnchorWindlassOperatingStatus,
 ) -> Message:
     """
@@ -1933,7 +1941,7 @@ class AnchorWindlassMonitoringStatus:
     windlass_monitoring_events: types.N2kWindlassMonitoringEvents
 
 
-def set_n2k_anchor_windlass_monitoring_status(
+def create_n2k_anchor_windlass_monitoring_status_message(
     data: AnchorWindlassMonitoringStatus,
 ) -> Message:
     """
@@ -1989,7 +1997,7 @@ class LatLonRapid:
     longitude: float
 
 
-def set_n2k_lat_long_rapid(data: LatLonRapid) -> Message:
+def create_n2k_lat_long_rapid_message(data: LatLonRapid) -> Message:
     """
     Position rapid update (PGN 129025)
 
@@ -2035,7 +2043,7 @@ class CogSogRapid:
     sog: float
 
 
-def set_n2k_cog_sog_rapid(data: CogSogRapid) -> Message:
+def create_n2k_cog_sog_rapid_message(data: CogSogRapid) -> Message:
     """
     Course and Speed over Ground, rapid update (PGN 129026)
 
@@ -2114,7 +2122,7 @@ class GNSSPositionData:
     age_of_correction: float | None
 
 
-def set_n2k_gnss_data(data: GNSSPositionData) -> Message:
+def create_n2k_gnss_data_message(data: GNSSPositionData) -> Message:
     """
     GNSS Position Data (PGN 129029)
 
@@ -2236,7 +2244,7 @@ class DateTimeLocalOffset:
     sid: int
 
 
-def set_n2k_date_time_local_offset(data: DateTimeLocalOffset) -> Message:
+def create_n2k_date_time_local_offset_message(data: DateTimeLocalOffset) -> Message:
     """
     Date, Time & Local offset (PGN 129033), see also PGN 126992 (:py:class:`SystemTime`)
 
@@ -2315,7 +2323,7 @@ class AISClassAPositionReport:
     sid: int
 
 
-def set_n2k_ais_class_a_position(data: AISClassAPositionReport) -> Message:
+def create_n2k_ais_class_a_position_message(data: AISClassAPositionReport) -> Message:
     """
     AIS Position Reports for Class A (PGN 129038)
 
@@ -2452,7 +2460,7 @@ class AISClassBPositionReport:
     sid: int
 
 
-def set_n2k_ais_class_b_position(data: AISClassBPositionReport) -> Message:
+def create_n2k_ais_class_b_position_message(data: AISClassBPositionReport) -> Message:
     """
     AIS Position Reports for Class B (PGN 129039)
 
@@ -2621,7 +2629,9 @@ class AISAtoNReportData:
     a_to_n_name: str | None
 
 
-def set_n2k_ais_aids_to_navigation_report(data: AISAtoNReportData) -> Message:
+def create_n2k_ais_aids_to_navigation_report_message(
+    data: AISAtoNReportData,
+) -> Message:
     """
     AIS Aids to Navigation (AtoN) Report (PGN 129041)
 
@@ -2734,7 +2744,7 @@ class CrossTrackError:
     xte: float
 
 
-def set_n2k_cross_track_error(data: CrossTrackError) -> Message:
+def create_n2k_cross_track_error_message(data: CrossTrackError) -> Message:
     """
     Cross Track Error (PGN 129283)
 
@@ -2813,7 +2823,7 @@ class NavigationInfo:
     waypoint_closing_velocity: float
 
 
-def set_n2k_navigation_info(data: NavigationInfo) -> Message:
+def create_n2k_navigation_info_message(data: NavigationInfo) -> Message:
     """
     # Navigation Info (PGN 129284)
 
@@ -2901,7 +2911,9 @@ class RouteWaypointInformation:
     waypoints: list[types.Waypoint]
 
 
-def set_n2k_route_waypoint_information(data: RouteWaypointInformation) -> Message:
+def create_n2k_route_waypoint_information_message(
+    data: RouteWaypointInformation,
+) -> Message:
     """
     Route Waypoint Information (PGN 129285)
 
@@ -3005,7 +3017,7 @@ class GNSSDOPData:
     tdop: float
 
 
-def set_n2k_gnss_dop(data: GNSSDOPData) -> Message:
+def create_n2k_gnss_dop_message(data: GNSSDOPData) -> Message:
     """
     GNSS DOP Data (PGN 129539)
 
@@ -3066,7 +3078,7 @@ class GNSSSatellitesInView:
     satellites: list[types.SatelliteInfo]
 
 
-def set_n2k_gnss_satellites_in_view(data: GNSSSatellitesInView) -> Message:
+def create_n2k_gnss_satellites_in_view_message(data: GNSSSatellitesInView) -> Message:
     """
     GNSS Satellites in View (PGN 129540)
 
@@ -3208,7 +3220,7 @@ class AISClassAStaticData:
     sid: int
 
 
-def set_n2k_ais_class_a_static_data(data: AISClassAStaticData) -> Message:
+def create_n2k_ais_class_a_static_data_message(data: AISClassAStaticData) -> Message:
     """
     AIS Class A Static Data (PGN 129794)
 
@@ -3326,7 +3338,9 @@ class AISClassBStaticDataPartA:
     sid: int
 
 
-def set_n2k_ais_class_b_static_data_part_a(data: AISClassBStaticDataPartA) -> Message:
+def create_n2k_ais_class_b_static_data_part_a_message(
+    data: AISClassBStaticDataPartA,
+) -> Message:
     """
     AIS Class B Static Data part A (PGN 129809)
 
@@ -3420,7 +3434,9 @@ class AISClassBStaticDataPartB:
     sid: int
 
 
-def set_n2k_ais_class_b_static_data_part_b(data: AISClassBStaticDataPartB) -> Message:
+def create_n2k_ais_class_b_static_data_part_b_message(
+    data: AISClassBStaticDataPartB,
+) -> Message:
     """
     AIS CLass B Static Data part B (PGN 129810)
 
@@ -3505,7 +3521,7 @@ class WaypointList:
     waypoints: list[types.Waypoint]
 
 
-def set_n2k_waypoint_list(
+def create_n2k_waypoint_list_message(
     data: WaypointList,
 ) -> Message:
     """
@@ -3602,7 +3618,7 @@ class WindSpeed:
     wind_reference: types.N2kWindReference
 
 
-def set_n2k_wind_speed(data: WindSpeed) -> Message:
+def create_n2k_wind_speed_message(data: WindSpeed) -> Message:
     """
     Wind Speed (PGN 130306)
 
@@ -3678,7 +3694,7 @@ def parse_n2k_wind_speed(msg: Message) -> WindSpeed:
 
 
 # ISO Acknowledgement (PGN 59392)
-def set_n2k_pgn_iso_acknowledgement(
+def create_n2k_pgn_iso_acknowledgement_message(
     destination: int,
     control: int,
     group_function: int,
@@ -3699,14 +3715,20 @@ def set_n2k_pgn_iso_acknowledgement(
 
 
 # ISO Address Claim (PGN 60928)
-def set_n2k_iso_address_claim(
+def create_n2k_iso_address_claim_message(
     destination: int,
     device_information: DeviceInformation,
 ) -> Message:
-    return set_n2k_iso_address_claim_by_name(destination, device_information.name)
+    return create_n2k_iso_address_claim_message_by_name(
+        destination,
+        device_information.name,
+    )
 
 
-def set_n2k_iso_address_claim_by_name(destination: int, name: int) -> Message:
+def create_n2k_iso_address_claim_message_by_name(
+    destination: int,
+    name: int,
+) -> Message:
     msg = Message()
     msg.pgn = PGN.IsoAddressClaim
     msg.priority = 6
@@ -3717,7 +3739,7 @@ def set_n2k_iso_address_claim_by_name(destination: int, name: int) -> Message:
 
 
 # Product Information (PGN 126996)
-def set_n2k_product_information(
+def create_n2k_product_information_message(
     data: types.ProductInformation,
     destination: int,
 ) -> Message:
@@ -3759,7 +3781,7 @@ def parse_n2k_pgn_product_information(msg: Message) -> types.ProductInformation:
 
 
 # Configuration Information (PGN: 126998)
-def set_n2k_configuration_information(
+def create_n2k_configuration_information_message(
     data: types.ConfigurationInformation,
 ) -> Message:
     msg = Message()
@@ -3827,7 +3849,7 @@ def parse_n2k_pgn_configuration_information(
 
 
 # ISO Request (PGN 59904)
-def set_n2k_pgn_iso_request(destination: int, requested_pgn: int) -> Message:
+def create_n2k_pgn_iso_request_message(destination: int, requested_pgn: int) -> Message:
     msg = Message()
     msg.pgn = PGN.IsoRequest
     msg.destination = destination
@@ -3849,7 +3871,7 @@ def parse_n2k_pgn_iso_request(msg: Message) -> int | None:
 
 
 # PGN List (Transmit and Receive)
-def set_n2k_pgn_transmit_list(destination: int, pgns: list[int]) -> Message:
+def create_n2k_pgn_transmit_list_message(destination: int, pgns: list[int]) -> Message:
     raise NotImplementedError
 
 
