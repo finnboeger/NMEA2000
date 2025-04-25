@@ -91,3 +91,5 @@ N2K_DL_TIME_BETWEEN_PL_REQUEST = 1000  # Time in ms between PGN list requests
 # Can Message Buffer
 
 MAX_N2K_MSG_BUF_TIME: int = 100
+
+STR_NULL_CHAR = 0xFF

@@ -259,7 +259,7 @@ class Message:
             self.add_byte_uint(b)
         # fill up to length using 0xff. Garmin instead uses 0x00 to fill but both seems to work.
         for _b in range(length - len(encoded)):
-            self.add_byte_uint(0xFF)
+            self.add_byte_uint(constants.STR_NULL_CHAR)
 
     def add_var_str(self, v: str) -> None:
         self.add_byte_uint(len(v) + 2)
@@ -524,7 +524,7 @@ class Message:
         i = -1
         for i in range(length):
             b = self.get_byte_uint(index)
-            if b == 0x00 or b == ord(nul_char):
+            if b in (0x00, constants.STR_NULL_CHAR, ord(nul_char)):
                 # either null terminator or custom nul char (e.g. '@' for AIS)
                 break
             ret.append(b)
