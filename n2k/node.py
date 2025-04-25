@@ -579,7 +579,7 @@ class Node(can.Listener):
 
             ack_msg = Message()
             # No user handler or user handler returned false. Send Negative Acknowledgment
-            set_n2k_pgn_iso_acknowledgement(msg, 1, 0xFF, requested_pgn)
+            set_n2k_pgn_iso_acknowledgement(ack_msg, 1, 0xFF, requested_pgn)
             # Direct the response to the original requester
             ack_msg.destination = msg.source
             self.send_msg(ack_msg)
