@@ -178,7 +178,7 @@ class Message:
                 round(v / precision),
                 constants.N2K_INT24_OR,
             )
-            self.data.extend(struct.pack("<i", v)[:3])
+            self.data.extend(v.to_bytes(3, byteorder="little", signed=True))
         else:
             self.data.extend(struct.pack("<i", constants.N2K_INT24_NA)[:3])
         self.data_len += 3
@@ -242,7 +242,7 @@ class Message:
         self.data_len += 2
 
     def add_3_byte_int(self, v: int) -> None:
-        self.data.extend(struct.pack("<i", v)[:3])
+        self.data.extend(v.to_bytes(3, byteorder="little", signed=True))
         self.data_len += 3
 
     def add_4_byte_uint(self, v: int) -> None:
@@ -464,10 +464,11 @@ class Message:
         length = 3
         if index.value + length > self.data_len:
             return default
-        v = struct.unpack(
-            "<i",
-            self.data[index.value : index.value + length] + b"\x00",
-        )[0]
+        v = int.from_bytes(
+            self.data[index.value : index.value + length],
+            byteorder="little",
+            signed=True,
+        )
         index.value += length
         return v
 
