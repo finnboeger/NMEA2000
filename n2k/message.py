@@ -87,6 +87,12 @@ class Message:
 
     # Data Insertion
     def add_float(self, v: float, undef_val: float = constants.N2K_FLOAT_NA) -> None:
+        """
+        Store :obj:`float` values as single precision IEEE floating point
+
+        :param v: value to be stored
+        :param undef_val: value which marks the field as undefined, defaults to :py:obj:`constants.N2K_FLOAT_NA`
+        """
         if v != undef_val:
             self.data.extend(struct.pack("<f", v))
         else:
@@ -99,6 +105,17 @@ class Message:
         precision: float,
         undef_val: float = constants.N2K_DOUBLE_NA,
     ) -> None:
+        """
+        Store :obj:`float` values with a fixed amount of decimal places
+
+        Limited to 1 byte (0 - 254) unsigned integer values. Thus if we choose a precision of 0.1, the maximum that could be stored is 0.1 * 254 = 25.4
+        If the value is outside of this range, it will be clamped to 0 or 254.
+        255 is used to mark the field as undefined.
+
+        :param v: value to be stored
+        :param precision: factor by which the value is divided before being rounded and stored
+        :param undef_val: value which marks the field as undefined, defaults to :py:obj:`constants.N2K_DOUBLE_NA`
+        """
         if v != undef_val:
             v = clamp_int(0, round(v / precision), constants.N2K_UINT8_OR)
             self.data.extend(struct.pack("<B", v))
@@ -112,6 +129,17 @@ class Message:
         precision: float,
         undef_val: float = constants.N2K_DOUBLE_NA,
     ) -> None:
+        """
+        Store :obj:`float` values with a fixed amount of decimal places
+
+        Limited to 1 byte (-128 - 126) signed integer values. Thus if we choose a precision of 0.1, the maximum that could be stored is 0.1 * 126 = 12.6
+        If the value is outside of this range, it will be clamped to -128 or 126.
+        127 is used to mark the field as undefined.
+
+        :param v: value to be stored
+        :param precision: factor by which the value is divided before being rounded and stored
+        :param undef_val: value which marks the field as undefined, defaults to :py:obj:`constants.N2K_DOUBLE_NA`
+        """
         if v != undef_val:
             v = clamp_int(
                 constants.N2K_INT8_MIN,
@@ -129,6 +157,17 @@ class Message:
         precision: float,
         undef_val: float = constants.N2K_DOUBLE_NA,
     ) -> None:
+        """
+        Store :obj:`float` values with a fixed amount of decimal places
+
+        Limited to 2 bytes (0 - 65534) unsigned integer values. Thus if we choose a precision of 0.01, the maximum that could be stored is 0.01 * 65534 = 655.34
+        If the value is outside of this range, it will be clamped to 0 or 65534.
+        65535 is used to mark the field as undefined.
+
+        :param v: value to be stored
+        :param precision: factor by which the value is divided before being rounded and stored
+        :param undef_val: value which marks the field as undefined, defaults to :py:obj:`constants.N2K_DOUBLE_NA`
+        """
         if v != undef_val:
             v = clamp_int(0, round(v / precision), constants.N2K_UINT16_OR)
             self.data.extend(struct.pack("<H", v))
@@ -142,6 +181,17 @@ class Message:
         precision: float,
         undef_val: float = constants.N2K_DOUBLE_NA,
     ) -> None:
+        """
+        Store :obj:`float` values with a fixed amount of decimal places
+
+        Limited to 2 bytes (-32768 - 32676) signed integer values. Thus if we choose a precision of 0.01, the maximum that could be stored is 0.01 * 32676 = 326.76
+        If the value is outside of this range, it will be clamped to -32768 or 32676.
+        32767 is used to mark the field as undefined.
+
+        :param v: value to be stored
+        :param precision: factor by which the value is divided before being rounded and stored
+        :param undef_val: value which marks the field as undefined, defaults to :py:obj:`constants.N2K_DOUBLE_NA`
+        """
         if v != undef_val:
             v = clamp_int(
                 constants.N2K_INT16_MIN,
@@ -159,6 +209,17 @@ class Message:
         precision: float,
         undef_val: float = constants.N2K_DOUBLE_NA,
     ) -> None:
+        """
+        Store :obj:`float` values with a fixed amount of decimal places
+
+        Limited to 3 bytes (0 - 16777214) unsigned integer values. Thus if we choose a precision of 0.001, the maximum that could be stored is 0.001 * 16777214 = 16777.214
+        If the value is outside of this range, it will be clamped to 0 or 16777214.
+        16777215 is used to mark the field as undefined.
+
+        :param v: value to be stored
+        :param precision: factor by which the value is divided before being rounded and stored
+        :param undef_val: value which marks the field as undefined, defaults to :py:obj:`constants.N2K_DOUBLE_NA`
+        """
         if v != undef_val:
             v = clamp_int(0, round(v / precision), constants.N2K_UINT24_OR)
             self.data.extend(struct.pack("<I", v)[:3])
@@ -172,6 +233,17 @@ class Message:
         precision: float,
         undef_val: float = constants.N2K_DOUBLE_NA,
     ) -> None:
+        """
+        Store :obj:`float` values with a fixed amount of decimal places
+
+        Limited to 3 bytes (-8388608 - 8388606) signed integer values. Thus if we choose a precision of 0.001, the maximum that could be stored is 0.001 * 8388606 = 8388.606
+        If the value is outside of this range, it will be clamped to -8388608 or 8388606.
+        8388607 is used to mark the field as undefined.
+
+        :param v: value to be stored
+        :param precision: factor by which the value is divided before being rounded and stored
+        :param undef_val: value which marks the field as undefined, defaults to :py:obj:`constants.N2K_DOUBLE_NA`
+        """
         if v != undef_val:
             v = clamp_int(
                 constants.N2K_INT24_MIN,
@@ -189,6 +261,17 @@ class Message:
         precision: float,
         undef_val: float = constants.N2K_DOUBLE_NA,
     ) -> None:
+        """
+        Store :obj:`float` values with a fixed amount of decimal places
+
+        Limited to 4 bytes (0 - 4294967294) unsigned integer values. Thus if we choose a precision of 0.00001, the maximum that could be stored is 0.00001 * 4294967294 = 42949.67294
+        If the value is outside of this range, it will be clamped to 0 or 4294967294.
+        4294967295 is used to mark the field as undefined.
+
+        :param v: value to be stored
+        :param precision: factor by which the value is divided before being rounded and stored
+        :param undef_val: value which marks the field as undefined, defaults to :py:obj:`constants.N2K_DOUBLE_NA`
+        """
         if v != undef_val:
             v = clamp_int(0, round(v / precision), constants.N2K_UINT32_OR)
             self.data.extend(struct.pack("<I", v))
@@ -202,6 +285,17 @@ class Message:
         precision: float,
         undef_val: float = constants.N2K_DOUBLE_NA,
     ) -> None:
+        """
+        Store :obj:`float` values with a fixed amount of decimal places
+
+        Limited to 4 bytes (-2147483648 - 2147483646) signed integer values. Thus if we choose a precision of 0.00001, the maximum that could be stored is 0.00001 * 2147483646 = 21474.83646
+        If the value is outside of this range, it will be clamped to -2147483648 or 2147483646.
+        2147483647 is used to mark the field as undefined.
+
+        :param v: value to be stored
+        :param precision: factor by which the value is divided before being rounded and stored
+        :param undef_val: value which marks the field as undefined, defaults to :py:obj:`constants.N2K_DOUBLE_NA`
+        """
         if v != undef_val:
             v = clamp_int(
                 constants.N2K_INT32_MIN,
@@ -219,6 +313,17 @@ class Message:
         precision: float,
         undef_val: float = constants.N2K_DOUBLE_NA,
     ) -> None:
+        """
+        Store :obj:`float` values with a fixed amount of decimal places
+
+        Limited to 8 bytes (-2^63 to 2^63-2) signed integer values. Thus if we choose a precision of 1e-7, the maximum that could be stored is 0.0000001 * (2^63-2).
+        If the value is outside of this range, it will be clamped to -2^63 or 2^63-2.
+        2^63-1 is used to mark the field as undefined.
+
+        :param v: value to be stored
+        :param precision: factor by which the value is divided before being rounded and stored
+        :param undef_val: value which marks the field as undefined, defaults to :py:obj:`constants.N2K_DOUBLE_NA`
+        """
         if v != undef_val:
             self.data.extend(struct.pack("<q", round(v / precision)))
         else:
