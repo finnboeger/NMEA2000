@@ -49,12 +49,12 @@ class N2kGroupFunctionParameterErrorCode(IntEnum):
 
 
 def match_request_field(field_val, match_val, mask) -> tuple[bool, int]:
-    if field_val & mask != match_val:
-        return (
-            False,
-            N2kGroupFunctionParameterErrorCode.RequestOrCommandParameterOutOfRange,
-        )
-    return True, N2kGroupFunctionParameterErrorCode.Acknowledge
+    if field_val & mask == match_val:
+        return True, N2kGroupFunctionParameterErrorCode.Acknowledge
+    return (
+        False,
+        N2kGroupFunctionParameterErrorCode.RequestOrCommandParameterOutOfRange,
+    )
 
 
 def match_request_field_str(field_val, match_val) -> tuple[bool, int]:
