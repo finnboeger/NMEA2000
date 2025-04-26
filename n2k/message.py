@@ -241,6 +241,10 @@ class Message:
         self.data.extend(struct.pack("<h", v))
         self.data_len += 2
 
+    def add_3_byte_uint(self, v: int) -> None:
+        self.data.extend(struct.pack("<I", v)[:3])
+        self.data_len += 3
+
     def add_3_byte_int(self, v: int) -> None:
         self.data.extend(v.to_bytes(3, byteorder="little", signed=True))
         self.data_len += 3
