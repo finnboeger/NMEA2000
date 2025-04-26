@@ -282,11 +282,6 @@ class Message:
         for _b in range(length - len(validated)):
             self.add_byte_uint(ord("@"))  # '@' is the AIS null character
 
-    def add_buf(self, v: bytearray) -> None:
-        v = v[: self.get_available_data_length()]
-        for b in v:
-            self.add_byte_uint(b)
-
     # Data Retrieval
     def get_float(
         self,
@@ -545,9 +540,6 @@ class Message:
         if str_type != 0x01:
             return None
         return self.get_str(length, index, b"\xff")
-
-    def get_buf(self, length: int, index: IntRef) -> bytearray:
-        raise NotImplementedError
 
     # Data Manipulation
     def set_byte_uint(self, v: int, index: IntRef) -> bool:
