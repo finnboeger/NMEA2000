@@ -220,7 +220,7 @@ class Message:
         undef_val: float = constants.N2K_DOUBLE_NA,
     ) -> None:
         if v != undef_val:
-            self.data.extend(struct.pack("<q", int(v / precision)))
+            self.data.extend(struct.pack("<q", round(v / precision)))
         else:
             self.data.extend(struct.pack("<q", constants.N2K_INT64_NA))
         self.data_len += 8
