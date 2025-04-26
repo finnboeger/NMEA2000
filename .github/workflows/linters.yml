@@ -1,4 +1,4 @@
-name: Run Linters
+name: Run Linters and Tests
 
 on:
   push:
@@ -32,3 +32,5 @@ jobs:
           version: 1.1.399
       - name: Perform Bandit Analysis
         run: bandit -r n2k
+      - name: Run Tests
+        run: pytest -v
