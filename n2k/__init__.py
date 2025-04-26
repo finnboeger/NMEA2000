@@ -32,7 +32,7 @@ __all__ = [
 ]
 
 
-def set_log_level(level: int):
+def set_log_level(level: int) -> None:
     if level > logging.DEBUG >= log.level:
         log.setLevel(level)
         log.removeHandler(debug_console_handler)

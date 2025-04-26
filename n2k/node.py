@@ -155,8 +155,8 @@ class Node(can.Listener):
         self,
         bus: can.BusABC,
         device_information: DeviceInformation,
-        can_msg_buffer_size=20,
-    ):
+        can_msg_buffer_size: int = 20,
+    ) -> None:
         super().__init__()
         self.bus = bus
         self.device_list = DeviceList(self)
@@ -457,7 +457,12 @@ class Node(can.Listener):
     ) -> None:
         raise NotImplementedError
 
-    def _create_n2k_can_buf_msg_message(self, can_id: int, length: int, buf: bytearray):
+    def _create_n2k_can_buf_msg_message(
+        self,
+        can_id: int,
+        length: int,
+        buf: bytearray,
+    ) -> Message | None:
         raise NotImplementedError
 
     def _is_fast_packet_pgn(self, pgn: int) -> bool:
@@ -678,7 +683,7 @@ class Node(can.Listener):
             self._start_address_claim()
             self.address_changed = True
 
-    def _get_next_address(self, restart_at_end: bool = False):
+    def _get_next_address(self, restart_at_end: bool = False) -> None:
         if self.n2k_source == constants.N2K_NULL_CAN_BUS_ADDRESS:
             if restart_at_end:
                 # For Null address start at beginning
@@ -697,7 +702,7 @@ class Node(can.Listener):
         self.address_changed = True
         return
 
-    def _get_sequence_counter(self, pgn: int):
+    def _get_sequence_counter(self, pgn: int) -> int:
         if self.pgn_sequence_counters is None:
             return 0
 
@@ -776,7 +781,7 @@ class Node(can.Listener):
 
     def create_n2k_can_receive_frame_buf_size_message(
         self,
-        max_can_receive_frames,
+        max_can_receive_frames: int,
     ) -> None:
         if not self._is_initialized():
             self._max_can_receive_frames = max_can_receive_frames
@@ -885,7 +890,7 @@ class Node(can.Listener):
 
     def send_configuration_information(
         self,
-        destination=0xFF,
+        destination: int = 0xFF,
     ) -> bool:  #  use_tp: bool = False
         # msg.tp_message = ust_tp
         if (
@@ -915,7 +920,7 @@ class Node(can.Listener):
         return False
 
     # Heartbeat Support
-    def send_heartbeat(self, force: bool = False):
+    def send_heartbeat(self, force: bool = False) -> bool:
         raise NotImplementedError
 
     # Send message to the bus

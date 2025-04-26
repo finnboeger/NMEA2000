@@ -23,7 +23,7 @@ n2k_node.set_configuration_information()
 
 
 class Handler(n2k.MessageHandler):
-    def __init__(self, node: n2k.Node):
+    def __init__(self, node: n2k.Node) -> None:
         super().__init__(0, node)
 
     def handle_msg(self, msg: n2k.Message) -> None:

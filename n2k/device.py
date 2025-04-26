@@ -42,7 +42,7 @@ class Device:
 
     last_message_time: int
 
-    def __init__(self, name, source=255):
+    def __init__(self, name: int, source: int = 255) -> None:
         self.source = source
         self.dev_i = n2k.device_information.DeviceInformation.from_name(name)
         self.create_time = millis()

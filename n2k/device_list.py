@@ -16,7 +16,7 @@ class DeviceList(MessageHandler):
     list_updated: bool
     has_pending_requests: bool
 
-    def __init__(self, node: n2k.node.Node):
+    def __init__(self, node: n2k.node.Node) -> None:
         """Initialize Device List"""
         super().__init__(0, node)
         self.sources = [None] * constants.N2K_MAX_BUS_DEVICES
@@ -470,13 +470,13 @@ class DeviceList(MessageHandler):
             return 0
         return dev.last_message_time
 
-    def read_reset_is_list_updated(self):
+    def read_reset_is_list_updated(self) -> bool:
         if self.list_updated:
             self.list_updated = False
             return True
         return False
 
-    def count(self):
+    def count(self) -> int:
         c = 0
         for x in self.sources:
             if x is not None:

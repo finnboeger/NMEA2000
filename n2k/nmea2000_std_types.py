@@ -63,11 +63,11 @@ class N2kDD206:
     throttle_position_sensor: int = 0
     engine_emergency_stop_mode: int = 0
 
-    def __init__(self, value: int = 0):
+    def __init__(self, value: int = 0) -> None:
         self.status = value
 
     @property
-    def status(self):
+    def status(self) -> int:
         return (
             self.check_engine << 0
             | self.over_temperature << 1
@@ -88,7 +88,7 @@ class N2kDD206:
         )
 
     @status.setter
-    def status(self, value):
+    def status(self, value: int) -> None:
         self.check_engine = (value >> 0) & 0b1
         self.over_temperature = (value >> 1) & 0b1
         self.low_oil_pressure = (value >> 2) & 0b1
@@ -125,11 +125,11 @@ class N2kDD223:
     manufacturer7: int = 0
     manufacturer8: int = 0
 
-    def __init__(self, value: int = 0):
+    def __init__(self, value: int = 0) -> None:
         self.status = value
 
     @property
-    def status(self):
+    def status(self) -> int:
         return (
             self.warning_level1 << 0
             | self.warning_level2 << 1
@@ -150,7 +150,7 @@ class N2kDD223:
         )
 
     @status.setter
-    def status(self, value):
+    def status(self, value: int) -> None:
         self.warning_level1 = (value >> 0) & 0b1
         self.warning_level2 = (value >> 1) & 0b1
         self.power_reduction = (value >> 2) & 0b1
@@ -168,7 +168,7 @@ class N2kDD223:
         self.manufacturer7 = (value >> 14) & 0b1
         self.manufacturer8 = (value >> 15) & 0b1
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if isinstance(other, N2kDD223):
             return self.status == other.status & 0x00FF
         if isinstance(other, int):
@@ -231,11 +231,11 @@ class N2kDD471:
     reserved: int = 0
     data_not_available: int = 0
 
-    def __init__(self, value: int = 0):
+    def __init__(self, value: int = 0) -> None:
         self.events = value
 
     @property
-    def events(self):
+    def events(self) -> int:
         return (
             self.motor_over_temperature_cutout << 0
             | self.motor_over_current_cutout << 1
@@ -248,7 +248,7 @@ class N2kDD471:
         )
 
     @events.setter
-    def events(self, value):
+    def events(self, value: int) -> None:
         self.motor_over_temperature_cutout = (value >> 0) & 0b1
         self.motor_over_current_cutout = (value >> 1) & 0b1
         self.low_oil_level_warning = (value >> 2) & 0b1
@@ -279,17 +279,17 @@ class N2kDD475:
     another_device_controlling_thruster: int = 0
     boat_speed_to_fast: int = 0
 
-    def __init__(self, value: int = 0):
+    def __init__(self, value: int = 0) -> None:
         self.events = value
 
     @property
-    def events(self):
+    def events(self) -> int:
         return (
             self.another_device_controlling_thruster << 0 | self.boat_speed_to_fast << 1
         )
 
     @events.setter
-    def events(self, value):
+    def events(self, value: int) -> None:
         self.another_device_controlling_thruster = (value >> 0) & 0b1
         self.boat_speed_to_fast = (value >> 1) & 0b1
 
@@ -300,11 +300,11 @@ class N2kDD477:
     controller_over_current_cutout: int = 0
     controller_over_temperature_cutout: int = 0
 
-    def __init__(self, value: int = 0):
+    def __init__(self, value: int = 0) -> None:
         self.events = value
 
     @property
-    def events(self):
+    def events(self) -> int:
         return (
             self.controller_under_voltage_cutout << 0
             | self.controller_over_current_cutout << 1
@@ -312,7 +312,7 @@ class N2kDD477:
         )
 
     @events.setter
-    def events(self, value):
+    def events(self, value: int) -> None:
         self.controller_under_voltage_cutout = (value >> 0) & 0b1
         self.controller_over_current_cutout = (value >> 1) & 0b1
         self.controller_over_temperature_cutout = (value >> 2) & 0b1
@@ -322,15 +322,15 @@ class N2kDD477:
 class N2kDD478:
     another_device_controlling_windlass: int = 0
 
-    def __init__(self, value: int = 0):
+    def __init__(self, value: int = 0) -> None:
         self.events = value
 
     @property
-    def events(self):
+    def events(self) -> int:
         return self.another_device_controlling_windlass
 
     @events.setter
-    def events(self, value):
+    def events(self, value: int) -> None:
         self.another_device_controlling_windlass = (value >> 0) & 0b1
 
 
@@ -366,11 +366,11 @@ class N2kDD483:
     retrieval_docking_distance_reached: int = 0
     end_of_rode_reached: int = 0
 
-    def __init__(self, value: int = 0):
+    def __init__(self, value: int = 0) -> None:
         self.event = value
 
     @property
-    def event(self):
+    def event(self) -> int:
         return (
             self.system_error << 0
             | self.sensor_error << 1
@@ -380,7 +380,7 @@ class N2kDD483:
         )
 
     @event.setter
-    def event(self, value):
+    def event(self, value: int) -> None:
         self.system_error = (value >> 0) & 0b1
         self.sensor_error = (value >> 1) & 0b1
         self.no_windlass_motion_detected = (value >> 2) & 0b1

@@ -15,7 +15,7 @@ class N2kCANMessage:
     )
     copied_len: int
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.n2k_msg = Message()
 
     def free_message(self) -> None:

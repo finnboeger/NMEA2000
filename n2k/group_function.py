@@ -5,6 +5,7 @@ from enum import IntEnum
 from typing import TYPE_CHECKING
 
 from n2k.message import Message
+from n2k.n2k import PGN
 
 if TYPE_CHECKING:
     import n2k.node
@@ -48,7 +49,7 @@ class N2kGroupFunctionParameterErrorCode(IntEnum):
     ReadOrWriteIsNotSupported = 6
 
 
-def match_request_field(field_val, match_val, mask) -> tuple[bool, int]:
+def match_request_field(field_val: int, match_val: int, mask: int) -> tuple[bool, int]:
     if field_val & mask == match_val:
         return True, N2kGroupFunctionParameterErrorCode.Acknowledge
     return (
@@ -57,7 +58,7 @@ def match_request_field(field_val, match_val, mask) -> tuple[bool, int]:
     )
 
 
-def match_request_field_str(field_val, match_val) -> tuple[bool, int]:
+def match_request_field_str(field_val: str, match_val: str) -> tuple[bool, int]:
     match = field_val == match_val
     if match:
         return True, N2kGroupFunctionParameterErrorCode.Acknowledge
@@ -129,7 +130,7 @@ class N2kGroupFunctionHandler:
     def _handle_write_fields_reply(self, msg: Message) -> bool:
         raise NotImplementedError
 
-    def __init__(self, n2k_node: "n2k.node.Node", pgn: int):
+    def __init__(self, n2k_node: "n2k.node.Node", pgn: int) -> None:
         self.n2k_node = n2k_node
         self._pgn = pgn
 
@@ -146,7 +147,11 @@ def get_pgn_for_group_function(msg: Message) -> int:
     raise NotImplementedError
 
 
-def parse(msg: Message, group_function_code, pgn_for_group_function) -> bool:
+def parse(
+    msg: Message,
+    group_function_code: N2kGroupFunctionCode,
+    pgn_for_group_function: PGN,
+) -> bool:
     raise NotImplementedError
 
 

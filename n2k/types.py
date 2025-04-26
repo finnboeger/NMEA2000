@@ -438,7 +438,7 @@ class N2kTransmissionDiscreteStatus1:
     low_oil_level: int = 0
     sail_drive: int = 0
 
-    def __init__(self, value: int = 0):
+    def __init__(self, value: int = 0) -> None:
         self.status = value
 
     @property
@@ -452,7 +452,7 @@ class N2kTransmissionDiscreteStatus1:
         )
 
     @status.setter
-    def status(self, value):
+    def status(self, value: int) -> None:
         self.check_temperature = (value >> 0) & 0b1
         self.over_temperature = (value >> 1) & 0b1
         self.low_oil_pressure = (value >> 2) & 0b1

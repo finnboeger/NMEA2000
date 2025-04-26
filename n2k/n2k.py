@@ -8,7 +8,7 @@ def is_broadcast(source: int) -> bool:
     return source == constants.N2K_BROADCAST_CAN_BUS_ADDRESS
 
 
-def is_fast_packet_first_frame(byte: int):
+def is_fast_packet_first_frame(byte: int) -> bool:
     return byte & 0x1F == 0
 
 

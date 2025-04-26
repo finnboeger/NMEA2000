@@ -47,7 +47,7 @@ class Message:
         self.data_len = len(data)
         # self.tp_message = False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         s = "Message("
         s += "source=" + str(self.source) + ","
         s += "destination=" + str(self.destination) + ","
@@ -82,7 +82,7 @@ class Message:
             return len(self.data) - index
         return 0
 
-    def get_available_data_length(self):
+    def get_available_data_length(self) -> int:
         return max(0, self.max_data_len - len(self.data))
 
     # Data Insertion
@@ -667,5 +667,5 @@ class Message:
 #  Or maybe just be class functions? Or static functions that return a message (probably best)
 
 
-def print_buf(port: Stream, length: int, p_data: str, add_lf: bool = False):
+def print_buf(port: Stream, length: int, p_data: str, add_lf: bool = False) -> None:
     print("NotImplemented print_buf")

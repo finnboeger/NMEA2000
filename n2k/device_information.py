@@ -17,7 +17,7 @@ class DeviceInformation:
         device_instance: int = 0,
         system_instance: int = 0,
         industry_group: int = 4,
-    ):
+    ) -> None:
         self.unique_number = unique_number
         self.manufacturer_code = manufacturer_code
         self.device_function = device_function
@@ -62,7 +62,7 @@ class DeviceInformation:
         )
 
     @name.setter
-    def name(self, value) -> None:
+    def name(self, value: int) -> None:
         self.unique_number = value & 0x1FFFFF
         self.manufacturer_code = (value >> 21) & 0x7FF
         self.device_instance = (value >> 32) & 0xFF

@@ -25,10 +25,10 @@ class IntRef:
 
     value: int
 
-    def __init__(self, value: int = 0):
+    def __init__(self, value: int = 0) -> None:
         self.value = value
 
-    def __add__(self, other):
+    def __add__(self, other: int | IntRef) -> int:
         if isinstance(other, IntRef):
             return self.value + other.value
         if isinstance(other, int):
@@ -39,7 +39,7 @@ class IntRef:
             + "'",
         )
 
-    def __radd__(self, other):
+    def __radd__(self, other: int | IntRef) -> int:
         if isinstance(other, IntRef):
             return other.value + self.value
         if isinstance(other, int):
@@ -50,7 +50,7 @@ class IntRef:
             + "' and 'IntRef'",
         )
 
-    def __sub__(self, other):
+    def __sub__(self, other: int | IntRef) -> int:
         if isinstance(other, IntRef):
             return self.value - other.value
         if isinstance(other, int):
@@ -61,7 +61,7 @@ class IntRef:
             + "'",
         )
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: int | IntRef) -> int:
         if isinstance(other, IntRef):
             return other.value - self.value
         if isinstance(other, int):
@@ -72,7 +72,7 @@ class IntRef:
             + "' and 'IntRef'",
         )
 
-    def __mult__(self, other):
+    def __mult__(self, other: int | IntRef) -> int:
         if isinstance(other, IntRef):
             return self.value * other.value
         if isinstance(other, int):
@@ -83,7 +83,7 @@ class IntRef:
             + "'",
         )
 
-    def __floordiv__(self, other):
+    def __floordiv__(self, other: int | IntRef) -> int:
         if isinstance(other, IntRef):
             return self.value // other.value
         if isinstance(other, int):
@@ -94,7 +94,7 @@ class IntRef:
             + "'",
         )
 
-    def __rfloordiv__(self, other):
+    def __rfloordiv__(self, other: int | IntRef) -> int:
         if isinstance(other, IntRef):
             return other.value // self.value
         if isinstance(other, int):
@@ -105,7 +105,7 @@ class IntRef:
             + "' and 'IntRef'",
         )
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: int | IntRef) -> float:
         if isinstance(other, IntRef):
             return self.value / other.value
         if isinstance(other, int):
@@ -116,7 +116,7 @@ class IntRef:
             + "'",
         )
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other: int | IntRef) -> float:
         if isinstance(other, IntRef):
             return other.value / self.value
         if isinstance(other, int):
@@ -127,13 +127,13 @@ class IntRef:
             + "' and 'IntRef'",
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "IntRef(" + str(self.value) + ")"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.value)
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
 

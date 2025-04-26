@@ -21,7 +21,7 @@ class N2kGroupFunctionHandlerForPGN60928(N2kGroupFunctionHandler):
     ) -> bool:
         raise NotImplementedError
 
-    def __init__(self, n2k_node: n2k.node.Node):
+    def __init__(self, n2k_node: n2k.node.Node) -> None:
         super().__init__(n2k_node, 60928)
 
 
@@ -35,7 +35,7 @@ class N2kGroupFunctionHandlerForPGN126464(N2kGroupFunctionHandler):
     ) -> bool:
         raise NotImplementedError
 
-    def __init__(self, n2k_node: n2k.node.Node):
+    def __init__(self, n2k_node: n2k.node.Node) -> None:
         super().__init__(n2k_node, 126464)
 
 
@@ -49,7 +49,7 @@ class N2kGroupFunctionHandlerForPGN126993(N2kGroupFunctionHandler):
     ) -> bool:
         raise NotImplementedError
 
-    def __init__(self, n2k_node: n2k.node.Node):
+    def __init__(self, n2k_node: n2k.node.Node) -> None:
         super().__init__(n2k_node, 126993)
 
 
@@ -63,7 +63,7 @@ class N2kGroupFunctionHandlerForPGN126996(N2kGroupFunctionHandler):
     ) -> bool:
         raise NotImplementedError
 
-    def __init__(self, n2k_node: n2k.node.Node):
+    def __init__(self, n2k_node: n2k.node.Node) -> None:
         super().__init__(n2k_node, 126996)
 
 
@@ -85,5 +85,5 @@ class N2kGroupFunctionHandlerForPGN126998(N2kGroupFunctionHandler):
     ) -> bool:
         raise NotImplementedError
 
-    def __init__(self, n2k_node: n2k.node.Node):
+    def __init__(self, n2k_node: n2k.node.Node) -> None:
         super().__init__(n2k_node, 126998)

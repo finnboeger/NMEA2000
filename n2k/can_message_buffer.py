@@ -8,7 +8,7 @@ from n2k.utils import millis
 class N2kCANMessageBuffer:
     _buffer: list[N2kCANMessage]
 
-    def __init__(self, size: int):
+    def __init__(self, size: int) -> None:
         if size <= 0:
             raise ValueError(size)
 
