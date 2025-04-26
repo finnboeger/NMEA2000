@@ -80,6 +80,14 @@ ignore = [
     "PLR0911", "PLR0912", "PLR0913", "T201", "TD002", "TD003", "TD004", "TD005", "UP035"
 ]
 
+[tool.ruff.per-file-ignores]
+# Ignore all rules for tests
+"tests/**/*.py" = [
+    "S101", # allow asserts in tests
+    "PLR2004", # Magic value used in comparison
+    "D", # Don't care about docstrings in tests
+]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
@@ -89,3 +97,12 @@ line-ending = "auto"
 venvPath = "."
 venv = ".venv"
 typeCheckingMode = "standard"
+
+[tool.bandit.assert_used]
+skips = ['*/test_*.py']
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = [
+    "--import-mode=importlib",
+]
