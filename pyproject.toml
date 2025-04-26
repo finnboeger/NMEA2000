@@ -76,8 +76,8 @@ ignore = [
     # rules to be evaluated and fixed bit by bit
     "ANN001", "ANN201", "ANN202", "ANN204", "ARG001", "ARG002", "B007", "C901",
     "D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205", "D401",
-    "E501", "ERA001", "F403", "FBT001", "FBT002", "FIX002", "N815",
-    "PLR0911", "PLR0912", "PLR0913", "T201", "TD002", "TD003", "TD004", "TD005", "UP035"
+    "E501", "ERA001", "FBT001", "FBT002", "FIX002", "N815",
+    "PLR0911", "PLR0912", "PLR0913", "T201", "TD002", "TD003", "TD004", "TD005"
 ]
 
 [tool.ruff.lint.per-file-ignores]
