@@ -280,7 +280,7 @@ class N2kDD475:
     boat_speed_to_fast: int = 0
 
     def __init__(self, value: int = 0):
-        self.events = 0
+        self.events = value
 
     @property
     def events(self):
