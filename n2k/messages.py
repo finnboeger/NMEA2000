@@ -1185,7 +1185,7 @@ def create_n2k_charger_status_message(data: ChargerStatus) -> Message:
     msg.add_byte_uint(
         0x0F << 4 | (data.equalization_pending & 0x03) << 2 | (data.enabled & 0x03),
     )
-    msg.add_2_byte_udouble(data.equalization_time_remaining, 1)
+    msg.add_2_byte_udouble(data.equalization_time_remaining, 60)
     return msg
 
 
@@ -1206,7 +1206,7 @@ def parse_n2k_charger_status(msg: Message) -> ChargerStatus:
     vb = msg.get_byte_uint(index)
     enabled = types.N2kOnOff(vb & 0x03)
     equalization_pending = types.N2kOnOff((vb >> 2) & 0x03)
-    equalization_time_remaining = msg.get_2_byte_double(60, index)
+    equalization_time_remaining = msg.get_2_byte_udouble(60, index)
 
     return ChargerStatus(
         instance=instance,
