@@ -662,6 +662,10 @@ class EngineParametersRapid:
     #: Turbocharger boost pressure in Pascal, stored at a precision of 100 Pa
     engine_boost_pressure: float
     #: Engine tilt or trim (positive or negative) in percent, stored as an integer.
+    #:
+    #: 0: full tilt down
+    #: 50: neutral
+    #: 100: full tilt up
     engine_tilt_trim: int
 
 
@@ -678,9 +682,9 @@ def create_n2k_engine_parameters_rapid_message(data: EngineParametersRapid) -> M
     msg.add_byte_uint(data.engine_instance)
     msg.add_2_byte_udouble(data.engine_speed, 0.25)
     msg.add_2_byte_udouble(data.engine_boost_pressure, 100)
-    msg.add_byte_uint(
+    msg.add_byte_int(
         data.engine_tilt_trim,
-    )  # TODO: this is probably incorrect and should instead be add_byte_int. Verify with Garmin Display
+    )
     msg.add_byte_uint(0xFF)  # reserved
     msg.add_byte_uint(0xFF)  # reserved
     return msg
@@ -698,7 +702,7 @@ def parse_n2k_engine_parameters_rapid(msg: Message) -> EngineParametersRapid:
         engine_instance=msg.get_byte_uint(index),
         engine_speed=msg.get_2_byte_udouble(0.25, index),
         engine_boost_pressure=msg.get_2_byte_udouble(100, index),
-        engine_tilt_trim=msg.get_byte_uint(index),  # TODO: see above
+        engine_tilt_trim=msg.get_byte_int(index),
     )
 
 
