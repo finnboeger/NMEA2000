@@ -3658,43 +3658,43 @@ def parse_n2k_wind_speed(msg: Message) -> WindSpeed:
 
 
 # Outside Environmental parameters (PGN 130310)
-# TODO
+# TODO: implement
 
 
 # Environmental parameters (PGN 130311)
-# TODO
+# TODO: implement
 
 
 # Temperature [deprecated] (PGN 130312)
-# TODO
+# TODO: implement
 
 
 # Humidity (PGN 130313)
-# TODO
+# TODO: implement
 
 
 # Pressure (PGN 130314)
-# TODO
+# TODO: implement
 
 
 # Set pressure (PGN 130315)
-# TODO
+# TODO: implement
 
 
 # Temperature (PGN 130316)
-# TODO
+# TODO: implement
 
 
 # Meteorological Station Data (PGN 130323)
-# TODO
+# TODO: implement
 
 
 # Small Craft Status (Trim Tab Position) (PGN 130576)
-# TODO
+# TODO: implement
 
 
 # Direction Data (PGN 130577)
-# TODO
+# TODO: implement
 
 
 # ISO Acknowledgement (PGN 59392)

@@ -18,4 +18,4 @@ class MessageHandler:
         self._node = node
         self.pgn = pgn
 
-    # TODO how is dropping & unregistering of the handler done?
+    # TODO: how is dropping & unregistering of the handler done?
