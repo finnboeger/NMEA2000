@@ -1346,7 +1346,7 @@ def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfiguration
     charging_algorithm = types.N2kChargingAlgorithm(vb & 0x0F)
     charger_mode = types.N2kChargerMode((vb >> 4) & 0x0F)
     vb = msg.get_byte_uint(index)
-    battery_temperature = types.N2kBattTempNoSensor(vb & 0x04)
+    battery_temperature = types.N2kBattTempNoSensor(vb & 0x0F)
     equalization_enabled = types.N2kOnOff((vb >> 4) & 0x03)
     over_charge_enable = types.N2kOnOff((vb >> 6) & 0x03)
     equalization_time_remaining = msg.get_2_byte_uint(index)
