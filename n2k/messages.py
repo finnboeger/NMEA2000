@@ -21,9 +21,6 @@ class SystemTime:
     System Time is in UTC.
     """
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time.
-    sid: int
     #: Days since 1970-01-01
     system_date: int
     # TODO: check if seconds since midnight is UTC or timezone specific
@@ -31,6 +28,9 @@ class SystemTime:
     system_time: float
     #: Time source, see :py:class:`n2k.types.N2kTimeSource`
     time_source: types.N2kTimeSource
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = constants.N2K_UINT8_NA
 
 
 def create_n2k_system_time_message(
@@ -132,9 +132,6 @@ def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadca
 class MOBNotification:
     """Data for Man Overboard Notification Message (PGN 127233)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time.
-    sid: int
     #: Identifier for each MOB emitter, unique to the vessel
     mob_emitter_id: int
     #: MOB Status, see :py:class:`n2k.types.N2kMOBStatus`
@@ -161,6 +158,9 @@ class MOBNotification:
     mmsi: int
     #: see :py:class:`n2k.types.N2kMOBEmitterBatteryStatus`
     mob_emitter_battery_status: types.N2kMOBEmitterBatteryStatus
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_mob_notification_message(data: MOBNotification) -> Message:
@@ -395,9 +395,6 @@ def parse_n2k_rudder(msg: Message) -> Rudder:
 class Heading:
     """Data for Vessel Heading Message (PGN 127250)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time.
-    sid: int
     #: Heading in radians
     heading: float
     #: Magnetic deviation in radians. Use `N2K_DOUBLE_NA` for undefined value.
@@ -406,6 +403,9 @@ class Heading:
     variation: float
     #: Heading reference. Can be true or magnetic.
     ref: types.N2kHeadingReference
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_heading_message(
@@ -454,11 +454,11 @@ def parse_n2k_heading(msg: Message) -> Heading:
 class RateOfTurn:
     """Data for Rate of Turn Message (PGN 127251)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time.
-    sid: int
     #: Rate of turn in radians per second
     rate_of_turn: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_rate_of_turn_message(data: RateOfTurn) -> Message:
@@ -497,15 +497,15 @@ def parse_n2k_rate_of_turn(msg: Message) -> RateOfTurn:
 class Heave:
     """Data for Heave Message (PGN 127252)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Vertical displacement perpendicular to the earth's surface in meters
     heave: float
     #: Delay added by calculations in seconds
     delay: float
     #: Delay Source, see type
     delay_source: types.N2kDelaySource
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_heave_message(
@@ -550,15 +550,15 @@ def parse_n2k_heave(msg: Message) -> Heave:
 class Attitude:
     """Data for Attitude Message (PGN 127257)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time.
-    sid: int
     #: Heading in radians
     yaw: float
     #: Pitch in radians. Positive, when your bow rises.
     pitch: float
     #: Roll in radians. Positive, when tilted right.
     roll: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_attitude_message(data: Attitude) -> Message:
@@ -600,15 +600,15 @@ def parse_n2k_attitude(msg: Message) -> Attitude:
 class MagneticVariation:
     """Data for Magnetic Variation Message (PGN 127258)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time.
-    sid: int
     #: How the magnetic variation for the current location has been derived
     source: types.N2kMagneticVariation
     #: UTC Date in Days since 1970
     days_since_1970: int
     #: Variation in radians, positive values represent Easterly, negative values a Westerly variation.
     variation: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_magnetic_variation_message(data: MagneticVariation) -> Message:
@@ -1084,9 +1084,6 @@ def parse_n2k_fluid_level(msg: Message) -> FluidLevel:
 class DCDetailedStatus:
     """Data for DC Detailed Status Message (PGN 127506)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: DC Source Instance
     dc_instance: int
     #: Type of DC Source
@@ -1101,6 +1098,9 @@ class DCDetailedStatus:
     ripple_voltage: float
     #: Battery capacity in coulombs
     capacity: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_dc_detailed_status_message(data: DCDetailedStatus) -> Message:
@@ -1230,7 +1230,7 @@ class BatteryStatus:
     battery_temperature: float
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int
+    sid: int = 0xFF
 
 
 def create_n2k_battery_status_message(data: BatteryStatus) -> Message:
@@ -1454,9 +1454,6 @@ def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfiguration
 class ConverterStatus:
     """Data for Converter Status Message (PGN 127750)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Connection number
     connection_number: int
     #: Operating state (see :py:class:`n2k.types.N2kConvMode`)
@@ -1469,6 +1466,9 @@ class ConverterStatus:
     low_dc_voltage_state: types.N2kDCVoltageState
     #: Ripple state (see :py:class:`n2k.types.N2kRippleState`)
     ripple_state: types.N2kRippleState
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_converter_status_message(data: ConverterStatus) -> Message:
@@ -1534,12 +1534,12 @@ def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
 class Leeway:
     """Data for Leeway Message (PGN 128000)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Positive angles indicate slippage to starboard, that is, the vessel is tracking to the right of its heading,
     #: and negative angles indicate slippage to port. Angle in radians, stored at a precision of 0.0001rad
     leeway: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_leeway_message(data: Leeway) -> Message:
@@ -1582,15 +1582,15 @@ def parse_n2k_leeway(msg: Message) -> Leeway:
 class BoatSpeed:
     """Data for Boat Speed Message (PGN 128259)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Speed through the water in meters per second, precision 0.01m/s
     water_referenced: float
     #: Speed over ground in meters per second, precision 0.01m/s
     ground_referenced: float
     #: Type of transducer for the water referenced speed, see type
     swrt: types.N2kSpeedWaterReferenceType
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_boat_speed_message(data: BoatSpeed) -> Message:
@@ -1633,9 +1633,6 @@ def parse_n2k_boat_speed(msg: Message) -> BoatSpeed:
 class WaterDepth:
     """Data for Water Depth Message (PGN 128267)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Water depth below transducer in meters, precision 0.01m
     depth_below_transducer: float
     #: Distance in meters between transducer and water surface (positive) or transducer and keel (negative),
@@ -1643,6 +1640,9 @@ class WaterDepth:
     offset: float
     #: Maximum depth that can be measured
     max_range: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_water_depth_message(data: WaterDepth) -> Message:
@@ -1732,9 +1732,6 @@ def parse_n2k_distance_log(msg: Message) -> DistanceLog:
 class AnchorWindlassControlStatus:
     """Data for Anchor Windlass Control Status Message (PGN 128776)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Windlass Identifier
     windlass_identifier: int
     #: Windlass Direction, see type
@@ -1761,6 +1758,9 @@ class AnchorWindlassControlStatus:
     command_timeout: float
     #: Windlass Control Events, see type
     windlass_control_events: types.N2kWindlassControlEvents
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_anchor_windlass_control_status_message(
@@ -1842,9 +1842,6 @@ def parse_n2k_anchor_windlass_control_status(
 class AnchorWindlassOperatingStatus:
     """Data for Anchor Windlass Operating Status Message (PGN 128777)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Identifier of the windlass instance
     windlass_identifier: int
     #: Amount of rode deployed, in metres
@@ -1859,6 +1856,9 @@ class AnchorWindlassOperatingStatus:
     anchor_docking_status: types.N2kAnchorDockingStates
     #: Windlass Operating Events, see type
     windlass_operating_events: types.N2kWindlassOperatingEvents
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_anchor_windlass_operating_status_message(
@@ -1926,9 +1926,6 @@ def parse_n2k_anchor_windlass_operating_status(
 class AnchorWindlassMonitoringStatus:
     """Data for Anchor Windlass Monitoring Status Message (PGN 128778)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Identifier of the windlass instance
     windlass_identifier: int
     #: Total runtime of the motor in seconds
@@ -1939,6 +1936,9 @@ class AnchorWindlassMonitoringStatus:
     motor_current: float
     #: Windlass Monitoring Events, see type
     windlass_monitoring_events: types.N2kWindlassMonitoringEvents
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_anchor_windlass_monitoring_status_message(
@@ -2032,15 +2032,15 @@ def parse_n2k_lat_long_rapid(msg: Message) -> LatLonRapid:
 class CogSogRapid:
     """Data for COG/SOG Rapid Message (PGN 129026)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Course over Ground reference, see type
     heading_reference: types.N2kHeadingReference
     #: Course over Ground in radians, precision 0.0001rad
     cog: float
     #: Speed over Ground in meters per second, precision 0.01m/s
     sog: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_cog_sog_rapid_message(data: CogSogRapid) -> Message:
@@ -2084,9 +2084,6 @@ def parse_n2k_cog_sog_rapid(msg: Message) -> CogSogRapid:
 class GNSSPositionData:
     """Data for GNSS Position Data Message (PGN 129029)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Days since 1.1.1970 UTC
     days_since_1970: int
     # TODO: check if seconds since midnight is UTC or timezone specific
@@ -2120,6 +2117,9 @@ class GNSSPositionData:
     reference_station_id: int | None
     #: Age of DGNSS Correction
     age_of_correction: float | None
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_gnss_data_message(data: GNSSPositionData) -> Message:
@@ -2204,7 +2204,6 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
         age_of_correction = constants.N2K_DOUBLE_NA
 
     return GNSSPositionData(
-        sid,
         days_since_1970,
         seconds_since_midnight,
         latitude,
@@ -2220,6 +2219,7 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
         reference_station_type,
         reference_station_id,
         age_of_correction,
+        sid,
     )
 
 
@@ -2241,7 +2241,7 @@ class DateTimeLocalOffset:
     local_offset: int
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int
+    sid: int = 0xFF
 
 
 def create_n2k_date_time_local_offset_message(data: DateTimeLocalOffset) -> Message:
@@ -2320,7 +2320,7 @@ class AISClassAPositionReport:
     nav_status: types.N2kAISNavStatus
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int
+    sid: int = 0xFF
 
 
 def create_n2k_ais_class_a_position_message(data: AISClassAPositionReport) -> Message:
@@ -2457,7 +2457,7 @@ class AISClassBPositionReport:
     state: bool
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int
+    sid: int = 0xFF
 
 
 def create_n2k_ais_class_b_position_message(data: AISClassBPositionReport) -> Message:
@@ -2733,15 +2733,15 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
 class CrossTrackError:
     """Data for Cross Track Error Message (PGN 129283)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: CrossTrackError Mode, see type
     xte_mode: types.N2kXTEMode
     #: Navigation has been terminated
     navigation_terminated: bool
     #: CrossTrackError in meters
     xte: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_cross_track_error_message(data: CrossTrackError) -> Message:
@@ -2790,9 +2790,6 @@ def parse_n2k_cross_track_error(msg: Message) -> CrossTrackError:
 class NavigationInfo:
     """Data for Navigation Info Message (PGN 129284)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Distance to Destination Waypoint in meters (precision 1cm)
     distance_to_waypoint: float
     #: Course/Bearing Reference, see type
@@ -2821,6 +2818,9 @@ class NavigationInfo:
     destination_longitude: float
     #: Waypoint Closing Velocity
     waypoint_closing_velocity: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_navigation_info_message(data: NavigationInfo) -> Message:
@@ -3002,9 +3002,6 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
 class GNSSDOPData:
     """Data for GNSS DOP Data Message (PGN 129539)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Desired DOP Mode
     desired_mode: types.N2kGNSSDOPmode
     #: Actual DOP Mode
@@ -3015,6 +3012,9 @@ class GNSSDOPData:
     vdop: float
     #: Time Dilution of Precision
     tdop: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_gnss_dop_message(data: GNSSDOPData) -> Message:
@@ -3069,13 +3069,13 @@ MAX_SATELLITE_INFO_COUNT: Final = 18  # Maximum amount of satellites that fit in
 class GNSSSatellitesInView:
     """Data for GNSS Satellites in View Message (PGN 129540)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Range Residual Mode
     mode: types.N2kRangeResidualMode
     #: List of the info of the satellites used
     satellites: list[types.SatelliteInfo]
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_gnss_satellites_in_view_message(data: GNSSSatellitesInView) -> Message:
@@ -3217,7 +3217,7 @@ class AISClassAStaticData:
     ais_info: types.N2kAISTransceiverInformation
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int
+    sid: int = 0xFF
 
 
 def create_n2k_ais_class_a_static_data_message(data: AISClassAStaticData) -> Message:
@@ -3335,7 +3335,7 @@ class AISClassBStaticDataPartA:
     ais_info: types.N2kAISTransceiverInformation
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int
+    sid: int = 0xFF
 
 
 def create_n2k_ais_class_b_static_data_part_a_message(
@@ -3431,7 +3431,7 @@ class AISClassBStaticDataPartB:
     ais_info: types.N2kAISTransceiverInformation
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int
+    sid: int = 0xFF
 
 
 def create_n2k_ais_class_b_static_data_part_b_message(
@@ -3604,9 +3604,6 @@ def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
 class WindSpeed:
     """Data for Wind Speed message (PGN 130306)"""
 
-    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
-    #: for different messages to indicate that they are measured at same time
-    sid: int
     #: Wind Speed in meters per second
     wind_speed: float
     #: Wind Angle in radians
@@ -3616,6 +3613,9 @@ class WindSpeed:
     #:
     #: See :py:class:`n2k.types.N2kWindReference`
     wind_reference: types.N2kWindReference
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
 
 
 def create_n2k_wind_speed_message(data: WindSpeed) -> Message:
