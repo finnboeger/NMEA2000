@@ -87,3 +87,10 @@ class DeviceInformation:
 
     def calculated_industry_group_and_system_instance(self) -> int:
         return (self.industry_group << 4) | 0x80 | (self.system_instance & 0x0F)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, DeviceInformation):
+            return self.name == other.name
+        if isinstance(other, int):
+            return self.name == other
+        return False

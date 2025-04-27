@@ -459,6 +459,13 @@ class N2kTransmissionDiscreteStatus1:
         self.low_oil_level = (value >> 3) & 0b1
         self.sail_drive = (value >> 4) & 0b1
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, N2kTransmissionDiscreteStatus1):
+            return self.status == other.status
+        if isinstance(other, int):
+            return self.status == other
+        return False
+
 
 N2kBinaryStatus = int
 

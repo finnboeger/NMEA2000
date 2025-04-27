@@ -106,6 +106,13 @@ class N2kDD206:
         self.throttle_position_sensor = (value >> 14) & 0b1
         self.engine_emergency_stop_mode = (value >> 15) & 0b1
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, N2kDD206):
+            return self.status == other.status
+        if isinstance(other, int):
+            return self.status == other
+        return False
+
 
 class N2kDD223:
     warning_level1: int = 0
@@ -170,9 +177,9 @@ class N2kDD223:
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, N2kDD223):
-            return self.status == other.status & 0x00FF
+            return self.status == other.status
         if isinstance(other, int):
-            return self.status == other & 0x00FF
+            return self.status == other
         return False
 
 
@@ -258,6 +265,13 @@ class N2kDD471:
         self.reserved = (value >> 6) & 0b1
         self.data_not_available = (value >> 7) & 0b1
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, N2kDD471):
+            return self.events == other.events
+        if isinstance(other, int):
+            return self.events == other
+        return False
+
 
 # Thruster Direction Control
 class N2kDD473(IntEnum):
@@ -293,6 +307,13 @@ class N2kDD475:
         self.another_device_controlling_thruster = (value >> 0) & 0b1
         self.boat_speed_to_fast = (value >> 1) & 0b1
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, N2kDD475):
+            return self.events == other.events
+        if isinstance(other, int):
+            return self.events == other
+        return False
+
 
 # DD477 - Windlass Monitoring Events
 class N2kDD477:
@@ -317,6 +338,13 @@ class N2kDD477:
         self.controller_over_current_cutout = (value >> 1) & 0b1
         self.controller_over_temperature_cutout = (value >> 2) & 0b1
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, N2kDD477):
+            return self.events == other.events
+        if isinstance(other, int):
+            return self.events == other
+        return False
+
 
 # DD478 - Windlass Control Events
 class N2kDD478:
@@ -332,6 +360,13 @@ class N2kDD478:
     @events.setter
     def events(self, value: int) -> None:
         self.another_device_controlling_windlass = (value >> 0) & 0b1
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, N2kDD478):
+            return self.events == other.events
+        if isinstance(other, int):
+            return self.events == other
+        return False
 
 
 # DD480 - Windlass Motion States
@@ -386,6 +421,13 @@ class N2kDD483:
         self.no_windlass_motion_detected = (value >> 2) & 0b1
         self.retrieval_docking_distance_reached = (value >> 3) & 0b1
         self.end_of_rode_reached = (value >> 4) & 0b1
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, N2kDD483):
+            return self.event == other.event
+        if isinstance(other, int):
+            return self.event == other
+        return False
 
 
 # DD484 - Windlass Direction Control
