@@ -1096,11 +1096,11 @@ class DCDetailedStatus:
     state_of_charge: int
     #: Percent of health
     state_of_health: int
-    #: Time remaining in seconds
+    #: Time remaining in seconds, precision 60s
     time_remaining: float
-    #: DC output voltage ripple in Volt
+    #: DC output voltage ripple in Volt, precision 0.001V
     ripple_voltage: float
-    #: Battery capacity in coulombs
+    #: Battery capacity in coulombs, precision 3600C (aka 1Ah)
     capacity: float
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
