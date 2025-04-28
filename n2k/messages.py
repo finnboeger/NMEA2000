@@ -2261,6 +2261,7 @@ def create_n2k_date_time_local_offset_message(data: DateTimeLocalOffset) -> Mess
     msg.add_2_byte_uint(data.days_since_1970)
     msg.add_4_byte_udouble(data.seconds_since_midnight, 0.0001)
     msg.add_2_byte_int(data.local_offset)
+    msg.add_byte_uint(data.sid)
     return msg
 
 
