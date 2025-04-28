@@ -220,13 +220,13 @@ class N2kBatChem(IntEnum):
 
 
 class N2kBatNomVolt(IntEnum):
-    _6v = 0
-    _12v = 1
-    _24v = 2
-    _32v = 3
-    _62v = 4
-    _42v = 5
-    _48v = 6
+    Volt_6 = 0
+    Volt_12 = 1
+    Volt_24 = 2
+    Volt_32 = 3
+    Volt_36 = 4
+    Volt_42 = 5
+    Volt_48 = 6
 
 
 class N2kTransmissionGear(IntEnum):
