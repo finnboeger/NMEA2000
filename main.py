@@ -46,6 +46,11 @@ notifier.add_listener(n2k_node)
 while True:
     time.sleep(0.2)
     msg = n2k.messages.create_n2k_wind_speed_message(
-        WindSpeed(0, 10, radians(340), n2k.types.N2kWindReference.TrueNorth),
+        WindSpeed(
+            wind_speed=10,
+            wind_angle=radians(340),
+            wind_reference=n2k.types.N2kWindReference.TrueNorth,
+            sid=0,
+        ),
     )
     n2k_node.send_msg(msg)
