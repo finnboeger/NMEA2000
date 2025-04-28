@@ -415,7 +415,7 @@ class Message:
         v = self.get_byte_uint(index)
         if v == constants.N2K_UINT8_NA:
             return default
-        return v * precision
+        return apply_precision(v, precision)
 
     def get_1_byte_double(
         self,
@@ -426,7 +426,7 @@ class Message:
         v = self.get_byte_int(index)
         if v == constants.N2K_INT8_NA:
             return default
-        return v * precision
+        return apply_precision(v, precision)
 
     def get_2_byte_udouble(
         self,
@@ -437,7 +437,7 @@ class Message:
         v = self.get_2_byte_uint(index)
         if v == constants.N2K_UINT16_NA:
             return default
-        return v * precision
+        return apply_precision(v, precision)
 
     def get_2_byte_double(
         self,
@@ -448,7 +448,7 @@ class Message:
         v = self.get_2_byte_int(index)
         if v == constants.N2K_INT16_NA:
             return default
-        return v * precision
+        return apply_precision(v, precision)
 
     def get_3_byte_udouble(
         self,
@@ -459,7 +459,7 @@ class Message:
         v = self.get_3_byte_uint(index)
         if v == constants.N2K_UINT24_NA:
             return default
-        return v * precision
+        return apply_precision(v, precision)
 
     def get_3_byte_double(
         self,
@@ -470,7 +470,7 @@ class Message:
         v = self.get_3_byte_int(index)
         if v == constants.N2K_INT24_NA:
             return default
-        return v * precision
+        return apply_precision(v, precision)
 
     def get_4_byte_udouble(
         self,
@@ -481,7 +481,7 @@ class Message:
         v = self.get_4_byte_uint(index)
         if v == constants.N2K_UINT32_NA:
             return default
-        return v * precision
+        return apply_precision(v, precision)
 
     def get_4_byte_double(
         self,
@@ -492,7 +492,7 @@ class Message:
         v = self.get_4_byte_int(index)
         if v == constants.N2K_INT32_NA:
             return default
-        return v * precision
+        return apply_precision(v, precision)
 
     def get_8_byte_double(
         self,
@@ -503,7 +503,7 @@ class Message:
         v = self.get_8_byte_int(index)
         if v == constants.N2K_INT64_NA:
             return default
-        return v * precision
+        return apply_precision(v, precision)
 
     def get_byte_uint(self, index: IntRef) -> int:
         length = 1
@@ -669,3 +669,22 @@ class Message:
 
 def print_buf(port: Stream, length: int, p_data: str, add_lf: bool = False) -> None:
     print("NotImplemented print_buf")
+
+
+def apply_precision(raw_value: int, precision: float) -> float:
+    """
+    Apply the precision to the raw value.
+
+    Due to limitations of floating point numbers (https://docs.python.org/3/tutorial/floatingpoint.html) the exact value of many decimal numbers cannot be represented.
+    When dividing by a float, python seems to return the actual number that the binary representation maps to.
+    This is not a problem, but throws off unit tests that check for equality.
+    Dividing by the inverse of the precision (which should always be an integer) instead, seems to yield the expected result.
+
+    :param raw_value: value as parsed from the message
+    :param precision: precision with which the value was stored
+    :return: value with applied precision, with the appropriate number of decimal places
+    """
+    if precision > 1:
+        return raw_value * precision
+    inverse_precision = round(1 / precision)
+    return raw_value / inverse_precision

@@ -13,7 +13,9 @@ def test_float() -> None:
 def test_1_byte_udouble() -> None:
     for val in [0.0, 1.502, 2.512]:
         for precision in [0.1, 0.01]:
-            ret_val = round(val / precision) * precision
+            inverse_precision = round(1 / precision)
+            ret_val = round(val / precision) / inverse_precision
+
             msg = Message()
             msg.add_1_byte_udouble(val, precision)
             index = IntRef(0)
@@ -23,7 +25,9 @@ def test_1_byte_udouble() -> None:
 def test_1_byte_double() -> None:
     for val in [0.0, 1.1256, -1.1256]:
         for precision in [0.1, 0.01]:
-            ret_val = round(val / precision) * precision
+            inverse_precision = round(1 / precision)
+            ret_val = round(val / precision) / inverse_precision
+
             msg = Message()
             msg.add_1_byte_double(val, precision)
             index = IntRef(0)
@@ -33,7 +37,9 @@ def test_1_byte_double() -> None:
 def test_2_byte_udouble() -> None:
     for val in [0.0, 1.502, 2.512, 5.123, 20.69584, 652.654]:
         for precision in [0.1, 0.01]:
-            ret_val = round(val / precision) * precision
+            inverse_precision = round(1 / precision)
+            ret_val = round(val / precision) / inverse_precision
+
             msg = Message()
             msg.add_2_byte_udouble(val, precision)
             index = IntRef(0)
@@ -43,7 +49,9 @@ def test_2_byte_udouble() -> None:
 def test_2_byte_double() -> None:
     for val in [0.0, 1.1256, -1.1256, 2.512, -237.136]:
         for precision in [0.1, 0.01]:
-            ret_val = round(val / precision) * precision
+            inverse_precision = round(1 / precision)
+            ret_val = round(val / precision) / inverse_precision
+
             msg = Message()
             msg.add_2_byte_double(val, precision)
             index = IntRef(0)
@@ -53,7 +61,9 @@ def test_2_byte_double() -> None:
 def test_3_byte_udouble() -> None:
     for val in [0.0, 1.502, 2.512, 5.123, 20.69584, 16252.654]:
         for precision in [0.1, 0.01, 1e-3]:
-            ret_val = round(val / precision) * precision
+            inverse_precision = round(1 / precision)
+            ret_val = round(val / precision) / inverse_precision
+
             msg = Message()
             msg.add_3_byte_udouble(val, precision)
             index = IntRef(0)
@@ -63,7 +73,9 @@ def test_3_byte_udouble() -> None:
 def test_3_byte_double() -> None:
     for val in [0.0, 1.1256, -1.1256, 2.512, -4237.136]:
         for precision in [0.1, 0.01, 1e-3]:
-            ret_val = round(val / precision) * precision
+            inverse_precision = round(1 / precision)
+            ret_val = round(val / precision) / inverse_precision
+
             msg = Message()
             msg.add_3_byte_double(val, precision)
             index = IntRef(0)
@@ -73,7 +85,9 @@ def test_3_byte_double() -> None:
 def test_4_byte_udouble() -> None:
     for val in [0.0, 1.502, 2.512, 5.123, 20.69584, 16252.654]:
         for precision in [0.1, 0.01, 1e-3, 1e-4, 1e-5]:
-            ret_val = round(val / precision) * precision
+            inverse_precision = round(1 / precision)
+            ret_val = round(val / precision) / inverse_precision
+
             msg = Message()
             msg.add_4_byte_udouble(val, precision)
             index = IntRef(0)
@@ -83,7 +97,9 @@ def test_4_byte_udouble() -> None:
 def test_4_byte_double() -> None:
     for val in [0.0, 1.1256, -1.1256, 2.512, -4237.136]:
         for precision in [0.1, 0.01, 1e-3, 1e-4, 1e-5]:
-            ret_val = round(val / precision) * precision
+            inverse_precision = round(1 / precision)
+            ret_val = round(val / precision) / inverse_precision
+
             msg = Message()
             msg.add_4_byte_double(val, precision)
             index = IntRef(0)
@@ -93,7 +109,9 @@ def test_4_byte_double() -> None:
 def test_8_byte_double() -> None:
     for val in [0.0, 1.1256, -1.1256, 2.512, -4237.136, 12456.3245123]:
         for precision in [0.1, 0.01, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7]:
-            ret_val = round(val / precision) * precision
+            inverse_precision = round(1 / precision)
+            ret_val = round(val / precision) / inverse_precision
+
             msg = Message()
             msg.add_8_byte_double(val, precision)
             index = IntRef(0)
