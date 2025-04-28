@@ -222,6 +222,14 @@ def test_str() -> None:
     assert msg.get_str(len(val), index) == val
 
 
+def test_str_filling() -> None:
+    val = "Test 123456"
+    msg = Message()
+    msg.add_str(val, len(val) + 4)
+    index = IntRef(0)
+    assert msg.get_str(len(val) + 4, index) == val
+
+
 def test_var_str() -> None:
     val = "Test 123456"
     msg = Message()
@@ -236,3 +244,11 @@ def test_ais_str() -> None:
     msg.add_ais_str(val, len(val))
     index = IntRef(0)
     assert msg.get_str(len(val), index) == val.upper()
+
+
+def test_ais_str_filling() -> None:
+    val = "Test 123456"
+    msg = Message()
+    msg.add_ais_str(val, len(val) + 6)
+    index = IntRef(0)
+    assert msg.get_str(len(val) + 6, index) == val.upper()
