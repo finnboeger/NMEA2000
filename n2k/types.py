@@ -85,9 +85,12 @@ class N2kGNSSMethod(IntEnum):
 
 
 class N2kGNSSDOPmode(IntEnum):
-    _1D = 0
-    _2D = 1
-    _3D = 2
+    #: 1D
+    Vertical = 0
+    #: 2D
+    Horizontal = 1
+    #: 3D
+    Positional = 2
     Auto = 3
     Reserved = 4
     Reserved2 = 5

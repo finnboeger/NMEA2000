@@ -9,11 +9,11 @@ class N2kDD002(IntEnum):
     Off = No
     Disabled = No
     Reset = No
-    _0 = No
+    Zero = No
     On = Yes
     Enabled = Yes
     Set = Yes
-    _1 = Yes
+    One = Yes
     Unknown = Unavailable
 
 
