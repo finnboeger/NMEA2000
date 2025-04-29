@@ -33,4 +33,4 @@ jobs:
       - name: Perform Bandit Analysis
         run: bandit -r n2k
       - name: Run Tests
-        run: pytest -v
+        run: pytest -vv
