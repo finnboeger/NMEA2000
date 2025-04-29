@@ -2386,7 +2386,7 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
     heading = msg.get_2_byte_udouble(1e-4, index)
     rot = msg.get_2_byte_double(3.125e-5, index)
     vb = msg.get_byte_uint(index)
-    nav_status = types.N2kAISNavStatus(vb & 0x03)
+    nav_status = types.N2kAISNavStatus(vb & 0x0F)
     msg.get_byte_uint(index)  # reserved
     sid = msg.get_byte_uint(index)
 
