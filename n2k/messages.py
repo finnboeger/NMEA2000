@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, Literal
 
 from n2k import constants, types
 from n2k.message import Message
@@ -74,7 +74,7 @@ class AISSafetyRelatedBroadcast:
     """Data for AIS Safety Related Broadcast Message (PGN 129802)"""
 
     #: Message Type. Identifier for AIS Safety Related Broadcast Message aka Message 14; always 14.
-    message_id: int
+    message_id: Literal[types.N2kAISMessageID.Safety_related_broadcast_message]
     #: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
     #:
     #: 0-3; 0 = default; 3 = do not repeat anymore
@@ -115,9 +115,12 @@ def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadca
     """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
+    message_id = types.N2kAISMessageID(vb & 0x3F)
+    if message_id != types.N2kAISMessageID.Safety_related_broadcast_message:
+        raise ValueError
 
     return AISSafetyRelatedBroadcast(
-        message_id=vb & 0x3F,
+        message_id=message_id,
         repeat=types.N2kAISRepeat((vb >> 6) & 0x03),
         source_id=msg.get_4_byte_uint(index) & 0x3FFFFFFF,
         ais_transceiver_information=types.N2kAISTransceiverInformation(
@@ -2288,7 +2291,7 @@ class AISClassAPositionReport:
     """Data for AIS Class A Position Report Message (PGN 129038)"""
 
     #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    message_id: int
+    message_id: types.N2kAISMessageID
     #: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
     repeat: types.N2kAISRepeat
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
@@ -2368,7 +2371,7 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
     index = IntRef(0)
 
     vb = msg.get_byte_uint(index)
-    message_id = vb & 0x3F
+    message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     longitude = msg.get_4_byte_double(1e-7, index)
@@ -2415,7 +2418,7 @@ class AISClassBPositionReport:
     """Data for AIS Class B Position Report Message (PGN 129039)"""
 
     #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    message_id: int
+    message_id: types.N2kAISMessageID
     #: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
     repeat: types.N2kAISRepeat
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
@@ -2512,7 +2515,7 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
     index = IntRef(0)
 
     vb = msg.get_byte_uint(index)
-    message_id = vb & 0x3F
+    message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     longitude = msg.get_4_byte_double(1e-7, index)
@@ -2570,7 +2573,7 @@ class AISAtoNReportData:
     """Data for AIS Aids to Navigation (AtoN) Report Message (PGN 129041)"""
 
     #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    message_id: int
+    message_id: types.N2kAISMessageID
     #: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
     repeat: types.N2kAISRepeat
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
@@ -2684,7 +2687,7 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
     """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
-    message_id = vb & 0x3F
+    message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     longitude = msg.get_4_byte_double(1e-7, index)
@@ -3159,7 +3162,7 @@ class AISClassAStaticData:
     """Data for AIS Class A Static Data Message (PGN 129794)"""
 
     #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    message_id: int
+    message_id: types.N2kAISMessageID
     #: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
     #:
     #: 0-3; 0 = default; 3 = do not repeat anymore
@@ -3269,7 +3272,7 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
     """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
-    message_id = vb & 0x3F
+    message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     imo_number = msg.get_4_byte_uint(index)
@@ -3321,7 +3324,7 @@ class AISClassBStaticDataPartA:
     """Data for AIS Class B Static Data Part A Message (PGN 129809)"""
 
     #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    message_id: int
+    message_id: types.N2kAISMessageID
     #: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
     #:
     #: 0-3; 0 = default; 3 = do not repeat anymore
@@ -3373,7 +3376,7 @@ def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDat
     """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
-    message_id = vb & 0x3F
+    message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     name = msg.get_str(20, index)
@@ -3397,7 +3400,7 @@ class AISClassBStaticDataPartB:
     """Data for AIS Class B Static Data Part B Message (PGN 129810)"""
 
     #: Message Type ID according to https://www.itu.int/rec/R-REC-M.1371
-    message_id: int
+    message_id: types.N2kAISMessageID
     #: Repeat indicator. Used by the repeater to indicate how many times a message has been repeated.
     #:
     #: 0-3; 0 = default; 3 = do not repeat anymore
@@ -3477,7 +3480,7 @@ def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDat
     """
     index = IntRef(0)
     vb = msg.get_byte_uint(index)
-    message_id = vb & 0x3F
+    message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     vessel_type = msg.get_byte_uint(index)

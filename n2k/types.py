@@ -290,6 +290,36 @@ class N2kAISTransceiverInformation(IntEnum):
     Reserved = 5
 
 
+class N2kAISMessageID(IntEnum):
+    Scheduled_Class_A_position_report = 1
+    Assigned_scheduled_Class_A_position_report = 2
+    Interrogated_Class_A_position_report = 3
+    Base_station_report = 4
+    Static_and_voyage_related_data = 5
+    Binary_addressed_message = 6
+    Binary_acknowledgement = 7
+    Binary_broadcast_message = 8
+    Standard_SAR_aircraft_position_report = 9
+    UTC_date_inquiry = 10
+    UTC_date_response = 11
+    Safety_related_addressed_message = 12
+    Safety_related_acknowledgement = 13
+    Safety_related_broadcast_message = 14
+    Interrogation = 15
+    Assignment_mode_command = 16
+    DGNSS_broadcast_binary_message = 17
+    Standard_Class_B_position_report = 18
+    Extended_Class_B_position_report = 19
+    Data_link_management_message = 20
+    ATON_report = 21
+    Channel_management = 22
+    Group_assignment_command = 23
+    Static_data_report = 24
+    Single_slot_binary_message = 25
+    Multiple_slot_binary_message = 26
+    Position_report_for_long_range_applications = 27
+
+
 class N2kMagneticVariation(IntEnum):
     Manual = 0
     Chart = 1
