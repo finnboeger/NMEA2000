@@ -3111,7 +3111,7 @@ def create_n2k_gnss_satellites_in_view_message(data: GNSSSatellitesInView) -> Me
         msg.add_2_byte_double(satellite.elevation, 1e-4)
         msg.add_2_byte_udouble(satellite.azimuth, 1e-4)
         msg.add_2_byte_double(satellite.snr, 1e-2)
-        msg.add_4_byte_double(satellite.range_residuals, 1e-4)
+        msg.add_4_byte_double(satellite.range_residuals, 1e-5)
         msg.add_byte_uint(satellite.usage_status | 0xF0)
 
     return msg
