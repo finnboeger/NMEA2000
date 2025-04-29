@@ -74,7 +74,7 @@ class N2kGNSSType(IntEnum):
 
 
 class N2kGNSSMethod(IntEnum):
-    noGNSS = 0
+    NoGNSS = 0
     GNSS_fix = 1
     DGNSS = 2
     PreciseGNSS = 3

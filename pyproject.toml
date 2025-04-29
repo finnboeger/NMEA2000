@@ -79,7 +79,7 @@ ignore = [
     # rules to be evaluated and fixed bit by bit
     "ARG001", "ARG002", "B007", "C901",
     "D100", "D101", "D102", "D103", "D104", "D105", "D107", "D205", "D401",
-    "E501", "ERA001", "FBT001", "FBT002", "N815",
+    "E501", "ERA001", "FBT001", "FBT002",
     "PLR0911", "PLR0912", "PLR0913", "T201"
 ]
 
