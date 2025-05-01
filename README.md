@@ -32,7 +32,7 @@ source .venv/bin/activate
 ```
 to setup your virtual environment, install dependencies and setup pre-commit hooks.
 
-If you choose to user VS Code as your editor, there are some extension recommendations that will automatically show up, as well as some pre-configured workspace settings.
+If you choose to use VS Code as your editor, there are some extension recommendations that will automatically show up, as well as some pre-configured workspace settings.
 
 ### Build Documentation
 ```bash
