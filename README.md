@@ -41,5 +41,5 @@ cd docs && make clean && make html
 
 ### Build and publish package
 ```bash
-python -m build && twine upload/dist*
+python -m build && twine upload dist/*
 ```
