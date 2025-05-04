@@ -797,7 +797,7 @@ def parse_n2k_engine_parameters_dynamic(msg: Message) -> EngineParametersDynamic
 
     msg.get_byte_uint(index)
     status1 = types.N2kEngineDiscreteStatus1.from_status(msg.get_2_byte_uint(index))
-    status2 = types.N2kEngineDiscreteStatus2(msg.get_2_byte_uint(index))
+    status2 = types.N2kEngineDiscreteStatus2.from_status(msg.get_2_byte_uint(index))
     engine_load = msg.get_byte_uint(index)
     engine_torque = msg.get_byte_uint(index)
 

@@ -115,6 +115,7 @@ class N2kDD206:
         return False
 
 
+@dataclass(frozen=True, kw_only=True)
 class N2kDD223:
     warning_level1: int = 0
     warning_level2: int = 0
@@ -132,9 +133,6 @@ class N2kDD223:
     manufacturer6: int = 0
     manufacturer7: int = 0
     manufacturer8: int = 0
-
-    def __init__(self, value: int = 0) -> None:
-        self.status = value
 
     @property
     def status(self) -> int:
@@ -157,24 +155,26 @@ class N2kDD223:
             | self.manufacturer8 << 15
         )
 
-    @status.setter
-    def status(self, value: int) -> None:
-        self.warning_level1 = (value >> 0) & 0b1
-        self.warning_level2 = (value >> 1) & 0b1
-        self.power_reduction = (value >> 2) & 0b1
-        self.maintenance_needed = (value >> 3) & 0b1
-        self.engine_comm_error = (value >> 4) & 0b1
-        self.sub_or_secondary_throttle = (value >> 5) & 0b1
-        self.neutral_start_protect = (value >> 6) & 0b1
-        self.engine_shutting_down = (value >> 7) & 0b1
-        self.manufacturer1 = (value >> 8) & 0b1
-        self.manufacturer2 = (value >> 9) & 0b1
-        self.manufacturer3 = (value >> 10) & 0b1
-        self.manufacturer4 = (value >> 11) & 0b1
-        self.manufacturer5 = (value >> 12) & 0b1
-        self.manufacturer6 = (value >> 13) & 0b1
-        self.manufacturer7 = (value >> 14) & 0b1
-        self.manufacturer8 = (value >> 15) & 0b1
+    @staticmethod
+    def from_status(value: int) -> "N2kDD223":
+        return N2kDD223(
+            warning_level1=(value >> 0) & 0b1,
+            warning_level2=(value >> 1) & 0b1,
+            power_reduction=(value >> 2) & 0b1,
+            maintenance_needed=(value >> 3) & 0b1,
+            engine_comm_error=(value >> 4) & 0b1,
+            sub_or_secondary_throttle=(value >> 5) & 0b1,
+            neutral_start_protect=(value >> 6) & 0b1,
+            engine_shutting_down=(value >> 7) & 0b1,
+            manufacturer1=(value >> 8) & 0b1,
+            manufacturer2=(value >> 9) & 0b1,
+            manufacturer3=(value >> 10) & 0b1,
+            manufacturer4=(value >> 11) & 0b1,
+            manufacturer5=(value >> 12) & 0b1,
+            manufacturer6=(value >> 13) & 0b1,
+            manufacturer7=(value >> 14) & 0b1,
+            manufacturer8=(value >> 15) & 0b1,
+        )
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, N2kDD223):
