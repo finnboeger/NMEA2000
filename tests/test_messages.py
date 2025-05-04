@@ -415,7 +415,7 @@ def test_anchor_windlass_monitoring_status_message() -> None:
         total_motor_time=2520,
         controller_voltage=12.4,
         motor_current=4,
-        windlass_monitoring_events=types.N2kWindlassMonitoringEvents(1),
+        windlass_monitoring_events=types.N2kWindlassMonitoringEvents.from_events(1),
         sid=135,
     )
     msg = messages.create_n2k_anchor_windlass_monitoring_status_message(

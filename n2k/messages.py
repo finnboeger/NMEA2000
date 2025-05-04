@@ -1984,7 +1984,7 @@ def parse_n2k_anchor_windlass_monitoring_status(
     return AnchorWindlassMonitoringStatus(
         sid=msg.get_byte_uint(index),
         windlass_identifier=msg.get_byte_uint(index),
-        windlass_monitoring_events=types.N2kWindlassMonitoringEvents(
+        windlass_monitoring_events=types.N2kWindlassMonitoringEvents.from_events(
             msg.get_byte_uint(index),
         ),
         controller_voltage=msg.get_1_byte_udouble(0.2, index),

@@ -317,13 +317,11 @@ class N2kDD475:
 
 
 # DD477 - Windlass Monitoring Events
+@dataclass(frozen=True, kw_only=True)
 class N2kDD477:
     controller_under_voltage_cutout: int = 0
     controller_over_current_cutout: int = 0
     controller_over_temperature_cutout: int = 0
-
-    def __init__(self, value: int = 0) -> None:
-        self.events = value
 
     @property
     def events(self) -> int:
@@ -333,11 +331,13 @@ class N2kDD477:
             | self.controller_over_temperature_cutout << 2
         )
 
-    @events.setter
-    def events(self, value: int) -> None:
-        self.controller_under_voltage_cutout = (value >> 0) & 0b1
-        self.controller_over_current_cutout = (value >> 1) & 0b1
-        self.controller_over_temperature_cutout = (value >> 2) & 0b1
+    @staticmethod
+    def from_events(value: int) -> "N2kDD477":
+        return N2kDD477(
+            controller_under_voltage_cutout=(value >> 0) & 0b1,
+            controller_over_current_cutout=(value >> 1) & 0b1,
+            controller_over_temperature_cutout=(value >> 2) & 0b1,
+        )
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, N2kDD477):
