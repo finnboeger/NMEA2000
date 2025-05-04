@@ -229,6 +229,7 @@ class N2kDD374(IntEnum):
 
 
 # Thruster Motor Events
+@dataclass(frozen=True, kw_only=True)
 class N2kDD471:
     motor_over_temperature_cutout: int = 0
     motor_over_current_cutout: int = 0
@@ -238,9 +239,6 @@ class N2kDD471:
     manufacturer_defined: int = 0
     reserved: int = 0
     data_not_available: int = 0
-
-    def __init__(self, value: int = 0) -> None:
-        self.events = value
 
     @property
     def events(self) -> int:
@@ -255,16 +253,18 @@ class N2kDD471:
             | self.data_not_available << 7
         )
 
-    @events.setter
-    def events(self, value: int) -> None:
-        self.motor_over_temperature_cutout = (value >> 0) & 0b1
-        self.motor_over_current_cutout = (value >> 1) & 0b1
-        self.low_oil_level_warning = (value >> 2) & 0b1
-        self.oil_over_temperature_warning = (value >> 3) & 0b1
-        self.controller_under_voltage_cutout = (value >> 4) & 0b1
-        self.manufacturer_defined = (value >> 5) & 0b1
-        self.reserved = (value >> 6) & 0b1
-        self.data_not_available = (value >> 7) & 0b1
+    @staticmethod
+    def from_events(value: int) -> "N2kDD471":
+        return N2kDD471(
+            motor_over_temperature_cutout=(value >> 0) & 0b1,
+            motor_over_current_cutout=(value >> 1) & 0b1,
+            low_oil_level_warning=(value >> 2) & 0b1,
+            oil_over_temperature_warning=(value >> 3) & 0b1,
+            controller_under_voltage_cutout=(value >> 4) & 0b1,
+            manufacturer_defined=(value >> 5) & 0b1,
+            reserved=(value >> 6) & 0b1,
+            data_not_available=(value >> 7) & 0b1,
+        )
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, N2kDD471):
