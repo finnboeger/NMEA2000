@@ -1917,7 +1917,7 @@ def parse_n2k_anchor_windlass_operating_status(
     windlass_line_speed = msg.get_2_byte_udouble(0.01, index)
     vb = msg.get_byte_uint(index)
     anchor_docking_status = types.N2kAnchorDockingStates(vb & 0x03)
-    windlass_operating_events = types.N2kWindlassOperatingEvents(vb >> 2)
+    windlass_operating_events = types.N2kWindlassOperatingEvents.from_event(vb >> 2)
     return AnchorWindlassOperatingStatus(
         sid=sid,
         windlass_identifier=windlass_identifier,

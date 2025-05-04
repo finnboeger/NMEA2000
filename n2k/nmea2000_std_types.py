@@ -395,15 +395,13 @@ class N2kDD482(IntEnum):
 
 
 # DD483 - Windlass Operating Events
+@dataclass(frozen=True, kw_only=True)
 class N2kDD483:
     system_error: int = 0
     sensor_error: int = 0
     no_windlass_motion_detected: int = 0
     retrieval_docking_distance_reached: int = 0
     end_of_rode_reached: int = 0
-
-    def __init__(self, value: int = 0) -> None:
-        self.event = value
 
     @property
     def event(self) -> int:
@@ -415,13 +413,15 @@ class N2kDD483:
             | self.end_of_rode_reached << 4
         )
 
-    @event.setter
-    def event(self, value: int) -> None:
-        self.system_error = (value >> 0) & 0b1
-        self.sensor_error = (value >> 1) & 0b1
-        self.no_windlass_motion_detected = (value >> 2) & 0b1
-        self.retrieval_docking_distance_reached = (value >> 3) & 0b1
-        self.end_of_rode_reached = (value >> 4) & 0b1
+    @staticmethod
+    def from_event(value: int) -> "N2kDD483":
+        return N2kDD483(
+            system_error=(value >> 0) & 0b1,
+            sensor_error=(value >> 1) & 0b1,
+            no_windlass_motion_detected=(value >> 2) & 0b1,
+            retrieval_docking_distance_reached=(value >> 3) & 0b1,
+            end_of_rode_reached=(value >> 4) & 0b1,
+        )
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, N2kDD483):

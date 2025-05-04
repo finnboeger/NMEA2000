@@ -397,7 +397,7 @@ def test_anchor_windlass_operating_status_message() -> None:
         windlass_motion_status=types.N2kWindlassMotionStates.RetrievalOccurring,
         rode_type_status=types.N2kRodeTypeStates.ChainPresentlyDetected,
         anchor_docking_status=types.N2kAnchorDockingStates.DataNotAvailable,
-        windlass_operating_events=types.N2kWindlassOperatingEvents(1),
+        windlass_operating_events=types.N2kWindlassOperatingEvents.from_event(1),
         sid=135,
     )
     msg = messages.create_n2k_anchor_windlass_operating_status_message(
