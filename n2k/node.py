@@ -6,7 +6,7 @@ import traceback
 from binascii import hexlify
 from collections import deque
 from dataclasses import asdict
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 import can
 
@@ -46,6 +46,8 @@ from n2k.types import (
 from n2k.utils import IntRef, millis
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from n2k.can_message import N2kCANMessage
     from n2k.message_handler import MessageHandler
 
