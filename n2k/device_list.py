@@ -3,6 +3,7 @@ from __future__ import annotations
 import n2k.device
 import n2k.messages
 from n2k import constants
+from n2k.device_information import DeviceInformation
 from n2k.message import Message
 from n2k.message_handler import MessageHandler
 from n2k.n2k import PGN
@@ -110,7 +111,7 @@ class DeviceList(MessageHandler):
                     dev = dev2
                 else:
                     # if we don't, set device at claimed address to have the provided name and set list_updated to true
-                    dev.dev_i.name = caller_name
+                    dev.dev_i = DeviceInformation.from_name(caller_name)
                     self.list_updated = True
             elif dev.dev_i.name != caller_name:
                 # if the device has a name, but it does not match the provided one

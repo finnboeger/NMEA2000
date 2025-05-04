@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, kw_only=True)
 class DeviceInformation:
     unique_number: int  # 21 bits
     manufacturer_code: int  # 11 bits
@@ -6,31 +10,30 @@ class DeviceInformation:
     device_class: int  # 8 bits
     # https://github.com/ttlappalainen/NMEA2000/blob/master/src/NMEA2000.h#L133
     system_instance: int = 0  # 4 bits
+    #: 0 - Global
+    #:
+    #: 1 - On-Highway Equipment
+    #:
+    #: 2 - Agricultural and Forestry Equipment
+    #:
+    #: 3 - Construction Equipment
+    #:
+    #: 4 - Marine Equipment
+    #:
+    #: 5 - Industrial, Process Control, Stationary Equipment
     industry_group: int = 4  # 4 bits (actually 3 bits but the upper is always set)
-
-    def __init__(
-        self,
-        unique_number: int,
-        manufacturer_code: int,
-        device_function: int,
-        device_class: int,
-        device_instance: int = 0,
-        system_instance: int = 0,
-        industry_group: int = 4,
-    ) -> None:
-        self.unique_number = unique_number
-        self.manufacturer_code = manufacturer_code
-        self.device_function = device_function
-        self.device_class = device_class
-        self.device_instance = device_instance
-        self.system_instance = system_instance
-        self.industry_group = industry_group
 
     @staticmethod
     def from_name(name: int) -> "DeviceInformation":
-        d = DeviceInformation(0, 0, 0, 0)
-        d.name = name
-        return d
+        return DeviceInformation(
+            unique_number=name & 0x1FFFFF,
+            manufacturer_code=(name >> 21) & 0x7FF,
+            device_instance=(name >> 32) & 0xFF,
+            device_function=(name >> 40) & 0xFF,
+            device_class=(name >> 48) & 0xFF,
+            system_instance=(name >> 56) & 0x0F,
+            industry_group=(name >> 60) & 0x07,
+        )
 
     @property
     def name(self) -> int:
@@ -60,16 +63,6 @@ class DeviceInformation:
             | (self.industry_group & 0x07) << 60
             | (1 << 63)
         )
-
-    @name.setter
-    def name(self, value: int) -> None:
-        self.unique_number = value & 0x1FFFFF
-        self.manufacturer_code = (value >> 21) & 0x7FF
-        self.device_instance = (value >> 32) & 0xFF
-        self.device_function = (value >> 40) & 0xFF
-        self.device_class = (value >> 48) & 0xFF
-        self.system_instance = (value >> 56) & 0x0F
-        self.industry_group = (value >> 60) & 0x07
 
     def calculated_unique_number_and_manufacturer_code(self) -> int:
         return (self.manufacturer_code & 0x7FF) << 21 | (self.unique_number & 0x1FFFFF)

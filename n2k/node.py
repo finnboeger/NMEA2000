@@ -5,6 +5,7 @@ import time
 import traceback
 from binascii import hexlify
 from collections import deque
+from dataclasses import asdict
 from typing import TYPE_CHECKING, Callable
 
 import can
@@ -344,16 +345,8 @@ class Node(can.Listener):
             manufacturer_code=manufacturer_code,
             device_function=device_function,
             device_class=device_class,
+            industry_group=4,
         )
-        """
-        0 - Global
-        1 - On-Highway Equipment
-        2 - Agricultural and Forestry Equipment
-        3 - Construction Equipment
-        4 - Marine Equipment
-        5 - Industrial, Process Control, Stationary Equipment
-        """
-        self.device_information.industry_group = 4
         # TODO: device_instance, system_instance
 
     message_handlers: set[MessageHandler]
@@ -652,7 +645,10 @@ class Node(can.Listener):
                 # This shouldn't happen, if the user takes care to set a unique ID for device information.
                 # If he does not there is no problem with this class, but e.g. Garmin gets crazy.
                 # Try to solve situation by changing our device instance.
-                self.device_information.device_instance += 1
+                self.device_information = DeviceInformation(
+                    **asdict(self.device_information),
+                    device_instance=self.device_information.device_instance + 1,
+                )
                 self.device_information_changed = True
             else:
                 self._get_next_address()
