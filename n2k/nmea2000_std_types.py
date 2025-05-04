@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import IntEnum
 
 
@@ -45,6 +46,7 @@ class N2kDD124(IntEnum):
     Unavailable = 15
 
 
+@dataclass(frozen=True, kw_only=True)
 class N2kDD206:
     check_engine: int = 0
     over_temperature: int = 0
@@ -62,9 +64,6 @@ class N2kDD206:
     egr_system: int = 0
     throttle_position_sensor: int = 0
     engine_emergency_stop_mode: int = 0
-
-    def __init__(self, value: int = 0) -> None:
-        self.status = value
 
     @property
     def status(self) -> int:
@@ -87,24 +86,26 @@ class N2kDD206:
             | self.engine_emergency_stop_mode << 15
         )
 
-    @status.setter
-    def status(self, value: int) -> None:
-        self.check_engine = (value >> 0) & 0b1
-        self.over_temperature = (value >> 1) & 0b1
-        self.low_oil_pressure = (value >> 2) & 0b1
-        self.low_oil_level = (value >> 3) & 0b1
-        self.low_fuel_pressure = (value >> 4) & 0b1
-        self.low_system_voltage = (value >> 5) & 0b1
-        self.low_coolant_level = (value >> 6) & 0b1
-        self.water_flow = (value >> 7) & 0b1
-        self.water_in_fuel = (value >> 8) & 0b1
-        self.charge_indicator = (value >> 9) & 0b1
-        self.preheat_indicator = (value >> 10) & 0b1
-        self.high_boost_pressure = (value >> 11) & 0b1
-        self.rev_limit_exceeded = (value >> 12) & 0b1
-        self.egr_system = (value >> 13) & 0b1
-        self.throttle_position_sensor = (value >> 14) & 0b1
-        self.engine_emergency_stop_mode = (value >> 15) & 0b1
+    @staticmethod
+    def from_status(value: int) -> "N2kDD206":
+        return N2kDD206(
+            check_engine=(value >> 0) & 0b1,
+            over_temperature=(value >> 1) & 0b1,
+            low_oil_pressure=(value >> 2) & 0b1,
+            low_oil_level=(value >> 3) & 0b1,
+            low_fuel_pressure=(value >> 4) & 0b1,
+            low_system_voltage=(value >> 5) & 0b1,
+            low_coolant_level=(value >> 6) & 0b1,
+            water_flow=(value >> 7) & 0b1,
+            water_in_fuel=(value >> 8) & 0b1,
+            charge_indicator=(value >> 9) & 0b1,
+            preheat_indicator=(value >> 10) & 0b1,
+            high_boost_pressure=(value >> 11) & 0b1,
+            rev_limit_exceeded=(value >> 12) & 0b1,
+            egr_system=(value >> 13) & 0b1,
+            throttle_position_sensor=(value >> 14) & 0b1,
+            engine_emergency_stop_mode=(value >> 15) & 0b1,
+        )
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, N2kDD206):
