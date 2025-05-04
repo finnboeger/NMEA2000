@@ -1826,7 +1826,9 @@ def parse_n2k_anchor_windlass_control_status(
     deck_and_anchor_wash = types.N2kGenericStatusPair((vb >> 4) & 0x03)
     anchor_light = types.N2kGenericStatusPair((vb >> 6) & 0x03)
     command_timeout = msg.get_1_byte_udouble(0.005, index)
-    windlass_control_events = types.N2kWindlassControlEvents(msg.get_byte_uint(index))
+    windlass_control_events = types.N2kWindlassControlEvents.from_events(
+        msg.get_byte_uint(index),
+    )
 
     return AnchorWindlassControlStatus(
         sid=sid,

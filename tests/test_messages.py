@@ -378,7 +378,7 @@ def test_anchor_windlass_control_status_message() -> None:
         deck_and_anchor_wash=types.N2kGenericStatusPair.No,
         anchor_light=types.N2kGenericStatusPair.Yes,
         command_timeout=1.115,
-        windlass_control_events=types.N2kWindlassControlEvents(1),
+        windlass_control_events=types.N2kWindlassControlEvents.from_events(1),
     )
     msg = messages.create_n2k_anchor_windlass_control_status_message(
         anchor_windlass_control_status,

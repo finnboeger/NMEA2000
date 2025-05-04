@@ -348,19 +348,19 @@ class N2kDD477:
 
 
 # DD478 - Windlass Control Events
+@dataclass(frozen=True, kw_only=True)
 class N2kDD478:
     another_device_controlling_windlass: int = 0
-
-    def __init__(self, value: int = 0) -> None:
-        self.events = value
 
     @property
     def events(self) -> int:
         return self.another_device_controlling_windlass
 
-    @events.setter
-    def events(self, value: int) -> None:
-        self.another_device_controlling_windlass = (value >> 0) & 0b1
+    @staticmethod
+    def from_events(value: int) -> "N2kDD478":
+        return N2kDD478(
+            another_device_controlling_windlass=(value >> 0) & 0b1,
+        )
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, N2kDD478):
