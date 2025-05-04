@@ -290,12 +290,10 @@ class N2kDD474(IntEnum):
 
 
 # Thruster Control Events
+@dataclass(frozen=True, kw_only=True)
 class N2kDD475:
     another_device_controlling_thruster: int = 0
     boat_speed_to_fast: int = 0
-
-    def __init__(self, value: int = 0) -> None:
-        self.events = value
 
     @property
     def events(self) -> int:
@@ -303,10 +301,12 @@ class N2kDD475:
             self.another_device_controlling_thruster << 0 | self.boat_speed_to_fast << 1
         )
 
-    @events.setter
-    def events(self, value: int) -> None:
-        self.another_device_controlling_thruster = (value >> 0) & 0b1
-        self.boat_speed_to_fast = (value >> 1) & 0b1
+    @staticmethod
+    def from_events(value: int) -> "N2kDD475":
+        return N2kDD475(
+            another_device_controlling_thruster=(value >> 0) & 0b1,
+            boat_speed_to_fast=(value >> 1) & 0b1,
+        )
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, N2kDD475):
