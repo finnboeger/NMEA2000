@@ -876,7 +876,7 @@ def parse_n2k_transmission_parameters_dynamic(
         transmission_gear=types.N2kTransmissionGear(msg.get_byte_uint(index) & 0x03),
         oil_pressure=msg.get_2_byte_udouble(100, index),
         oil_temperature=msg.get_2_byte_udouble(0.1, index),
-        discrete_status1=types.N2kTransmissionDiscreteStatus1(
+        discrete_status1=types.N2kTransmissionDiscreteStatus1.from_status(
             msg.get_byte_uint(index) & 0x1F,
         ),
     )

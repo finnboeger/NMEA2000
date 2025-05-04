@@ -464,15 +464,13 @@ class N2kPGNList(IntEnum):
     receive = 1
 
 
+@dataclass(frozen=True, kw_only=True)
 class N2kTransmissionDiscreteStatus1:
     check_temperature: int = 0
     over_temperature: int = 0
     low_oil_pressure: int = 0
     low_oil_level: int = 0
     sail_drive: int = 0
-
-    def __init__(self, value: int = 0) -> None:
-        self.status = value
 
     @property
     def status(self) -> int:
@@ -484,13 +482,15 @@ class N2kTransmissionDiscreteStatus1:
             | self.sail_drive << 4
         )
 
-    @status.setter
-    def status(self, value: int) -> None:
-        self.check_temperature = (value >> 0) & 0b1
-        self.over_temperature = (value >> 1) & 0b1
-        self.low_oil_pressure = (value >> 2) & 0b1
-        self.low_oil_level = (value >> 3) & 0b1
-        self.sail_drive = (value >> 4) & 0b1
+    @staticmethod
+    def from_status(value: int) -> "N2kTransmissionDiscreteStatus1":
+        return N2kTransmissionDiscreteStatus1(
+            check_temperature=(value >> 0) & 0b1,
+            over_temperature=(value >> 1) & 0b1,
+            low_oil_pressure=(value >> 2) & 0b1,
+            low_oil_level=(value >> 3) & 0b1,
+            sail_drive=(value >> 4) & 0b1,
+        )
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, N2kTransmissionDiscreteStatus1):
