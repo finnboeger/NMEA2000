@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 # System Date/Time (PGN 126992)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class SystemTime:
     """
     Data for System Date/Time Message (PGN 126992)
@@ -69,7 +69,7 @@ def parse_n2k_system_time(msg: Message) -> SystemTime:
 
 
 # AIS Safety Related Broadcast Message (PGN 129802)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class AISSafetyRelatedBroadcast:
     """Data for AIS Safety Related Broadcast Message (PGN 129802)"""
 
@@ -131,7 +131,7 @@ def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadca
 
 
 # Man Overboard Notification (PGN 127233)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class MOBNotification:
     """Data for Man Overboard Notification Message (PGN 127233)"""
 
@@ -223,7 +223,7 @@ def parse_n2k_mob_notification(msg: Message) -> MOBNotification:
 
 
 # Heading/Track Control (PGN 127237)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class HeadingTrackControl:
     """Data for Heading/Track Control Message (PGN 127237)"""
 
@@ -340,7 +340,7 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
 
 
 # Rudder (PGN 127245)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class Rudder:
     """Data for Rudder Message (PGN 127245)"""
 
@@ -394,7 +394,7 @@ def parse_n2k_rudder(msg: Message) -> Rudder:
 
 
 # Vessel Heading (PGN 127250)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class Heading:
     """Data for Vessel Heading Message (PGN 127250)"""
 
@@ -453,7 +453,7 @@ def parse_n2k_heading(msg: Message) -> Heading:
 
 
 # Rate of Turn (PGN 127251)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class RateOfTurn:
     """Data for Rate of Turn Message (PGN 127251)"""
 
@@ -496,7 +496,7 @@ def parse_n2k_rate_of_turn(msg: Message) -> RateOfTurn:
 
 
 # Heave (PGN 127252)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class Heave:
     """Data for Heave Message (PGN 127252)"""
 
@@ -549,7 +549,7 @@ def parse_n2k_heave(msg: Message) -> Heave:
 
 
 # Attitude (PGN 127257)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class Attitude:
     """Data for Attitude Message (PGN 127257)"""
 
@@ -599,7 +599,7 @@ def parse_n2k_attitude(msg: Message) -> Attitude:
 
 
 # Magnetic Variation (PGN 127258)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class MagneticVariation:
     """Data for Magnetic Variation Message (PGN 127258)"""
 
@@ -649,7 +649,7 @@ def parse_n2k_magnetic_variation(msg: Message) -> MagneticVariation:
 
 
 # Engine Parameters Rapid (PGN 127488)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class EngineParametersRapid:
     """Data for Engine Parameters Rapid Message (PGN 127488)"""
 
@@ -710,7 +710,7 @@ def parse_n2k_engine_parameters_rapid(msg: Message) -> EngineParametersRapid:
 
 
 # Engine Parameters Dynamic (PGN 127489)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class EngineParametersDynamic:
     """Data for Engine Parameters Dynamic Message (PGN 127489)"""
 
@@ -819,7 +819,7 @@ def parse_n2k_engine_parameters_dynamic(msg: Message) -> EngineParametersDynamic
 
 
 # Transmission parameters, dynamic (PGN 127493)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class TransmissionParametersDynamic:
     """Data for Transmission Parameters Dynamic Message (PGN 127493)"""
 
@@ -883,7 +883,7 @@ def parse_n2k_transmission_parameters_dynamic(
 
 
 # Trip Parameters, Engine (PGN 127497)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class TripFuelConsumptionEngine:
     """Data for Trip Fuel Consumption by Engine Message (PGN 127497)"""
 
@@ -942,7 +942,7 @@ def parse_n2k_trip_parameters_engine(msg: Message) -> TripFuelConsumptionEngine:
 
 
 # Binary status report (PGN 127501)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class BinaryStatusReport:
     """Data for Binary Status Report Message (PGN 127501)"""
 
@@ -982,7 +982,7 @@ def parse_n2k_binary_status_report(msg: Message) -> BinaryStatusReport:
 
 
 # Switch Bank Control (PGN 127502)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class SwitchBankControl:
     """Data for Switch Bank Control Message (PGN 127502)"""
 
@@ -1038,7 +1038,7 @@ def parse_n2k_switch_bank_control(msg: Message) -> SwitchBankControl:
 
 
 # Fluid level (PGN 127505)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class FluidLevel:
     """Data for Fluid Level Message (PGN 127505)"""
 
@@ -1087,7 +1087,7 @@ def parse_n2k_fluid_level(msg: Message) -> FluidLevel:
 
 
 # DC Detailed Status (PGN 127506)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class DCDetailedStatus:
     """Data for DC Detailed Status Message (PGN 127506)"""
 
@@ -1152,7 +1152,7 @@ def parse_n2k_dc_detailed_status(msg: Message) -> DCDetailedStatus:
 
 
 # Charger Status (PGN 127507)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class ChargerStatus:
     """Data for Charger Status Message (PGN 127507)"""
 
@@ -1223,7 +1223,7 @@ def parse_n2k_charger_status(msg: Message) -> ChargerStatus:
 
 
 # Battery Status (PGN 127508)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class BatteryStatus:
     """Data for Battery Status Message (PGN 127508)"""
 
@@ -1276,7 +1276,7 @@ def parse_n2k_battery_status(msg: Message) -> BatteryStatus:
 
 
 # Charger Configuration Status (PGN 127510)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class ChargerConfigurationStatus:
     """Data for Charger Configuration Status Message (PGN 127510)"""
 
@@ -1369,7 +1369,7 @@ def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfiguration
 
 
 # Battery Configuration Status (PGN 127513)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class BatteryConfigurationStatus:
     """Data for Battery Configuration Status Message (PGN 127513)"""
 
@@ -1457,7 +1457,7 @@ def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfiguration
 
 
 # Converter (Inverter/Charger) Status (PGN 127750)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class ConverterStatus:
     """Data for Converter Status Message (PGN 127750)"""
 
@@ -1537,7 +1537,7 @@ def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
 
 
 # Leeway (PGN 128000)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class Leeway:
     """Data for Leeway Message (PGN 128000)"""
 
@@ -1585,7 +1585,7 @@ def parse_n2k_leeway(msg: Message) -> Leeway:
 
 
 # Boat Speed (PGN 128259)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class BoatSpeed:
     """Data for Boat Speed Message (PGN 128259)"""
 
@@ -1636,7 +1636,7 @@ def parse_n2k_boat_speed(msg: Message) -> BoatSpeed:
 
 
 # Water depth (PGN 128267)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class WaterDepth:
     """Data for Water Depth Message (PGN 128267)"""
 
@@ -1686,7 +1686,7 @@ def parse_n2k_water_depth(msg: Message) -> WaterDepth:
 
 
 # Distance log (PGN 128275)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class DistanceLog:
     """Data for Distance Log Message (PGN 128275)"""
 
@@ -1735,7 +1735,7 @@ def parse_n2k_distance_log(msg: Message) -> DistanceLog:
 
 
 # Anchor Windlass Control Status (PGN 128776)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class AnchorWindlassControlStatus:
     """Data for Anchor Windlass Control Status Message (PGN 128776)"""
 
@@ -1845,7 +1845,7 @@ def parse_n2k_anchor_windlass_control_status(
 
 
 # Anchor Windlass Operating Status (PGN 128777)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class AnchorWindlassOperatingStatus:
     """Data for Anchor Windlass Operating Status Message (PGN 128777)"""
 
@@ -1929,7 +1929,7 @@ def parse_n2k_anchor_windlass_operating_status(
 
 
 # Anchor Windlass Monitoring Status (PGN 128778)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class AnchorWindlassMonitoringStatus:
     """Data for Anchor Windlass Monitoring Status Message (PGN 128778)"""
 
@@ -1994,7 +1994,7 @@ def parse_n2k_anchor_windlass_monitoring_status(
 
 
 # Lat/lon rapid (PGN 129025)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class LatLonRapid:
     """Data for Lat/Lon Rapid Message (PGN 129025)"""
 
@@ -2035,7 +2035,7 @@ def parse_n2k_lat_long_rapid(msg: Message) -> LatLonRapid:
 
 
 # COG SOG rapid (PGN 129026)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class CogSogRapid:
     """Data for COG/SOG Rapid Message (PGN 129026)"""
 
@@ -2087,7 +2087,7 @@ def parse_n2k_cog_sog_rapid(msg: Message) -> CogSogRapid:
 
 
 # GNSS Position Data (PGN 129029)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class GNSSPositionData:
     """Data for GNSS Position Data Message (PGN 129029)"""
 
@@ -2117,7 +2117,7 @@ class GNSSPositionData:
     #: Geoidal separation in meters, precision 0.01m
     geoidal_separation: float
     #: Number of Reference Stations
-    n_reference_station: int
+    n_reference_stations: int
     #: Reference Station type, see type
     reference_station_type: types.N2kGNSSType | None
     #: Reference Station ID
@@ -2151,7 +2151,7 @@ def create_n2k_gnss_data_message(data: GNSSPositionData) -> Message:
     msg.add_2_byte_double(data.hdop, 0.01)
     msg.add_2_byte_double(data.pdop, 0.01)
     msg.add_4_byte_double(data.geoidal_separation, 0.01)
-    if 0 < data.n_reference_station < constants.N2K_UINT8_NA:
+    if 0 < data.n_reference_stations < constants.N2K_UINT8_NA:
         msg.add_byte_uint(
             1,
         )  # Note that we have values for only one reference station, so pass only one values.
@@ -2164,7 +2164,7 @@ def create_n2k_gnss_data_message(data: GNSSPositionData) -> Message:
             0.01,
         )
     else:
-        msg.add_byte_uint(data.n_reference_station)
+        msg.add_byte_uint(data.n_reference_stations)
     return msg
 
 
@@ -2211,27 +2211,27 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
         age_of_correction = constants.N2K_DOUBLE_NA
 
     return GNSSPositionData(
-        days_since_1970,
-        seconds_since_midnight,
-        latitude,
-        longitude,
-        altitude,
-        gnss_type,
-        gnss_method,
-        n_satellites,
-        hdop,
-        pdop,
-        geoidal_separation,
-        n_reference_stations,
-        reference_station_type,
-        reference_station_id,
-        age_of_correction,
-        sid,
+        days_since_1970=days_since_1970,
+        seconds_since_midnight=seconds_since_midnight,
+        latitude=latitude,
+        longitude=longitude,
+        altitude=altitude,
+        gnss_type=gnss_type,
+        gnss_method=gnss_method,
+        n_satellites=n_satellites,
+        hdop=hdop,
+        pdop=pdop,
+        geoidal_separation=geoidal_separation,
+        n_reference_stations=n_reference_stations,
+        reference_station_type=reference_station_type,
+        reference_station_id=reference_station_id,
+        age_of_correction=age_of_correction,
+        sid=sid,
     )
 
 
 # Date,Time & Local offset (PGN 129033, see also PGN 126992)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class DateTimeLocalOffset:
     """
     Data for Date, Time & Local offset Message (PGN 129033)
@@ -2286,7 +2286,7 @@ def parse_n2k_date_time_local_offset(msg: Message) -> DateTimeLocalOffset:
 
 
 # AIS position reports for Class A (PGN 129038)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class AISClassAPositionReport:
     """Data for AIS Class A Position Report Message (PGN 129038)"""
 
@@ -2413,7 +2413,7 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
 
 
 # AIS position reports for Class B (PGN 129039)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class AISClassBPositionReport:
     """Data for AIS Class B Position Report Message (PGN 129039)"""
 
@@ -2568,7 +2568,7 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
 
 
 # AIS Aids to Navigation (AtoN) Report (PGN 129041)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class AISAtoNReportData:
     """Data for AIS Aids to Navigation (AtoN) Report Message (PGN 129041)"""
 
@@ -2737,7 +2737,7 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
 
 
 # Cross Track Error (PGN 129283)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class CrossTrackError:
     """Data for Cross Track Error Message (PGN 129283)"""
 
@@ -2794,7 +2794,7 @@ def parse_n2k_cross_track_error(msg: Message) -> CrossTrackError:
 
 
 # Navigation Info (PGN 129284)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class NavigationInfo:
     """Data for Navigation Info Message (PGN 129284)"""
 
@@ -2898,7 +2898,7 @@ def parse_n2k_navigation_info(msg: Message) -> NavigationInfo:
 
 
 # Route Waypoint Information (PGN 129285)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class RouteWaypointInformation:
     """Data for Route Waypoint Information Message (PGN 129285)"""
 
@@ -3006,7 +3006,7 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
 
 
 # GNSS DOP data (PGN 129539)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class GNSSDOPData:
     """Data for GNSS DOP Data Message (PGN 129539)"""
 
@@ -3073,7 +3073,7 @@ MAX_SATELLITE_INFO_COUNT: Final = 18  # Maximum amount of satellites that fit in
 # GNSS Satellites in View (PGN 129540)
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class GNSSSatellitesInView:
     """Data for GNSS Satellites in View Message (PGN 129540)"""
 
@@ -3157,7 +3157,7 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
 
 
 # AIS Class A Static Data (PGN 129794)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class AISClassAStaticData:
     """Data for AIS Class A Static Data Message (PGN 129794)"""
 
@@ -3319,7 +3319,7 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
 
 
 # AIS CLass B Static Data part A (PGN 129809)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class AISClassBStaticDataPartA:
     """Data for AIS Class B Static Data Part A Message (PGN 129809)"""
 
@@ -3395,7 +3395,7 @@ def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDat
 
 
 # AIS CLass B Static Data part B (PGN 129810)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class AISClassBStaticDataPartB:
     """Data for AIS Class B Static Data Part B Message (PGN 129810)"""
 
@@ -3514,7 +3514,7 @@ def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDat
 
 
 # Waypoint list (PGN 130074)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class WaypointList:
     """Data for Waypoint List message (PGN 130074)"""
 
@@ -3608,7 +3608,7 @@ def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
 
 
 # Wind Speed (PGN 130306)
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class WindSpeed:
     """Data for Wind Speed message (PGN 130306)"""
 

@@ -460,7 +460,7 @@ def test_gnss_data_message() -> None:
         hdop=1.2,
         pdop=1.3,
         geoidal_separation=123.02,
-        n_reference_station=1,
+        n_reference_stations=1,
         reference_station_type=types.N2kGNSSType.GPS_GLONASS,
         reference_station_id=1234,
         age_of_correction=23.24,

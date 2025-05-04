@@ -4,7 +4,7 @@ from enum import IntEnum
 import n2k.nmea2000_std_types
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class ProductInformation:
     n2k_version: int  # unsigned short
     product_code: int  # unsigned short
@@ -16,14 +16,14 @@ class ProductInformation:
     load_equivalency: int  # unsigned char
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class ConfigurationInformation:
     manufacturer_information: str
     installation_description1: str
     installation_description2: str
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class CANSendFrame:
     id: int  # unsigned long
     length: int  # unsigned char
@@ -528,7 +528,7 @@ N2kMotorPowerType = n2k.nmea2000_std_types.N2kDD487
 N2kSpeedType = n2k.nmea2000_std_types.N2kDD488
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class Waypoint:
     id: int
     name: str
@@ -536,7 +536,7 @@ class Waypoint:
     longitude: float
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class SatelliteInfo:
     prn: int
     elevation: float

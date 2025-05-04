@@ -72,14 +72,14 @@ class Node(can.Listener):
     n2k_source: int = 0  # uint8_t
     device_information: DeviceInformation
     product_information: ProductInformation = ProductInformation(
-        2101,
-        666,
-        "",
-        "",
-        "",
-        "",
-        0,
-        1,
+        n2k_version=2101,
+        product_code=666,
+        n2k_model_id="",
+        n2k_sw_code="",
+        n2k_model_version="",
+        n2k_model_serial_code="",
+        certification_level=0,
+        load_equivalency=1,
     )
     manufacturer_serial_code: str = ""
     pending_iso_address_claim: int | None = None  # unsigned long
@@ -364,9 +364,9 @@ class Node(can.Listener):
 
     # Configuration Information
     configuration_information: ConfigurationInformation = ConfigurationInformation(
-        "",
-        "",
-        "",
+        manufacturer_information="",
+        installation_description1="",
+        installation_description2="",
     )
 
     custom_single_frame_messages: list[int] | None = None

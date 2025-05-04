@@ -8,7 +8,7 @@ from typing import Final
 PDU1_FORMAT_BYTE_MAX: Final = 240
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class MsgHeader:
     source: int
     priority: int
