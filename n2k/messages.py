@@ -3663,8 +3663,58 @@ def parse_n2k_wind_speed(msg: Message) -> WindSpeed:
     )
 
 
-# Outside Environmental parameters (PGN 130310)
-# TODO: implement
+# Outside Environmental Parameters (PGN 130310) [deprecated]
+@dataclass(frozen=True, kw_only=True)
+class OutsideEnvironmentalParameters:
+    """Data for Outside Environmental Parameters message (PGN 130310) - DEPRECATED"""
+
+    #: Water temperature in Kelvin, precision 0.01K
+    water_temperature: float
+    #: Outside ambient air temperature in Kelvin, precision 0.01K
+    outside_ambient_air_temperature: float
+    #: Atmospheric pressure in Pascals, precision 100Pa
+    atmospheric_pressure: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
+
+
+def create_n2k_outside_environmental_parameters_message(
+    data: OutsideEnvironmentalParameters,
+) -> Message:
+    """
+    Outside Environmental Parameters (PGN 130310)
+
+    :param data: See :py:class:`OutsideEnvironmentalParameters`
+    :return: NMEA2000 message ready to be sent.
+    """
+    msg = Message()
+    msg.pgn = PGN.OutsideEnvironmentalParameters
+    msg.priority = 5
+    msg.add_byte_uint(data.sid)
+    msg.add_2_byte_udouble(data.water_temperature, 0.01)
+    msg.add_2_byte_udouble(data.outside_ambient_air_temperature, 0.01)
+    msg.add_2_byte_udouble(data.atmospheric_pressure, 100)
+    msg.add_byte_uint(0xFF)  # Reserved
+    return msg
+
+
+def parse_n2k_outside_environmental_parameters(
+    msg: Message,
+) -> OutsideEnvironmentalParameters:
+    """
+    Parse environmental information from a PGN 130310 message
+
+    :param msg: NMEA2000 Message with PGN 130310
+    :return: Object containing the parsed information
+    """
+    index = IntRef(0)
+    return OutsideEnvironmentalParameters(
+        sid=msg.get_byte_uint(index),
+        water_temperature=msg.get_2_byte_udouble(0.01, index),
+        outside_ambient_air_temperature=msg.get_2_byte_udouble(0.01, index),
+        atmospheric_pressure=msg.get_2_byte_udouble(100, index),
+    )
 
 
 # Environmental parameters (PGN 130311)

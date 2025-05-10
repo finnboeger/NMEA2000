@@ -820,6 +820,22 @@ def test_wind_speed_message() -> None:
     assert messages.parse_n2k_wind_speed(msg) == wind_speed
 
 
+def test_outside_environmental_parameters_message() -> None:
+    outside_environmental_parameters = messages.OutsideEnvironmentalParameters(
+        water_temperature=303.23,
+        outside_ambient_air_temperature=310.15,
+        atmospheric_pressure=1100,
+        sid=135,
+    )
+    msg = messages.create_n2k_outside_environmental_parameters_message(
+        outside_environmental_parameters,
+    )
+    assert (
+        messages.parse_n2k_outside_environmental_parameters(msg)
+        == outside_environmental_parameters
+    )
+
+
 def test_product_information_message() -> None:
     product_information = types.ProductInformation(
         n2k_version=2101,
