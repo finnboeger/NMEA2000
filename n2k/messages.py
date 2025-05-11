@@ -3685,6 +3685,12 @@ def create_n2k_outside_environmental_parameters_message(
     """
     Outside Environmental Parameters (PGN 130310)
 
+    Local atmospheric environmental conditions.
+
+    This PGN has been deprecated. Specific PGNs 130316 Temperature,
+    130313 Relative Humidity, 130314 Actual Pressure, 130315 Set Pressure
+    shall be used.
+
     :param data: See :py:class:`OutsideEnvironmentalParameters`
     :return: NMEA2000 message ready to be sent.
     """
