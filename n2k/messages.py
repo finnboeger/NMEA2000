@@ -3723,8 +3723,72 @@ def parse_n2k_outside_environmental_parameters(
     )
 
 
-# Environmental parameters (PGN 130311)
-# TODO: implement
+# Environmental parameters (PGN 130311) [deprecated]
+@dataclass(frozen=True, kw_only=True)
+class EnvironmentalParameters:
+    """Data for Environmental Parameters message (PGN 130311) - DEPRECATED"""
+
+    #: See :py:class:`n2k.types.N2kTempSource`
+    temp_source: types.N2kTempSource
+    #: Temperature in Kelvin, precision 0.01K
+    temperature: float
+    #: See :py:class:`n2k.types.N2kHumiditySource`
+    humidity_source: types.N2kHumiditySource
+    #: Humidity in percent, precision 0.004%
+    humidity: float
+    #: Atmospheric pressure in Pascals, precision 100Pa
+    atmospheric_pressure: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
+
+
+def create_n2k_environmental_parameters_message(
+    data: EnvironmentalParameters,
+) -> Message:
+    """
+    Environmental Parameters (PGN 130311)
+
+    This PGN has been deprecated. Specific PGNs 130316 Temperature,
+    130313 Relative Humidity, 130314 Actual Pressure, 130315 Set Pressure
+    shall be used.
+
+    :param data: See :py:class:`OutsideEnvironmentalParameters`
+    :return: NMEA2000 message ready to be sent.
+    """
+    msg = Message()
+    msg.pgn = PGN.EnvironmentalParameters
+    msg.priority = 5
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(((data.humidity_source & 0x03) << 6) | (data.temp_source & 0x3F))
+    msg.add_2_byte_udouble(data.temperature, 0.01)
+    msg.add_2_byte_udouble(data.humidity, 0.004)
+    msg.add_2_byte_udouble(data.atmospheric_pressure, 100)
+    return msg
+
+
+def parse_n2k_environmental_parameters(
+    msg: Message,
+) -> EnvironmentalParameters:
+    """
+    Parse environmental information from a PGN 130311 message
+
+    :param msg: NMEA2000 Message with PGN 130311
+    :return: Object containing the parsed information
+    """
+    index = IntRef(0)
+    sid = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index)
+    humidity_source = types.N2kHumiditySource((vb >> 6) & 0x03)
+    temp_source = types.N2kTempSource(vb & 0x3F)
+    return EnvironmentalParameters(
+        sid=sid,
+        temp_source=temp_source,
+        temperature=msg.get_2_byte_udouble(0.01, index),
+        humidity_source=humidity_source,
+        humidity=msg.get_2_byte_udouble(0.004, index),
+        atmospheric_pressure=msg.get_2_byte_udouble(100, index),
+    )
 
 
 # Temperature [deprecated] (PGN 130312)

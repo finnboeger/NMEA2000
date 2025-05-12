@@ -836,6 +836,21 @@ def test_outside_environmental_parameters_message() -> None:
     )
 
 
+def test_environmental_parameters_message() -> None:
+    environmental_parameters = messages.EnvironmentalParameters(
+        temp_source=types.N2kTempSource.ApparentWindChillTemperature,
+        temperature=303.23,
+        humidity_source=types.N2kHumiditySource.OutsideHumidity,
+        humidity=50.024,
+        atmospheric_pressure=1100,
+        sid=135,
+    )
+    msg = messages.create_n2k_environmental_parameters_message(
+        environmental_parameters,
+    )
+    assert messages.parse_n2k_environmental_parameters(msg) == environmental_parameters
+
+
 def test_product_information_message() -> None:
     product_information = types.ProductInformation(
         n2k_version=2101,

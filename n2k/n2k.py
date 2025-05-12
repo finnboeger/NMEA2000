@@ -53,6 +53,7 @@ class PGN(IntEnum):
     CrossTrackError = 129283  # prio: 3, period: 1000
     WindSpeed = 130306  # prio: 2, period: 100
     OutsideEnvironmentalParameters = 130310  # prio: 5, period: 500
+    EnvironmentalParameters = 130311  # prio: 5, period: 500
     Temperature = 130312  # prio: 5, period: 2000
     Humidity = 130313  # prio: 5, period: 2000
     Pressure = 130314  # prio: 5, period: 2000
