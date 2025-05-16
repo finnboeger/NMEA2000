@@ -851,6 +851,18 @@ def test_environmental_parameters_message() -> None:
     assert messages.parse_n2k_environmental_parameters(msg) == environmental_parameters
 
 
+def test_temperature_message() -> None:
+    temperature = messages.Temperature(
+        temp_instance=135,
+        temp_source=types.N2kTempSource.ApparentWindChillTemperature,
+        actual_temperature=293.57,
+        set_temperature=constants.N2K_UINT8_NA,
+        sid=135,
+    )
+    msg = messages.create_n2k_temperature_message(temperature)
+    assert messages.parse_n2k_temperature(msg) == temperature
+
+
 def test_product_information_message() -> None:
     product_information = types.ProductInformation(
         n2k_version=2101,

@@ -3791,8 +3791,68 @@ def parse_n2k_environmental_parameters(
     )
 
 
-# Temperature [deprecated] (PGN 130312)
-# TODO: implement
+# Temperature (PGN 130312) [deprecated]
+@dataclass(frozen=True, kw_only=True)
+class Temperature:
+    """Data for Temperature message (PGN 130312) - DEPRECATED"""
+
+    #: This should be unique at least on one device. May be best to have it unique over all devices sending this PGN.
+    temp_instance: int
+    #: Source of measurement. See :py:class:`n2k.types.N2kTempSource`
+    temp_source: types.N2kTempSource
+    #: Temperature in Kelvin, precision 0.01K
+    actual_temperature: float
+    #: Temperature set point in Kelvin, precision 0.01K
+    #:
+    #: This is meaningful for temperatures, which can be controlled like cabin, freezer, refrigeration temperature.
+    set_temperature: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
+
+
+def create_n2k_temperature_message(
+    data: Temperature,
+) -> Message:
+    """
+    Temperature (PGN 130312)
+
+    Temperature as measured by a specific temperature source. This
+    PGN has been deprecated. Please use PGN 130316 (Temperature-Extended Range)
+    for all new designs.
+
+    :param data: See :py:class:`Temperature`
+    :return: NMEA2000 message ready to be sent.
+    """
+    msg = Message()
+    msg.pgn = PGN.Temperature
+    msg.priority = 5
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(data.temp_instance)
+    msg.add_byte_uint(data.temp_source)
+    msg.add_2_byte_udouble(data.actual_temperature, 0.01)
+    msg.add_2_byte_udouble(data.set_temperature, 0.01)
+    msg.add_byte_uint(0xFF)  # Reserved
+    return msg
+
+
+def parse_n2k_temperature(
+    msg: Message,
+) -> Temperature:
+    """
+    Parse temperature from a PGN 130312 message
+
+    :param msg: NMEA2000 Message with PGN 130312
+    :return: Object containing the parsed information
+    """
+    index = IntRef(0)
+    return Temperature(
+        sid=msg.get_byte_uint(index),
+        temp_instance=msg.get_byte_uint(index),
+        temp_source=types.N2kTempSource(msg.get_byte_uint(index)),
+        actual_temperature=msg.get_2_byte_udouble(0.01, index),
+        set_temperature=msg.get_2_byte_udouble(0.01, index),
+    )
 
 
 # Humidity (PGN 130313)
