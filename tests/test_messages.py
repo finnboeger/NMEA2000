@@ -863,6 +863,18 @@ def test_temperature_message() -> None:
     assert messages.parse_n2k_temperature(msg) == temperature
 
 
+def test_humidity_message() -> None:
+    humidity = messages.Humidity(
+        humidity_instance=135,
+        humidity_source=types.N2kHumiditySource.InsideHumidity,
+        actual_humidity=50.024,
+        set_humidity=39.128,
+        sid=135,
+    )
+    msg = messages.create_n2k_humidity_message(humidity)
+    assert messages.parse_n2k_humidity(msg) == humidity
+
+
 def test_product_information_message() -> None:
     product_information = types.ProductInformation(
         n2k_version=2101,

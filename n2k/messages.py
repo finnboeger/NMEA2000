@@ -3856,7 +3856,63 @@ def parse_n2k_temperature(
 
 
 # Humidity (PGN 130313)
-# TODO: implement
+@dataclass(frozen=True, kw_only=True)
+class Humidity:
+    """Data for Humidity message (PGN 130313)"""
+
+    #: This should be unique at least on one device. May be best to have it unique over all devices sending this PGN.
+    humidity_instance: int
+    #: Source of measurement. See :py:class:`n2k.types.N2kHumiditySource`
+    humidity_source: types.N2kHumiditySource
+    #: Humidity in percent, precision 0.004%
+    actual_humidity: float
+    #: Set value of Humidity in percent, precision 0.004%
+    set_humidity: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
+
+
+def create_n2k_humidity_message(
+    data: Humidity,
+) -> Message:
+    """
+    Humidity (PGN 130313)
+
+    Humidity as measured by a specific humidity source.
+
+    :param data: See :py:class:`Humidity`
+    :return: NMEA2000 message ready to be sent.
+    """
+    msg = Message()
+    msg.pgn = PGN.Humidity
+    msg.priority = 5
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(data.humidity_instance)
+    msg.add_byte_uint(data.humidity_source)
+    msg.add_2_byte_udouble(data.actual_humidity, 0.004)
+    msg.add_2_byte_udouble(data.set_humidity, 0.004)
+    msg.add_byte_uint(0xFF)  # Reserved
+    return msg
+
+
+def parse_n2k_humidity(
+    msg: Message,
+) -> Humidity:
+    """
+    Parse humidity from a PGN 130313 message
+
+    :param msg: NMEA2000 Message with PGN 130313
+    :return: Object containing the parsed information
+    """
+    index = IntRef(0)
+    return Humidity(
+        sid=msg.get_byte_uint(index),
+        humidity_instance=msg.get_byte_uint(index),
+        humidity_source=types.N2kHumiditySource(msg.get_byte_uint(index)),
+        actual_humidity=msg.get_2_byte_udouble(0.004, index),
+        set_humidity=msg.get_2_byte_udouble(0.004, index),
+    )
 
 
 # Pressure (PGN 130314)
