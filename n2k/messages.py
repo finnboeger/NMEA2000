@@ -3915,8 +3915,60 @@ def parse_n2k_humidity(
     )
 
 
-# Pressure (PGN 130314)
-# TODO: implement
+# Actual Pressure (PGN 130314)
+@dataclass(frozen=True, kw_only=True)
+class ActualPressure:
+    """Data for Actual Pressure message (PGN 130314)"""
+
+    #: This should be unique at least on one device. May be best to have it unique over all devices sending this PGN.
+    pressure_instance: int
+    #: Source of measurement. See :py:class:`n2k.types.N2kPressureSource`
+    pressure_source: types.N2kPressureSource
+    #: Actual pressure in Pascals, precision 0.1Pa
+    actual_pressure: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
+
+
+def create_n2k_actual_pressure_message(
+    data: ActualPressure,
+) -> Message:
+    """
+    Actual Pressure (PGN 130314)
+
+    Pressure as measured by a specific pressure source
+
+    :param data: See :py:class:`ActualPressure`
+    :return: NMEA2000 message ready to be sent.
+    """
+    msg = Message()
+    msg.pgn = PGN.ActualPressure
+    msg.priority = 5
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(data.pressure_instance)
+    msg.add_byte_uint(data.pressure_source)
+    msg.add_4_byte_double(data.actual_pressure, 0.1)
+    msg.add_byte_uint(0xFF)  # Reserved
+    return msg
+
+
+def parse_n2k_actual_pressure(
+    msg: Message,
+) -> ActualPressure:
+    """
+    Parse actual pressure from a PGN 130314 message
+
+    :param msg: NMEA2000 Message with PGN 130314
+    :return: Object containing the parsed information
+    """
+    index = IntRef(0)
+    return ActualPressure(
+        sid=msg.get_byte_uint(index),
+        pressure_instance=msg.get_byte_uint(index),
+        pressure_source=types.N2kPressureSource(msg.get_byte_uint(index)),
+        actual_pressure=msg.get_4_byte_double(0.1, index),
+    )
 
 
 # Set pressure (PGN 130315)

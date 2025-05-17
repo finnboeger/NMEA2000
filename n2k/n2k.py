@@ -56,7 +56,7 @@ class PGN(IntEnum):
     EnvironmentalParameters = 130311  # prio: 5, period: 500
     Temperature = 130312  # prio: 5, period: 2000
     Humidity = 130313  # prio: 5, period: 2000
-    Pressure = 130314  # prio: 5, period: 2000
+    ActualPressure = 130314  # prio: 5, period: 2000
     TemperatureExtendedRange = 130316  # prio: 5, period: 2000
     SmallCraftStatusTrimTabPosition = 130576  # prio: 2, period: 200
 
@@ -242,7 +242,7 @@ def is_default_single_frame_message(pgn: int) -> bool:
         PGN.OutsideEnvironmentalParameters,
         PGN.Temperature,
         PGN.Humidity,
-        PGN.Pressure,
+        PGN.ActualPressure,
         PGN.TemperatureExtendedRange,
         PGN.SmallCraftStatusTrimTabPosition,
     ]
