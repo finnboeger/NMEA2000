@@ -886,6 +886,17 @@ def test_actual_pressure_message() -> None:
     assert messages.parse_n2k_actual_pressure(msg) == actual_pressure
 
 
+def test_set_pressure_message() -> None:
+    set_pressure = messages.SetPressure(
+        pressure_instance=135,
+        pressure_source=types.N2kPressureSource.CompressedAir,
+        set_pressure=1002200.2,
+        sid=135,
+    )
+    msg = messages.create_n2k_set_pressure_message(set_pressure)
+    assert messages.parse_n2k_set_pressure(msg) == set_pressure
+
+
 def test_product_information_message() -> None:
     product_information = types.ProductInformation(
         n2k_version=2101,

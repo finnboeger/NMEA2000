@@ -3972,7 +3972,61 @@ def parse_n2k_actual_pressure(
 
 
 # Set pressure (PGN 130315)
-# TODO: implement
+@dataclass(frozen=True, kw_only=True)
+class SetPressure:
+    """Data for Set Pressure message (PGN 130315)"""
+
+    #: This should be unique at least on one device. May be best to have it unique over all devices sending this PGN.
+    pressure_instance: int
+    #: Source of measurement. See :py:class:`n2k.types.N2kPressureSource`
+    pressure_source: types.N2kPressureSource
+    #: Set pressure in Pascals, precision 0.1Pa
+    set_pressure: float
+    #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
+    #: for different messages to indicate that they are measured at same time.
+    sid: int = 0xFF
+
+
+def create_n2k_set_pressure_message(
+    data: SetPressure,
+) -> Message:
+    """
+    Set Pressure (PGN 130315)
+
+    This parameter group can be sent to a device that controls pressure to
+    change its targeted pressure, or it can be sent out by the control device
+    to indicate its current targeted pressure.
+
+    :param data: See :py:class:`SetPressure`
+    :return: NMEA2000 message ready to be sent.
+    """
+    msg = Message()
+    msg.pgn = PGN.SetPressure
+    msg.priority = 5
+    msg.add_byte_uint(data.sid)
+    msg.add_byte_uint(data.pressure_instance)
+    msg.add_byte_uint(data.pressure_source)
+    msg.add_4_byte_double(data.set_pressure, 0.1)
+    msg.add_byte_uint(0xFF)  # Reserved
+    return msg
+
+
+def parse_n2k_set_pressure(
+    msg: Message,
+) -> SetPressure:
+    """
+    Parse set pressure from a PGN 130315 message
+
+    :param msg: NMEA2000 Message with PGN 130315
+    :return: Object containing the parsed information
+    """
+    index = IntRef(0)
+    return SetPressure(
+        sid=msg.get_byte_uint(index),
+        pressure_instance=msg.get_byte_uint(index),
+        pressure_source=types.N2kPressureSource(msg.get_byte_uint(index)),
+        set_pressure=msg.get_4_byte_double(0.1, index),
+    )
 
 
 # Temperature (PGN 130316)
