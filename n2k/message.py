@@ -591,7 +591,7 @@ class Message:
     def get_4_byte_int(
         self,
         index: IntRef,
-        default: int = constants.N2K_UINT32_NA,
+        default: int = constants.N2K_INT32_NA,
     ) -> int:
         length = 4
         if index.value + length > self.data_len:
