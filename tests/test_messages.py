@@ -84,8 +84,8 @@ def test_rudder_message() -> None:
 def test_heading_message() -> None:
     heading = messages.Heading(
         heading=1.2,
-        deviation=constants.N2K_DOUBLE_NA,
-        variation=constants.N2K_DOUBLE_NA,
+        deviation=None,
+        variation=None,
         ref=types.N2kHeadingReference.magnetic,
         sid=123,
     )
@@ -191,7 +191,7 @@ def test_trip_parameters_engine_message() -> None:
         engine_instance=0,
         trip_fuel_used=10,
         fuel_rate_average=14.4,
-        fuel_rate_economy=constants.N2K_DOUBLE_NA,
+        fuel_rate_economy=None,
         instantaneous_fuel_economy=31.1,
     )
     msg = messages.create_n2k_trip_parameters_engine_message(trip_parameters)

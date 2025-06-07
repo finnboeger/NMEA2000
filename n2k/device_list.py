@@ -84,7 +84,7 @@ class DeviceList(MessageHandler):
         # initialize index
         index: IntRef = IntRef(0)
         # get NAME from message. TODO: verify order
-        caller_name: int = msg.get_uint_64(index)
+        caller_name: int = msg.get_uint_64(index, constants.N2K_UINT64_NA)
 
         dev: n2k.device.Device | None = None
 

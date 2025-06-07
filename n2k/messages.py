@@ -22,15 +22,15 @@ class SystemTime:
     """
 
     #: Days since 1970-01-01
-    system_date: int
+    system_date: int | None
     # TODO: check if seconds since midnight is UTC or timezone specific
     #: Seconds since midnight
-    system_time: float
+    system_time: float | None
     #: Time source, see :py:class:`n2k.types.N2kTimeSource`
     time_source: types.N2kTimeSource
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = constants.N2K_UINT8_NA
+    sid: int | None = None
 
 
 def create_n2k_system_time_message(
@@ -62,7 +62,9 @@ def parse_n2k_system_time(msg: Message) -> SystemTime:
     index = IntRef(0)
     return SystemTime(
         sid=msg.get_byte_uint(index),
-        time_source=types.N2kTimeSource(msg.get_byte_uint(index) & 0x0F),
+        time_source=types.N2kTimeSource(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x0F,
+        ),
         system_date=msg.get_2_byte_uint(index),
         system_time=msg.get_4_byte_udouble(0.0001, index),
     )
@@ -80,7 +82,7 @@ class AISSafetyRelatedBroadcast:
     #: 0-3; 0 = default; 3 = do not repeat anymore
     repeat: types.N2kAISRepeat
     #: MMSI number of source station of message
-    source_id: int
+    source_id: int | None
     #: see :py:class:`n2k.types.N2kAISTransceiverInformation`
     ais_transceiver_information: types.N2kAISTransceiverInformation
     #: Maximum 121 bytes. Encoded as 6-bit ASCII (see ITU-R M.1371-1)
@@ -100,7 +102,9 @@ def create_n2k_ais_related_broadcast_msg_message(
     msg.pgn = PGN.AISSafetyRelatedBroadcastMessage
     msg.priority = 5
     msg.add_byte_uint((data.repeat & 0x03) << 6 | (data.message_id & 0x3F))
-    msg.add_4_byte_uint(0xC0000000 | (data.source_id & 0x3FFFFFFF))
+    msg.add_4_byte_uint(
+        0xC0000000 | (with_fallback(data.source_id, 0x3FFFFFFF) & 0x3FFFFFFF),
+    )
     msg.add_byte_uint(0xE0 | (0x1F & data.ais_transceiver_information))
     msg.add_var_str(data.safety_related_text or "")
     return msg
@@ -114,17 +118,20 @@ def parse_n2k_ais_related_broadcast_msg(msg: Message) -> AISSafetyRelatedBroadca
     :return: Object containing the parsed information.
     """
     index = IntRef(0)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     message_id = types.N2kAISMessageID(vb & 0x3F)
     if message_id != types.N2kAISMessageID.Safety_related_broadcast_message:
         raise ValueError
+    repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
+    vb = msg.get_4_byte_uint(index)
+    source_id = vb & 0x3FFFFFFF if vb is not None else None
 
     return AISSafetyRelatedBroadcast(
         message_id=message_id,
-        repeat=types.N2kAISRepeat((vb >> 6) & 0x03),
-        source_id=msg.get_4_byte_uint(index) & 0x3FFFFFFF,
+        repeat=repeat,
+        source_id=source_id,
         ais_transceiver_information=types.N2kAISTransceiverInformation(
-            msg.get_byte_uint(index) & 0x1F,
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x1F,
         ),
         safety_related_text=msg.get_var_str(index),
     )
@@ -136,36 +143,36 @@ class MOBNotification:
     """Data for Man Overboard Notification Message (PGN 127233)"""
 
     #: Identifier for each MOB emitter, unique to the vessel
-    mob_emitter_id: int
+    mob_emitter_id: int | None
     #: MOB Status, see :py:class:`n2k.types.N2kMOBStatus`
     mob_status: types.N2kMOBStatus
     #: Time of day (UTC) in seconds when MOB was initially activated
-    activation_time: float
+    activation_time: float | None
     #: Position Source, see :py:class:`n2k.types.N2kMOBPositionSource`
     position_source: types.N2kMOBPositionSource
     #: Date of MOB position in days since 1970-01-01 (UTC)
-    position_date: int
+    position_date: int | None
     #: Time of day of MOB position (UTC) in seconds
-    position_time: float
+    position_time: float | None
     #: Latitude in degrees
     #: Positive values indicate north, negative indicate south.
-    latitude: float
+    latitude: float | None
     #: Longitude in degrees
     #: Negative values indicate west, positive indicate east.
-    longitude: float
+    longitude: float | None
     #: True or Magnetic
     cog_reference: types.N2kHeadingReference
     #: Course Over Ground in radians with a resolution of 1x10E-4 rad
-    cog: float
+    cog: float | None
     #: Speed Over Ground in m/s with a resolution of 1x10E-2 m/s
-    sog: float
+    sog: float | None
     #: MMSI of vessel of Origin. Can be set to `n2k.constants.N2K_INT32_NA` if unknown
-    mmsi: int
+    mmsi: int | None
     #: see :py:class:`n2k.types.N2kMOBEmitterBatteryStatus`
     mob_emitter_battery_status: types.N2kMOBEmitterBatteryStatus
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_mob_notification_message(data: MOBNotification) -> Message:
@@ -207,19 +214,25 @@ def parse_n2k_mob_notification(msg: Message) -> MOBNotification:
     return MOBNotification(
         sid=msg.get_byte_uint(index),
         mob_emitter_id=msg.get_4_byte_uint(index),
-        mob_status=types.N2kMOBStatus(msg.get_byte_uint(index) & 0x07),
+        mob_status=types.N2kMOBStatus(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x07,
+        ),
         activation_time=msg.get_4_byte_udouble(0.0001, index),
-        position_source=types.N2kMOBPositionSource(msg.get_byte_uint(index) & 0x07),
+        position_source=types.N2kMOBPositionSource(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x07,
+        ),
         position_date=msg.get_2_byte_uint(index),
         position_time=msg.get_4_byte_udouble(0.0001, index),
         latitude=msg.get_4_byte_double(1e-7, index),
         longitude=msg.get_4_byte_double(1e-7, index),
-        cog_reference=types.N2kHeadingReference(msg.get_byte_uint(index) & 0x03),
+        cog_reference=types.N2kHeadingReference(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x03,
+        ),
         cog=msg.get_2_byte_udouble(0.0001, index),
         sog=msg.get_2_byte_udouble(0.01, index),
         mmsi=msg.get_4_byte_uint(index),
         mob_emitter_battery_status=types.N2kMOBEmitterBatteryStatus(
-            msg.get_byte_uint(index) & 0x07,
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x07,
         ),
     )
 
@@ -246,23 +259,23 @@ class HeadingTrackControl:
     #: Port or Starboard
     commanded_rudder_direction: types.N2kRudderDirectionOrder
     #: In radians
-    commanded_rudder_angle: float
+    commanded_rudder_angle: float | None
     #: In radians
-    heading_to_steer_course: float
+    heading_to_steer_course: float | None
     #: In radians
-    track: float
+    track: float | None
     #: In radians
-    rudder_limit: float
+    rudder_limit: float | None
     #: In radians
-    off_heading_limit: float
+    off_heading_limit: float | None
     #: In meters
-    radius_of_turn_order: float
+    radius_of_turn_order: float | None
     #: In radians/s
-    rate_of_turn_order: float
+    rate_of_turn_order: float | None
     #: In meters
-    off_track_limit: float
+    off_track_limit: float | None
     #: In radians
-    vessel_heading: float
+    vessel_heading: float | None
 
 
 def create_n2k_heading_track_control_message(
@@ -309,12 +322,12 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
     :return: Object containing the parsed information.
     """
     index = IntRef(0)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     rudder_limit_exceeded = types.N2kOnOff(vb & 0x03)
     off_heading_limit_exceeded = types.N2kOnOff((vb >> 2) & 0x03)
     off_track_limit_exceeded = types.N2kOnOff((vb >> 4) & 0x03)
     override = types.N2kOnOff((vb >> 6) & 0x03)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     steering_mode = types.N2kSteeringMode(vb & 0x07)
     turn_mode = types.N2kTurnMode((vb >> 3) & 0x07)
     heading_reference = types.N2kHeadingReference((vb >> 6) & 0x03)
@@ -327,7 +340,7 @@ def parse_n2k_heading_track_control(msg: Message) -> HeadingTrackControl:
         turn_mode=turn_mode,
         heading_reference=heading_reference,
         commanded_rudder_direction=types.N2kRudderDirectionOrder(
-            (msg.get_byte_uint(index) >> 5) & 0x07,
+            (msg.get_byte_uint(index, constants.N2K_UINT8_NA) >> 5) & 0x07,
         ),
         commanded_rudder_angle=msg.get_2_byte_double(0.0001, index),
         heading_to_steer_course=msg.get_2_byte_udouble(0.0001, index),
@@ -347,13 +360,13 @@ class Rudder:
     """Data for Rudder Message (PGN 127245)"""
 
     #: Current rudder position in radians.
-    rudder_position: float
+    rudder_position: float | None
     #: Rudder instance.
-    instance: int
+    instance: int | None
     #: Direction, where rudder should be turned.
     rudder_direction_order: types.N2kRudderDirectionOrder
     #: Angle where rudder should be turned in radians.
-    angle_order: float
+    angle_order: float | None
 
 
 def create_n2k_rudder_message(
@@ -388,7 +401,7 @@ def parse_n2k_rudder(msg: Message) -> Rudder:
     return Rudder(
         instance=msg.get_byte_uint(index),
         rudder_direction_order=types.N2kRudderDirectionOrder(
-            msg.get_byte_uint(index) & 0x07,
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x07,
         ),
         angle_order=msg.get_2_byte_double(0.0001, index),
         rudder_position=msg.get_2_byte_double(0.0001, index),
@@ -401,16 +414,16 @@ class Heading:
     """Data for Vessel Heading Message (PGN 127250)"""
 
     #: Heading in radians
-    heading: float
+    heading: float | None
     #: Magnetic deviation in radians. Use `N2K_DOUBLE_NA` for undefined value.
-    deviation: float
+    deviation: float | None
     #: Magnetic variation in radians. Use `N2K_DOUBLE_NA` for undefined value.
-    variation: float
+    variation: float | None
     #: Heading reference. Can be true or magnetic.
     ref: types.N2kHeadingReference
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_heading_message(
@@ -450,7 +463,9 @@ def parse_n2k_heading(msg: Message) -> Heading:
         heading=msg.get_2_byte_udouble(0.0001, index),
         deviation=msg.get_2_byte_double(0.0001, index),
         variation=msg.get_2_byte_double(0.0001, index),
-        ref=types.N2kHeadingReference(msg.get_byte_uint(index) & 0x03),
+        ref=types.N2kHeadingReference(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x03,
+        ),
     )
 
 
@@ -460,10 +475,10 @@ class RateOfTurn:
     """Data for Rate of Turn Message (PGN 127251)"""
 
     #: Rate of turn in radians per second
-    rate_of_turn: float
+    rate_of_turn: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_rate_of_turn_message(data: RateOfTurn) -> Message:
@@ -503,14 +518,14 @@ class Heave:
     """Data for Heave Message (PGN 127252)"""
 
     #: Vertical displacement perpendicular to the earth's surface in meters
-    heave: float
+    heave: float | None
     #: Delay added by calculations in seconds
-    delay: float
+    delay: float | None
     #: Delay Source, see type
     delay_source: types.N2kDelaySource
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_heave_message(
@@ -546,7 +561,9 @@ def parse_n2k_heave(msg: Message) -> Heave:
         sid=msg.get_byte_uint(index),
         heave=msg.get_2_byte_double(0.01, index),
         delay=msg.get_2_byte_udouble(0.01, index),
-        delay_source=types.N2kDelaySource(msg.get_byte_uint(index) & 0x0F),
+        delay_source=types.N2kDelaySource(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x0F,
+        ),
     )
 
 
@@ -556,14 +573,14 @@ class Attitude:
     """Data for Attitude Message (PGN 127257)"""
 
     #: Heading in radians
-    yaw: float
+    yaw: float | None
     #: Pitch in radians. Positive, when your bow rises.
-    pitch: float
+    pitch: float | None
     #: Roll in radians. Positive, when tilted right.
-    roll: float
+    roll: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_attitude_message(data: Attitude) -> Message:
@@ -608,12 +625,12 @@ class MagneticVariation:
     #: How the magnetic variation for the current location has been derived
     source: types.N2kMagneticVariation
     #: UTC Date in Days since 1970
-    days_since_1970: int
+    days_since_1970: int | None
     #: Variation in radians, positive values represent Easterly, negative values a Westerly variation.
-    variation: float
+    variation: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_magnetic_variation_message(data: MagneticVariation) -> Message:
@@ -644,7 +661,9 @@ def parse_n2k_magnetic_variation(msg: Message) -> MagneticVariation:
     index = IntRef(0)
     return MagneticVariation(
         sid=msg.get_byte_uint(index),
-        source=types.N2kMagneticVariation(msg.get_byte_uint(index) & 0x0F),
+        source=types.N2kMagneticVariation(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x0F,
+        ),
         days_since_1970=msg.get_2_byte_uint(index),
         variation=msg.get_2_byte_double(0.0001, index),
     )
@@ -661,17 +680,17 @@ class EngineParametersRapid:
     #: of the boat, incrementing to n going towards the stern of the boat.
     #: For engines at the same distance from the bow and the stern, the engines are
     #: numbered starting from the port side and proceeding towards the starboard side.
-    engine_instance: int
+    engine_instance: int | None
     #: Rotational speed in RPM, stored at a precision of ¼ RPM
-    engine_speed: float
+    engine_speed: float | None
     #: Turbocharger boost pressure in Pascal, stored at a precision of 100 Pa
-    engine_boost_pressure: float
+    engine_boost_pressure: float | None
     #: Engine tilt or trim (positive or negative) in percent, stored as an integer.
     #:
     #: 0: full tilt down
     #: 50: neutral
     #: 100: full tilt up
-    engine_tilt_trim: int
+    engine_tilt_trim: int | None
 
 
 def create_n2k_engine_parameters_rapid_message(data: EngineParametersRapid) -> Message:
@@ -722,27 +741,27 @@ class EngineParametersDynamic:
     #: of the boat, incrementing to n going towards the stern of the boat.
     #: For engines at the same distance from the bow and the stern, the engines are
     #: numbered starting from the port side and proceeding towards the starboard side.
-    engine_instance: int
+    engine_instance: int | None
     #: Oil pressure of the engine in Pascal, precision 100Pa
-    engine_oil_press: float
+    engine_oil_press: float | None
     #: Oil temperature of the engine in degrees Kelvin, precision 0.1°K
-    engine_oil_temp: float
+    engine_oil_temp: float | None
     #: Engine coolant temperature in degrees Kelvin, precision 0.1°K
-    engine_coolant_temp: float
+    engine_coolant_temp: float | None
     #: Alternator voltage in Volt, precision 0.01V
-    alternator_voltage: float
+    alternator_voltage: float | None
     #: Fuel consumption rate in cubic meters per hour, precision 0.0001 m³/h
-    fuel_rate: float
+    fuel_rate: float | None
     #: Cumulative runtime of the engine in seconds
-    engine_hours: float
+    engine_hours: float | None
     #: Engine coolant pressure in Pascal, precision 100 Pa
-    engine_coolant_press: float
+    engine_coolant_press: float | None
     #: Fuel pressure in Pascal, precision 1000 Pa
-    engine_fuel_press: float
+    engine_fuel_press: float | None
     #: Percent engine load, precision 1%
-    engine_load: int
+    engine_load: int | None
     #: Percent engine torque, precision 1%
-    engine_torque: int
+    engine_torque: int | None
     #: Warning conditions part 1
     status1: types.N2kEngineDiscreteStatus1
     #: Warning conditions part 2
@@ -798,8 +817,12 @@ def parse_n2k_engine_parameters_dynamic(msg: Message) -> EngineParametersDynamic
     engine_fuel_press = msg.get_2_byte_udouble(1000, index)
 
     msg.get_byte_uint(index)
-    status1 = types.N2kEngineDiscreteStatus1.from_status(msg.get_2_byte_uint(index))
-    status2 = types.N2kEngineDiscreteStatus2.from_status(msg.get_2_byte_uint(index))
+    status1 = types.N2kEngineDiscreteStatus1.from_status(
+        msg.get_2_byte_uint(index, constants.N2K_UINT16_NA),
+    )
+    status2 = types.N2kEngineDiscreteStatus2.from_status(
+        msg.get_2_byte_uint(index, constants.N2K_UINT16_NA),
+    )
     engine_load = msg.get_byte_uint(index)
     engine_torque = msg.get_byte_uint(index)
 
@@ -831,13 +854,13 @@ class TransmissionParametersDynamic:
     #: of the boat, incrementing to n going towards the stern of the boat.
     #: For engines at the same distance from the bow and the stern, the engines are
     #: numbered starting from the port side and proceeding towards the starboard side.
-    engine_instance: int
+    engine_instance: int | None
     #: The current gear the transmission is in
     transmission_gear: types.N2kTransmissionGear
     #: Transmission oil pressure in Pascal, precision 100 Pa
-    oil_pressure: float
+    oil_pressure: float | None
     #: Transmission oil temperature in degrees Kelvin, precision 0.1°K
-    oil_temperature: float
+    oil_temperature: float | None
     #: Transmission warning conditions.
     discrete_status1: types.N2kTransmissionDiscreteStatus1
 
@@ -875,11 +898,13 @@ def parse_n2k_transmission_parameters_dynamic(
     index = IntRef(0)
     return TransmissionParametersDynamic(
         engine_instance=msg.get_byte_uint(index),
-        transmission_gear=types.N2kTransmissionGear(msg.get_byte_uint(index) & 0x03),
+        transmission_gear=types.N2kTransmissionGear(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x03,
+        ),
         oil_pressure=msg.get_2_byte_udouble(100, index),
         oil_temperature=msg.get_2_byte_udouble(0.1, index),
         discrete_status1=types.N2kTransmissionDiscreteStatus1.from_status(
-            msg.get_byte_uint(index) & 0x1F,
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x1F,
         ),
     )
 
@@ -895,15 +920,15 @@ class TripFuelConsumptionEngine:
     #: of the boat, incrementing to n going towards the stern of the boat.
     #: For engines at the same distance from the bow and the stern, the engines are
     #: numbered starting from the port side and proceeding towards the starboard side.
-    engine_instance: int
+    engine_instance: int | None
     #: Fuel used by this engine during the trip in Litres, precision 1L
-    trip_fuel_used: float
+    trip_fuel_used: float | None
     #: Fuel used on average by this engine in Litres per hour, precision 0.1L/h
-    fuel_rate_average: float
+    fuel_rate_average: float | None
     #: Unknown? Litres per hour, precision 0.1L/h
-    fuel_rate_economy: float
+    fuel_rate_economy: float | None
     #: Fuel used at this moment by this engine in Litres per hour, precision 0.1L/h
-    instantaneous_fuel_economy: float
+    instantaneous_fuel_economy: float | None
 
 
 def create_n2k_trip_parameters_engine_message(
@@ -964,7 +989,9 @@ def create_n2k_binary_status_report_message(data: BinaryStatusReport) -> Message
     msg = Message()
     msg.pgn = PGN.BinaryStatusReport
     msg.priority = 3
-    msg.add_uint_64((data.bank_status << 8) | (data.device_bank_instance & 0xFF))
+    msg.add_uint_64(
+        (data.bank_status << 8) | (data.device_bank_instance & 0xFF),
+    )
     return msg
 
 
@@ -976,7 +1003,7 @@ def parse_n2k_binary_status_report(msg: Message) -> BinaryStatusReport:
     :return: Object containing the parsed information
     """
     index = IntRef(0)
-    vb = msg.get_uint_64(index)
+    vb = msg.get_uint_64(index, constants.N2K_UINT64_NA)
     return BinaryStatusReport(
         device_bank_instance=vb & 0xFF,
         bank_status=vb >> 8,
@@ -1020,7 +1047,9 @@ def create_n2k_switch_bank_control_message(
     msg = Message()
     msg.pgn = PGN.SwitchBankControl
     msg.priority = 3
-    msg.add_uint_64((data.bank_status << 8) | (data.target_bank_instance & 0xFF))
+    msg.add_uint_64(
+        (data.bank_status << 8) | (data.target_bank_instance & 0xFF),
+    )
     return msg
 
 
@@ -1032,7 +1061,7 @@ def parse_n2k_switch_bank_control(msg: Message) -> SwitchBankControl:
     :return: Object containing the parsed information
     """
     index = IntRef(0)
-    vb = msg.get_uint_64(index)
+    vb = msg.get_uint_64(index, constants.N2K_UINT64_NA)
     return SwitchBankControl(
         target_bank_instance=vb & 0xFF,
         bank_status=vb >> 8,
@@ -1049,9 +1078,9 @@ class FluidLevel:
     #: Type of fluid.
     fluid_type: types.N2kFluidType
     #: Tank level in % of full tank, precision 0.004%
-    level: float
+    level: float | None
     #: Tank capacity in litres, precision 0.1L
-    capacity: float
+    capacity: float | None
 
 
 def create_n2k_fluid_level_message(data: FluidLevel) -> Message:
@@ -1063,7 +1092,9 @@ def create_n2k_fluid_level_message(data: FluidLevel) -> Message:
     """
     msg = Message()
     msg.priority = 6
-    msg.add_byte_uint((data.instance & 0x0F) | ((data.fluid_type & 0x0F) << 4))
+    msg.add_byte_uint(
+        (data.instance & 0x0F) | ((data.fluid_type & 0x0F) << 4),
+    )
     msg.add_2_byte_double(data.level, 0.004)
     msg.add_4_byte_udouble(data.capacity, 0.1)
     msg.add_byte_uint(0xFF)  # Reserved
@@ -1078,7 +1109,7 @@ def parse_n2k_fluid_level(msg: Message) -> FluidLevel:
     :return: Object containing the parsed information
     """
     index = IntRef(0)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
 
     return FluidLevel(
         instance=vb & 0x0F,
@@ -1094,22 +1125,22 @@ class DCDetailedStatus:
     """Data for DC Detailed Status Message (PGN 127506)"""
 
     #: DC Source Instance
-    dc_instance: int
+    dc_instance: int | None
     #: Type of DC Source
     dc_type: types.N2kDCType
     #: Percent of charge
-    state_of_charge: int
+    state_of_charge: int | None
     #: Percent of health
-    state_of_health: int
+    state_of_health: int | None
     #: Time remaining in seconds, precision 60s
-    time_remaining: float
+    time_remaining: float | None
     #: DC output voltage ripple in Volt, precision 0.001V
-    ripple_voltage: float
+    ripple_voltage: float | None
     #: Battery capacity in coulombs, precision 3600C (aka 1Ah)
-    capacity: float
+    capacity: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_dc_detailed_status_message(data: DCDetailedStatus) -> Message:
@@ -1159,9 +1190,9 @@ class ChargerStatus:
     """Data for Charger Status Message (PGN 127507)"""
 
     #: Charger Instance
-    instance: int
+    instance: int | None
     #: Battery Instance
-    battery_instance: int
+    battery_instance: int | None
     #: Operating State
     charge_state: types.N2kChargeState
     #: Charger Mode
@@ -1171,7 +1202,7 @@ class ChargerStatus:
     #: Yes/No
     equalization_pending: types.N2kOnOff
     #: Time remaining in seconds, precision 1s
-    equalization_time_remaining: float
+    equalization_time_remaining: float | None
 
 
 def create_n2k_charger_status_message(data: ChargerStatus) -> Message:
@@ -1205,10 +1236,10 @@ def parse_n2k_charger_status(msg: Message) -> ChargerStatus:
 
     instance = msg.get_byte_uint(index)
     battery_instance = msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     charge_state = types.N2kChargeState(vb & 0x0F)
     charger_mode = types.N2kChargerMode((vb >> 4) & 0x0F)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     enabled = types.N2kOnOff(vb & 0x03)
     equalization_pending = types.N2kOnOff((vb >> 2) & 0x03)
     equalization_time_remaining = msg.get_2_byte_udouble(60, index)
@@ -1230,16 +1261,16 @@ class BatteryStatus:
     """Data for Battery Status Message (PGN 127508)"""
 
     #: Battery Instance
-    battery_instance: int
+    battery_instance: int | None
     #: Battery Voltage in Volt, precision 0.01V
-    battery_voltage: float
+    battery_voltage: float | None
     #: Battery Current in Ampere, precision 0.1A
-    battery_current: float
+    battery_current: float | None
     #: Battery Temperature in Kelvin, precision 0.01K
-    battery_temperature: float
+    battery_temperature: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_battery_status_message(data: BatteryStatus) -> Message:
@@ -1283,13 +1314,13 @@ class ChargerConfigurationStatus:
     """Data for Charger Configuration Status Message (PGN 127510)"""
 
     #: Charger Instance
-    charger_instance: int
+    charger_instance: int | None
     #: Battery Instance
-    battery_instance: int
+    battery_instance: int | None
     #: Enable/Disable charger
     enable: types.N2kOnOff
     #: Charge current limit in % range 0-252 resolution 1%
-    charge_current_limit: int
+    charge_current_limit: int | None
     #: Charging algorithm, see type
     charging_algorithm: types.N2kChargingAlgorithm
     #: Charger mode, see type
@@ -1301,7 +1332,7 @@ class ChargerConfigurationStatus:
     #: Enable/Disable over charge
     over_charge_enable: types.N2kOnOff
     #: Time remaining in seconds
-    equalization_time_remaining: int
+    equalization_time_remaining: int | None
 
 
 def create_n2k_charger_configuration_status_message(
@@ -1345,12 +1376,12 @@ def parse_n2k_charger_configuration_status(msg: Message) -> ChargerConfiguration
 
     charger_instance = msg.get_byte_uint(index)
     battery_instance = msg.get_byte_uint(index)
-    enable = types.N2kOnOff(msg.get_byte_uint(index) & 0x03)
+    enable = types.N2kOnOff(msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x03)
     charge_current_limit = msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     charging_algorithm = types.N2kChargingAlgorithm(vb & 0x0F)
     charger_mode = types.N2kChargerMode((vb >> 4) & 0x0F)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     battery_temperature = types.N2kBattTempNoSensor(vb & 0x0F)
     equalization_enabled = types.N2kOnOff((vb >> 4) & 0x03)
     over_charge_enable = types.N2kOnOff((vb >> 6) & 0x03)
@@ -1376,7 +1407,7 @@ class BatteryConfigurationStatus:
     """Data for Battery Configuration Status Message (PGN 127513)"""
 
     #: Battery Instance
-    battery_instance: int
+    battery_instance: int | None
     #: Battery Type, see type
     battery_type: types.N2kBatType
     #: Whether the battery supports equalization
@@ -1386,14 +1417,14 @@ class BatteryConfigurationStatus:
     #: Battery chemistry, see type
     battery_chemistry: types.N2kBatChem
     #: Battery capacity in Coulombs (aka Ampere Seconds), stored at a precision of 1Ah
-    battery_capacity: float
+    battery_capacity: float | None
     #: Battery temperature coefficient in %
-    battery_temperature_coefficient: int
+    battery_temperature_coefficient: int | None
     #: Peukert Exponent, describing the relation between discharge rate and effective capacity.
     #: Value between 1.0 and 1.504
-    peukert_exponent: float
+    peukert_exponent: float | None
     #: Charge efficiency factor
-    charge_efficiency_factor: int
+    charge_efficiency_factor: int | None
 
 
 def create_n2k_battery_configuration_status_message(
@@ -1418,12 +1449,13 @@ def create_n2k_battery_configuration_status_message(
     msg.add_2_byte_double(data.battery_capacity, 3600)
     msg.add_byte_uint(data.battery_temperature_coefficient)
     # Original code was unsure if this is correct.
-    # I am fairly certain it is as the exponent can't be better than 1 and shouldn't be worse than 1.5
-    peukert_exponent = data.peukert_exponent - 1
-    if 0 <= peukert_exponent <= 0.504:  # noqa: PLR2004
-        msg.add_1_byte_udouble(peukert_exponent, 0.002, -1)
+    # I am fairly certain it is as the exponent can't be better than 1 and shouldn't be worse than 1
+    if (
+        data.peukert_exponent is not None and 1 <= data.peukert_exponent <= 1.504  # noqa: PLR2004
+    ):
+        msg.add_1_byte_udouble(data.peukert_exponent - 1, 0.002)
     else:
-        msg.add_byte_uint(constants.N2K_UINT8_NA)
+        msg.add_byte_uint(None)
     msg.add_byte_uint(data.charge_efficiency_factor)
     return msg
 
@@ -1438,12 +1470,16 @@ def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfiguration
     index = IntRef(0)
 
     battery_instance = msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     battery_type = types.N2kBatType(vb & 0x0F)
     supports_equal = types.N2kBatEqSupport((vb >> 4) & 0x03)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     battery_nominal_voltage = types.N2kBatNomVolt(vb & 0x0F)
     battery_chemistry = types.N2kBatChem((vb >> 4) & 0x0F)
+    battery_capacity = msg.get_2_byte_double(3600, index)
+    battery_temperature_coefficient = msg.get_byte_uint(index)
+    vb = msg.get_1_byte_udouble(0.002, index)
+    peukert_exponent = vb + 1 if vb is not None else None
 
     return BatteryConfigurationStatus(
         battery_instance=battery_instance,
@@ -1451,9 +1487,9 @@ def parse_n2k_battery_configuration_status(msg: Message) -> BatteryConfiguration
         supports_equal=supports_equal,
         battery_nominal_voltage=battery_nominal_voltage,
         battery_chemistry=battery_chemistry,
-        battery_capacity=msg.get_2_byte_double(3600, index),
-        battery_temperature_coefficient=msg.get_byte_uint(index),
-        peukert_exponent=msg.get_1_byte_udouble(0.002, index) + 1,
+        battery_capacity=battery_capacity,
+        battery_temperature_coefficient=battery_temperature_coefficient,
+        peukert_exponent=peukert_exponent,
         charge_efficiency_factor=msg.get_byte_uint(index),
     )
 
@@ -1464,7 +1500,7 @@ class ConverterStatus:
     """Data for Converter Status Message (PGN 127750)"""
 
     #: Connection number
-    connection_number: int
+    connection_number: int | None
     #: Operating state (see :py:class:`n2k.types.N2kConvMode`)
     operating_state: types.N2kConvMode
     #: Temperature state (see :py:class:`n2k.types.N2kTemperatureState`)
@@ -1477,7 +1513,7 @@ class ConverterStatus:
     ripple_state: types.N2kRippleState
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_converter_status_message(data: ConverterStatus) -> Message:
@@ -1519,9 +1555,9 @@ def parse_n2k_converter_status(msg: Message) -> ConverterStatus:
     sid = msg.get_byte_uint(index)
     connection_number = msg.get_byte_uint(index)
     operating_state = types.N2kConvMode(
-        msg.get_byte_uint(index),
+        msg.get_byte_uint(index, constants.N2K_UINT8_NA),
     )  # might be N2kChargeState
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     ripple_state = types.N2kRippleState((vb >> 6) & 0x03)
     low_dc_voltage_state = types.N2kDCVoltageState((vb >> 4) & 0x03)
     overload_state = types.N2kOverloadState((vb >> 2) & 0x03)
@@ -1545,10 +1581,10 @@ class Leeway:
 
     #: Positive angles indicate slippage to starboard, that is, the vessel is tracking to the right of its heading,
     #: and negative angles indicate slippage to port. Angle in radians, stored at a precision of 0.0001rad
-    leeway: float
+    leeway: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_leeway_message(data: Leeway) -> Message:
@@ -1592,14 +1628,14 @@ class BoatSpeed:
     """Data for Boat Speed Message (PGN 128259)"""
 
     #: Speed through the water in meters per second, precision 0.01m/s
-    water_referenced: float
+    water_referenced: float | None
     #: Speed over ground in meters per second, precision 0.01m/s
-    ground_referenced: float
+    ground_referenced: float | None
     #: Type of transducer for the water referenced speed, see type
     swrt: types.N2kSpeedWaterReferenceType
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_boat_speed_message(data: BoatSpeed) -> Message:
@@ -1633,7 +1669,9 @@ def parse_n2k_boat_speed(msg: Message) -> BoatSpeed:
         sid=msg.get_byte_uint(index),
         water_referenced=msg.get_2_byte_udouble(0.01, index),
         ground_referenced=msg.get_2_byte_udouble(0.01, index),
-        swrt=types.N2kSpeedWaterReferenceType(msg.get_byte_uint(index)),
+        swrt=types.N2kSpeedWaterReferenceType(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA),
+        ),
     )
 
 
@@ -1643,15 +1681,15 @@ class WaterDepth:
     """Data for Water Depth Message (PGN 128267)"""
 
     #: Water depth below transducer in meters, precision 0.01m
-    depth_below_transducer: float
+    depth_below_transducer: float | None
     #: Distance in meters between transducer and water surface (positive) or transducer and keel (negative),
     #: precision 0.001m
-    offset: float
+    offset: float | None
     #: Maximum depth that can be measured
-    max_range: float
+    max_range: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_water_depth_message(data: WaterDepth) -> Message:
@@ -1693,14 +1731,14 @@ class DistanceLog:
     """Data for Distance Log Message (PGN 128275)"""
 
     #: Days since 1.1.1970 UTC
-    days_since_1970: int
+    days_since_1970: int | None
     # TODO: are the seconds UTC?
     #: Seconds since midnight, stored at a precision of 0.0001s
-    seconds_since_midnight: float
+    seconds_since_midnight: float | None
     #: Total distance traveled through the water since the installation of the device in meters.
-    log: int
+    log: int | None
     #: Total distance traveled through the water since the last trip reset in meters.
-    trip_log: int
+    trip_log: int | None
 
 
 def create_n2k_distance_log_message(data: DistanceLog) -> Message:
@@ -1742,7 +1780,7 @@ class AnchorWindlassControlStatus:
     """Data for Anchor Windlass Control Status Message (PGN 128776)"""
 
     #: Windlass Identifier
-    windlass_identifier: int
+    windlass_identifier: int | None
     #: Windlass Direction, see type
     windlass_direction_control: types.N2kWindlassDirectionControl
     #: Single Speed: 0=off, 1-100=on
@@ -1750,7 +1788,7 @@ class AnchorWindlassControlStatus:
     #: Dual Speed: 0=0ff, 1-49=slow, 50-100=fast
     #:
     #: Proportional speed: 0=off, 1-100=speed
-    speed_control: int
+    speed_control: int | None
     #: Speed control type, Single, Dual or Proportional
     speed_control_type: types.N2kSpeedType
     #: Anchor Docking Control, Yes/No
@@ -1764,12 +1802,12 @@ class AnchorWindlassControlStatus:
     #: Anchor Light, Yes/No
     anchor_light: types.N2kGenericStatusPair
     #: Command Timeout. Range 0.0 to 1.275 seconds, precision 0.005s
-    command_timeout: float
+    command_timeout: float | None
     #: Windlass Control Events, see type
     windlass_control_events: types.N2kWindlassControlEvents
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_anchor_windlass_control_status_message(
@@ -1817,19 +1855,19 @@ def parse_n2k_anchor_windlass_control_status(
 
     sid = msg.get_byte_uint(index)
     windlass_identifier = msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     windlass_direction_control = types.N2kWindlassDirectionControl(vb & 0x03)
     anchor_docking_control = types.N2kGenericStatusPair((vb >> 2) & 0x03)
     speed_control_type = types.N2kSpeedType((vb >> 4) & 0x03)
     speed_control = msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     power_enable = types.N2kGenericStatusPair(vb & 0x03)
     mechanical_lock = types.N2kGenericStatusPair((vb >> 2) & 0x03)
     deck_and_anchor_wash = types.N2kGenericStatusPair((vb >> 4) & 0x03)
     anchor_light = types.N2kGenericStatusPair((vb >> 6) & 0x03)
     command_timeout = msg.get_1_byte_udouble(0.005, index)
     windlass_control_events = types.N2kWindlassControlEvents.from_events(
-        msg.get_byte_uint(index),
+        msg.get_byte_uint(index, constants.N2K_UINT8_NA),
     )
 
     return AnchorWindlassControlStatus(
@@ -1854,11 +1892,11 @@ class AnchorWindlassOperatingStatus:
     """Data for Anchor Windlass Operating Status Message (PGN 128777)"""
 
     #: Identifier of the windlass instance
-    windlass_identifier: int
+    windlass_identifier: int | None
     #: Amount of rode deployed, in metres
-    rode_counter_value: float
+    rode_counter_value: float | None
     #: Deployment speed in metres per second
-    windlass_line_speed: float
+    windlass_line_speed: float | None
     #: Windlass Motion Status, see type
     windlass_motion_status: types.N2kWindlassMotionStates
     #: Rode Type Status, see type
@@ -1869,7 +1907,7 @@ class AnchorWindlassOperatingStatus:
     windlass_operating_events: types.N2kWindlassOperatingEvents
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_anchor_windlass_operating_status_message(
@@ -1912,12 +1950,12 @@ def parse_n2k_anchor_windlass_operating_status(
 
     sid = msg.get_byte_uint(index)
     windlass_identifier = msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     windlass_motion_status = types.N2kWindlassMotionStates(vb & 0x03)
     rode_type_status = types.N2kRodeTypeStates((vb >> 2) & 0x03)
     rode_counter_value = msg.get_2_byte_udouble(0.1, index)
     windlass_line_speed = msg.get_2_byte_udouble(0.01, index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     anchor_docking_status = types.N2kAnchorDockingStates(vb & 0x03)
     windlass_operating_events = types.N2kWindlassOperatingEvents.from_event(vb >> 2)
     return AnchorWindlassOperatingStatus(
@@ -1938,18 +1976,18 @@ class AnchorWindlassMonitoringStatus:
     """Data for Anchor Windlass Monitoring Status Message (PGN 128778)"""
 
     #: Identifier of the windlass instance
-    windlass_identifier: int
+    windlass_identifier: int | None
     #: Total runtime of the motor in seconds
-    total_motor_time: float
+    total_motor_time: float | None
     #: Voltage in Volts, precision 0.2V
-    controller_voltage: float
+    controller_voltage: float | None
     #: Current in Amperes, precision 1A
-    motor_current: float
+    motor_current: float | None
     #: Windlass Monitoring Events, see type
     windlass_monitoring_events: types.N2kWindlassMonitoringEvents
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_anchor_windlass_monitoring_status_message(
@@ -1989,7 +2027,7 @@ def parse_n2k_anchor_windlass_monitoring_status(
         sid=msg.get_byte_uint(index),
         windlass_identifier=msg.get_byte_uint(index),
         windlass_monitoring_events=types.N2kWindlassMonitoringEvents.from_events(
-            msg.get_byte_uint(index),
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA),
         ),
         controller_voltage=msg.get_1_byte_udouble(0.2, index),
         motor_current=msg.get_1_byte_udouble(1.0, index),
@@ -2004,10 +2042,10 @@ class LatLonRapid:
 
     #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
     #: Positive values indicate north, negative indicate south.
-    latitude: float
+    latitude: float | None
     #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
     #: Negative values indicate west, positive indicate east.
-    longitude: float
+    longitude: float | None
 
 
 def create_n2k_lat_long_rapid_message(data: LatLonRapid) -> Message:
@@ -2048,12 +2086,12 @@ class CogSogRapid:
     #: Course over Ground reference, see type
     heading_reference: types.N2kHeadingReference
     #: Course over Ground in radians, precision 0.0001rad
-    cog: float
+    cog: float | None
     #: Speed over Ground in meters per second, precision 0.01m/s
-    sog: float
+    sog: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_cog_sog_rapid_message(data: CogSogRapid) -> Message:
@@ -2086,7 +2124,9 @@ def parse_n2k_cog_sog_rapid(msg: Message) -> CogSogRapid:
 
     return CogSogRapid(
         sid=msg.get_byte_uint(index),
-        heading_reference=types.N2kHeadingReference(msg.get_byte_uint(index) & 0x03),
+        heading_reference=types.N2kHeadingReference(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x03,
+        ),
         cog=msg.get_2_byte_udouble(0.0001, index),
         sog=msg.get_2_byte_udouble(0.01, index),
     )
@@ -2098,32 +2138,32 @@ class GNSSPositionData:
     """Data for GNSS Position Data Message (PGN 129029)"""
 
     #: Days since 1.1.1970 UTC
-    days_since_1970: int
+    days_since_1970: int | None
     # TODO: check if seconds since midnight is UTC or timezone specific
     #: Seconds since midnight, stored at a precision of 0.0001s
-    seconds_since_midnight: float
+    seconds_since_midnight: float | None
     #: Latitude in degrees, precision approx 11 pico metre  (a fifth of the diameter of a helium atom, 1e-16 deg).
     #: Positive values indicate north, negative indicate south.
-    latitude: float
+    latitude: float | None
     #: Longitude in degrees, precision approx 11 pico metre at the equator (1e-16 deg)
     #: Negative values indicate west, positive indicate east.
-    longitude: float
+    longitude: float | None
     #: Altitude in reference to the WGS-84 model in metres, precision 1 micrometer
-    altitude: float
+    altitude: float | None
     #: GNSS Type, see type
     gnss_type: types.N2kGNSSType
     #: GNSS Method type, see type
     gnss_method: types.N2kGNSSMethod
     #: Number of satellites used for the provided data
-    n_satellites: int
+    n_satellites: int | None
     #: Horizontal Dilution Of Precision in meters, precision 0.01m
-    hdop: float
+    hdop: float | None
     #: Positional Dilution Of Precision in meters, precision 0.01m
-    pdop: float
+    pdop: float | None
     #: Geoidal separation in meters, precision 0.01m
-    geoidal_separation: float
+    geoidal_separation: float | None
     #: Number of Reference Stations
-    n_reference_stations: int
+    n_reference_stations: int | None
     #: Reference Station type, see type
     reference_station_type: types.N2kGNSSType | None
     #: Reference Station ID
@@ -2132,7 +2172,7 @@ class GNSSPositionData:
     age_of_correction: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_gnss_data_message(data: GNSSPositionData) -> Message:
@@ -2157,7 +2197,10 @@ def create_n2k_gnss_data_message(data: GNSSPositionData) -> Message:
     msg.add_2_byte_double(data.hdop, 0.01)
     msg.add_2_byte_double(data.pdop, 0.01)
     msg.add_4_byte_double(data.geoidal_separation, 0.01)
-    if 0 < data.n_reference_stations < constants.N2K_UINT8_NA:
+    if (
+        data.n_reference_stations is not None
+        and 0 < data.n_reference_stations < constants.N2K_UINT8_NA
+    ):
         msg.add_byte_uint(
             1,
         )  # Note that we have values for only one reference station, so pass only one values.
@@ -2193,7 +2236,7 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
     latitude = msg.get_8_byte_double(1e-16, index)
     longitude = msg.get_8_byte_double(1e-16, index)
     altitude = msg.get_8_byte_double(1e-6, index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     gnss_type = types.N2kGNSSType(vb & 0x0F)
     gnss_method = types.N2kGNSSMethod((vb >> 4) & 0x0F)
     vb = msg.get_byte_uint(index)  # Integrity 2 bit + reserved 6 bit
@@ -2202,19 +2245,18 @@ def parse_n2k_gnss_data(msg: Message) -> GNSSPositionData:
     pdop = msg.get_2_byte_double(0.01, index)
     geoidal_separation = msg.get_4_byte_double(0.01, index)
     n_reference_stations = msg.get_byte_uint(index)
-    reference_station_type = None
+    reference_station_type = types.N2kGNSSType.GPS
     reference_station_id = None
     age_of_correction = None
-    if 0 < n_reference_stations < constants.N2K_UINT8_NA:
+    if (
+        n_reference_stations is not None
+        and 0 < n_reference_stations < constants.N2K_UINT8_NA
+    ):
         # Note that we return real number of stations, but we only have variables for one.
-        vi = msg.get_2_byte_uint(index)
+        vi = msg.get_2_byte_uint(index, constants.N2K_UINT16_NA)
         reference_station_type = types.N2kGNSSType(vi & 0x0F)
         reference_station_id = vi >> 4
         age_of_correction = msg.get_2_byte_udouble(0.01, index)
-    else:
-        reference_station_type = types.N2kGNSSType.GPS
-        reference_station_id = constants.N2K_INT16_NA
-        age_of_correction = constants.N2K_DOUBLE_NA
 
     return GNSSPositionData(
         days_since_1970=days_since_1970,
@@ -2246,15 +2288,15 @@ class DateTimeLocalOffset:
     """
 
     #: Days since 1.1.1970 UTC
-    days_since_1970: int
+    days_since_1970: int | None
     # TODO: UTC?
     #: Seconds since midnight, stored at a precision of 0.0001s
-    seconds_since_midnight: float
+    seconds_since_midnight: float | None
     #: Local offset in minutes
-    local_offset: int
+    local_offset: int | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_date_time_local_offset_message(data: DateTimeLocalOffset) -> Message:
@@ -2301,13 +2343,13 @@ class AISClassAPositionReport:
     #: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
     repeat: types.N2kAISRepeat
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
-    user_id: int
+    user_id: int | None
     #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
     #: Positive values indicate north, negative indicate south.
-    latitude: float
+    latitude: float | None
     #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
     #: Negative values indicate west, positive indicate east.
-    longitude: float
+    longitude: float | None
     #: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
     accuracy: bool
     #: Receiver autonomous integrity monitoring (RAIM) flag of the electronic position fixing device.
@@ -2323,20 +2365,20 @@ class AISClassAPositionReport:
     #: 63: positioning system is inoperative
     seconds: int
     #: Course over Ground in radians, precision 0.0001rad
-    cog: float
+    cog: float | None
     #: Speed over Ground in meters per second, precision 0.01m/s
-    sog: float
+    sog: float | None
     #: AIS Transceiver Information, see type
     ais_transceiver_information: types.N2kAISTransceiverInformation
     #: Compass heading
-    heading: float
+    heading: float | None
     #: Rate of Turn
-    rot: float
+    rot: float | None
     #: Navigational status, see type
     nav_status: types.N2kAISNavStatus
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_ais_class_a_position_message(data: AISClassAPositionReport) -> Message:
@@ -2378,13 +2420,13 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
     """
     index = IntRef(0)
 
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     longitude = msg.get_4_byte_double(1e-7, index)
     latitude = msg.get_4_byte_double(1e-7, index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     accuracy = bool(vb & 0x01)
     raim = bool((vb >> 1) & 0x01)
     seconds = (vb >> 2) & 0x3F
@@ -2392,11 +2434,14 @@ def parse_n2k_ais_class_a_position(msg: Message) -> AISClassAPositionReport:
     sog = msg.get_2_byte_udouble(0.01, index)
     msg.get_byte_uint(index)  # Communication State (19 bits)
     msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)  # AIS transceiver information (5 bits)
+    vb = msg.get_byte_uint(
+        index,
+        constants.N2K_UINT8_NA,
+    )  # AIS transceiver information (5 bits)
     ais_transceiver_information = types.N2kAISTransceiverInformation((vb >> 3) & 0x1F)
     heading = msg.get_2_byte_udouble(1e-4, index)
     rot = msg.get_2_byte_double(3.125e-5, index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     nav_status = types.N2kAISNavStatus(vb & 0x0F)
     msg.get_byte_uint(index)  # reserved
     sid = msg.get_byte_uint(index)
@@ -2430,13 +2475,13 @@ class AISClassBPositionReport:
     #: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
     repeat: types.N2kAISRepeat
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
-    user_id: int
+    user_id: int | None
     #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
     #: Positive values indicate north, negative indicate south.
-    latitude: float
+    latitude: float | None
     #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
     #: Negative values indicate west, positive indicate east.
-    longitude: float
+    longitude: float | None
     #: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
     accuracy: bool
     #: Receiver autonomous integrity monitoring (RAIM) flag of the electronic position fixing device.
@@ -2452,13 +2497,13 @@ class AISClassBPositionReport:
     #: 63: positioning system is inoperative
     seconds: int
     #: Course over Ground in radians, precision 0.0001rad
-    cog: float
+    cog: float | None
     #: Speed over Ground in meters per second, precision 0.01m/s
-    sog: float
+    sog: float | None
     #: AIS Transceiver Information, see type
     ais_transceiver_information: types.N2kAISTransceiverInformation
     #: Compass heading
-    heading: float
+    heading: float | None
     #: Class B unit flag, see type
     unit: types.N2kAISUnit
     #: Class B display flag
@@ -2475,7 +2520,7 @@ class AISClassBPositionReport:
     state: bool
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_ais_class_b_position_message(data: AISClassBPositionReport) -> Message:
@@ -2493,7 +2538,9 @@ def create_n2k_ais_class_b_position_message(data: AISClassBPositionReport) -> Me
     msg.add_4_byte_double(data.longitude, 1e-7)
     msg.add_4_byte_double(data.latitude, 1e-7)
     msg.add_byte_uint(
-        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01),
+        (with_fallback(data.seconds, 0x3F) & 0x3F) << 2
+        | (data.raim & 0x01) << 1
+        | (data.accuracy & 0x01),
     )
     msg.add_2_byte_udouble(data.cog, 1e-4)
     msg.add_2_byte_udouble(data.sog, 0.01)
@@ -2524,13 +2571,13 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
     """
     index = IntRef(0)
 
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     longitude = msg.get_4_byte_double(1e-7, index)
     latitude = msg.get_4_byte_double(1e-7, index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     accuracy = bool(vb & 0x01)
     raim = bool((vb >> 1) & 0x01)
     seconds = (vb >> 2) & 0x3F
@@ -2538,18 +2585,21 @@ def parse_n2k_ais_class_b_position(msg: Message) -> AISClassBPositionReport:
     sog = msg.get_2_byte_udouble(0.01, index)
     msg.get_byte_uint(index)  # Communication State (19 bits)
     msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)  # AIS transceiver information (5 bits)
+    vb = msg.get_byte_uint(
+        index,
+        constants.N2K_UINT8_NA,
+    )  # AIS transceiver information (5 bits)
     ais_transceiver_information = types.N2kAISTransceiverInformation((vb >> 3) & 0x1F)
     heading = msg.get_2_byte_udouble(1e-4, index)
     msg.get_byte_uint(index)  # Regional application
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     unit = types.N2kAISUnit((vb >> 2) & 0x01)
     display = bool((vb >> 3) & 0x01)
     dsc = bool((vb >> 4) & 0x01)
     band = bool((vb >> 5) & 0x01)
     msg22 = bool((vb >> 6) & 0x01)
     mode = types.N2kAISMode((vb >> 7) & 0x01)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     state = bool(vb & 0x01)
     sid = msg.get_byte_uint(index)
 
@@ -2587,13 +2637,13 @@ class AISAtoNReportData:
     #: Repeat indicator, Used by the repeater to indicate how many times a message has been repeated.
     repeat: types.N2kAISRepeat
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
-    user_id: int
+    user_id: int | None
     #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
     #: Positive values indicate north, negative indicate south.
-    latitude: float
+    latitude: float | None
     #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
     #: Negative values indicate west, positive indicate east.
-    longitude: float
+    longitude: float | None
     #: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
     accuracy: bool
     #: Receiver autonomous integrity monitoring (RAIM) flag of the electronic position fixing device.
@@ -2609,13 +2659,13 @@ class AISAtoNReportData:
     #: 63: positioning system is inoperative
     seconds: int
     #: Structure Length/Diameter in meters
-    length: float
+    length: float | None
     #: Structure Beam/Diameter in meters
-    beam: float
+    beam: float | None
     #: Position Reference Point from Starboard Structure Edge/Radius
-    position_reference_starboard: float
+    position_reference_starboard: float | None
     #: Position Reference Point from True North facing Structure Edge/Radius
-    position_reference_true_north: float
+    position_reference_true_north: float | None
     #: Aid to Navigation (AtoN) Type, see type
     a_to_n_type: types.N2kAISAtoNType
     #: Off Position Indicator. For floating AtoN only
@@ -2642,7 +2692,7 @@ class AISAtoNReportData:
     #: Type of electronic position fixing device, see type
     gnss_type: types.N2kGNSSType
     #: AtoN Status byte. Reserved for the indication of the AtoN status.
-    a_to_n_status: int
+    a_to_n_status: int | None
     #: AIS Transceiver Information, see type.
     n2k_ais_transceiver_information: types.N2kAISTransceiverInformation
     #: Name of the AtoN Object, according to https://www.itu.int/rec/R-REC-M.1371
@@ -2666,7 +2716,9 @@ def create_n2k_ais_aids_to_navigation_report_message(
     msg.add_4_byte_double(data.longitude, 1e-7)
     msg.add_4_byte_double(data.latitude, 1e-7)
     msg.add_byte_uint(
-        (data.seconds & 0x3F) << 2 | (data.raim & 0x01) << 1 | (data.accuracy & 0x01),
+        (with_fallback(data.seconds, 0x3F) & 0x3F) << 2
+        | (data.raim & 0x01) << 1
+        | (data.accuracy & 0x01),
     )
     msg.add_2_byte_udouble(data.length, 0.1)
     msg.add_2_byte_udouble(data.beam, 0.1)
@@ -2698,13 +2750,13 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
     :return: Object containing the parsed information
     """
     index = IntRef(0)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     longitude = msg.get_4_byte_double(1e-7, index)
     latitude = msg.get_4_byte_double(1e-7, index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     accuracy = bool(vb & 0x01)
     raim = bool((vb >> 1) & 0x01)
     seconds = (vb >> 2) & 0x3F
@@ -2712,15 +2764,17 @@ def parse_n2k_ais_aids_to_navigation_report(msg: Message) -> AISAtoNReportData:
     beam = msg.get_2_byte_udouble(0.1, index)
     position_reference_starboard = msg.get_2_byte_udouble(0.1, index)
     position_reference_true_north = msg.get_2_byte_udouble(0.1, index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     a_to_n_type = types.N2kAISAtoNType(vb & 0x1F)
     off_position_reference_indicator = bool((vb >> 5) & 0x01)
     virtual_a_to_n_flag = bool((vb >> 6) & 0x01)
     assigned_mode_flag = bool((vb >> 7) & 0x01)
-    gnss_type = types.N2kGNSSType((msg.get_byte_uint(index) >> 1) & 0x0F)
+    gnss_type = types.N2kGNSSType(
+        (msg.get_byte_uint(index, constants.N2K_UINT8_NA) >> 1) & 0x0F,
+    )
     a_to_n_status = msg.get_byte_uint(index)
     n2k_ais_transceiver_information = types.N2kAISTransceiverInformation(
-        msg.get_byte_uint(index) & 0x1F,
+        msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x1F,
     )
     a_to_n_name = msg.get_var_str(index)
 
@@ -2758,10 +2812,10 @@ class CrossTrackError:
     #: Navigation has been terminated
     navigation_terminated: bool
     #: CrossTrackError in meters
-    xte: float
+    xte: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_cross_track_error_message(data: CrossTrackError) -> Message:
@@ -2792,7 +2846,7 @@ def parse_n2k_cross_track_error(msg: Message) -> CrossTrackError:
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     xte_mode = types.N2kXTEMode(vb & 0x0F)
     navigation_terminated = bool((vb >> 6) & 0x01)
     xte = msg.get_4_byte_double(0.01, index)
@@ -2811,7 +2865,7 @@ class NavigationInfo:
     """Data for Navigation Info Message (PGN 129284)"""
 
     #: Distance to Destination Waypoint in meters (precision 1cm)
-    distance_to_waypoint: float
+    distance_to_waypoint: float | None
     #: Course/Bearing Reference, see type
     bearing_reference: types.N2kHeadingReference
     #: Perpendicular Crossed
@@ -2821,28 +2875,28 @@ class NavigationInfo:
     #: Calculation Type, see type
     calculation_type: types.N2kDistanceCalculationType
     #: Time part of Estimated Time at Arrival in seconds since midnight
-    eta_time: float
+    eta_time: float | None
     #: Date part of Estimated Time at Arrival in Days since 1.1.1970 UTC
-    eta_date: int
+    eta_date: int | None
     #: Bearing, From Origin to Destination Waypoint
-    bearing_origin_to_destination_waypoint: float
+    bearing_origin_to_destination_waypoint: float | None
     #: Bearing, From current Position to Destination Waypoint
-    bearing_position_to_destination_waypoint: float
+    bearing_position_to_destination_waypoint: float | None
     #: Origin Waypoint Number
-    origin_waypoint_number: int
+    origin_waypoint_number: int | None
     #: Destination Waypoint Number
-    destination_waypoint_number: int
+    destination_waypoint_number: int | None
     #: Destination Waypoint Latitude
     #: Positive values indicate north, negative indicate south.
-    destination_latitude: float
+    destination_latitude: float | None
     #: Destination Waypoint Longitude
     #: Negative values indicate west, positive indicate east.
-    destination_longitude: float
+    destination_longitude: float | None
     #: Waypoint Closing Velocity
-    waypoint_closing_velocity: float
+    waypoint_closing_velocity: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_navigation_info_message(data: NavigationInfo) -> Message:
@@ -2886,7 +2940,7 @@ def parse_n2k_navigation_info(msg: Message) -> NavigationInfo:
     index = IntRef(0)
     sid = msg.get_byte_uint(index)
     distance_to_waypoint = msg.get_4_byte_udouble(0.01, index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     bearing_reference = types.N2kHeadingReference(vb & 0x03)
     perpendicular_crossed = bool((vb >> 2) & 0x01)
     arrival_circle_entered = bool((vb >> 4) & 0x01)
@@ -2917,11 +2971,11 @@ class RouteWaypointInformation:
     """Data for Route Waypoint Information Message (PGN 129285)"""
 
     #: The ID of the first waypoint
-    start: int
+    start: int | None
     #: Database ID
-    database: int
+    database: int | None
     #: Route ID
-    route: int
+    route: int | None
     #: Navigation Direction in Route, see type
     nav_direction: types.N2kNavigationDirection
     #: The name of the current route
@@ -2990,7 +3044,7 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
     waypoints_len = msg.get_2_byte_uint(index)
     database = msg.get_2_byte_uint(index)
     route = msg.get_2_byte_uint(index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     supplementary_data = types.N2kGenericStatusPair((vb >> 3) & 0x03)
     nav_direction = types.N2kNavigationDirection(vb & 0x07)
     route_name = with_fallback(msg.get_var_str(index), "")
@@ -3029,14 +3083,14 @@ class GNSSDOPData:
     #: Actual DOP Mode
     actual_mode: types.N2kGNSSDOPmode
     #: Horizontal Dilution of Precision in meters
-    hdop: float
+    hdop: float | None
     #: Vertical Dilution of Precision in meters
-    vdop: float
+    vdop: float | None
     #: Time Dilution of Precision
-    tdop: float
+    tdop: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_gnss_dop_message(data: GNSSDOPData) -> Message:
@@ -3069,7 +3123,7 @@ def parse_n2k_gnss_dop(msg: Message) -> GNSSDOPData:
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
-    modes = msg.get_byte_uint(index)
+    modes = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
 
     return GNSSDOPData(
         sid=sid,
@@ -3097,7 +3151,7 @@ class GNSSSatellitesInView:
     satellites: list[types.SatelliteInfo]
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_gnss_satellites_in_view_message(data: GNSSSatellitesInView) -> Message:
@@ -3141,11 +3195,13 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
     index = IntRef(0)
 
     sid = msg.get_byte_uint(index)
-    mode = types.N2kRangeResidualMode(msg.get_byte_uint(index) & 0x03)
+    mode = types.N2kRangeResidualMode(
+        msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x03,
+    )
     number_of_satellites = msg.get_byte_uint(index)
     satellites = []
 
-    if number_of_satellites > MAX_SATELLITE_INFO_COUNT:
+    if number_of_satellites is None or number_of_satellites > MAX_SATELLITE_INFO_COUNT:
         # TODO: Log warning
         pass
     else:
@@ -3158,7 +3214,7 @@ def parse_n2k_gnss_satellites_in_view(msg: Message) -> GNSSSatellitesInView:
                     snr=msg.get_2_byte_double(1e-2, index),
                     range_residuals=msg.get_4_byte_double(1e-5, index),
                     usage_status=types.N2kPRNUsageStatus(
-                        msg.get_byte_uint(index) & 0x0F,
+                        msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x0F,
                     ),
                 ),
             )
@@ -3182,9 +3238,9 @@ class AISClassAStaticData:
     #: 0-3; 0 = default; 3 = do not repeat anymore
     repeat: types.N2kAISRepeat
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
-    user_id: int
+    user_id: int | None
     #: Ship identification number by IMO. [1 .. 999999999]; 0: not available = default
-    imo_number: int
+    imo_number: int | None
     #: Call Sign. Max. 7 chars will be used. Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     callsign: str
     #: Name of the vessel
@@ -3206,21 +3262,21 @@ class AISClassAStaticData:
     #: 200-255: reserved, for regional use
     #:
     #: Not applicable to SAR aircraft
-    vessel_type: int
+    vessel_type: int | None
     #: Length/Diameter in meters
-    length: float
+    length: float | None
     #: Beam/Diameter in meters
-    beam: float
+    beam: float | None
     #: Position Reference Point from Starboard
-    pos_ref_stbd: float
+    pos_ref_stbd: float | None
     #: Position Reference Point from the Bow
-    pos_ref_bow: float
+    pos_ref_bow: float | None
     #: Date part of Estimated Time at Arrival in Days since 1.1.1970 UTC
-    eta_date: int
+    eta_date: int | None
     #: Time part of Estimated Time at Arrival in seconds since midnight
-    eta_time: float
+    eta_time: float | None
     #: Maximum present static draught
-    draught: float
+    draught: float | None
     #: Destination. Maximum of 20 6bit ASCII Characters.
     #:
     #: Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
@@ -3239,7 +3295,7 @@ class AISClassAStaticData:
     ais_info: types.N2kAISTransceiverInformation
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_ais_class_a_static_data_message(data: AISClassAStaticData) -> Message:
@@ -3285,7 +3341,7 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
     :return: Object containing the parsed information
     """
     index = IntRef(0)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
@@ -3301,11 +3357,13 @@ def parse_n2k_ais_class_a_static_data(msg: Message) -> AISClassAStaticData:
     eta_time = msg.get_4_byte_udouble(1e-4, index)
     draught = msg.get_2_byte_double(0.01, index)
     destination = msg.get_str(20, index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     ais_version = types.N2kAISVersion(vb & 0x03)
     gnss_type = types.N2kGNSSType((vb >> 2) & 0x0F)
     dte = types.N2kAISDTE((vb >> 6) & 0x1F)
-    ais_info = types.N2kAISTransceiverInformation(msg.get_byte_uint(index) & 0x1F)
+    ais_info = types.N2kAISTransceiverInformation(
+        msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x1F,
+    )
     sid = msg.get_byte_uint(index)
 
     return AISClassAStaticData(
@@ -3344,7 +3402,7 @@ class AISClassBStaticDataPartA:
     #: 0-3; 0 = default; 3 = do not repeat anymore
     repeat: types.N2kAISRepeat
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
-    user_id: int
+    user_id: int | None
     #: Name of the vessel
     #:
     #: Maximum 20 characters.
@@ -3357,7 +3415,7 @@ class AISClassBStaticDataPartA:
     ais_info: types.N2kAISTransceiverInformation
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_ais_class_b_static_data_part_a_message(
@@ -3389,12 +3447,12 @@ def parse_n2k_ais_class_b_static_data_part_a(msg: Message) -> AISClassBStaticDat
     :return: Object containing the parsed information
     """
     index = IntRef(0)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
     name = msg.get_str(20, index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     ais_info = types.N2kAISTransceiverInformation(vb & 0x1F)
     sid = msg.get_byte_uint(index)
 
@@ -3420,7 +3478,7 @@ class AISClassBStaticDataPartB:
     #: 0-3; 0 = default; 3 = do not repeat anymore
     repeat: types.N2kAISRepeat
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
-    user_id: int
+    user_id: int | None
     #: Vessel Type.
     #:
     #: 0: not available or no ship = default
@@ -3432,7 +3490,7 @@ class AISClassBStaticDataPartB:
     #: 200-255: reserved, for regional use
     #:
     #: Not applicable to SAR aircraft
-    vessel_type: int
+    vessel_type: int | None
     #: Unique identification of the Unit by a number as defined by the manufacturer.
     #:
     #: Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
@@ -3440,20 +3498,20 @@ class AISClassBStaticDataPartB:
     #: Call Sign. Max. 7 chars will be used. Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
     callsign: str
     #: Length/Diameter in meters
-    length: float
+    length: float | None
     #: Beam/Diameter in meters
-    beam: float
+    beam: float | None
     #: Position Reference Point from Starboard
-    pos_ref_stbd: float
+    pos_ref_stbd: float | None
     #: Position Reference Point from the Bow
-    pos_ref_bow: float
+    pos_ref_bow: float | None
     #: MMSI of the mothership
-    mothership_id: int
+    mothership_id: int | None
     #: AIS Transceiver Information, see type
     ais_info: types.N2kAISTransceiverInformation
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_ais_class_b_static_data_part_b_message(
@@ -3493,7 +3551,7 @@ def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDat
     :return: Object containing the parsed information
     """
     index = IntRef(0)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     message_id = types.N2kAISMessageID(vb & 0x3F)
     repeat = types.N2kAISRepeat((vb >> 6) & 0x03)
     user_id = msg.get_4_byte_uint(index)
@@ -3506,7 +3564,7 @@ def parse_n2k_ais_class_b_static_data_part_b(msg: Message) -> AISClassBStaticDat
     pos_ref_bow = msg.get_2_byte_udouble(0.1, index)
     mothership_id = msg.get_4_byte_uint(index)
     msg.get_byte_uint(index)  # 2-reserved, 6-spare
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     ais_info = types.N2kAISTransceiverInformation(vb & 0x1F)
     sid = msg.get_byte_uint(index)
 
@@ -3533,11 +3591,11 @@ class WaypointList:
     """Data for Waypoint List message (PGN 130074)"""
 
     #: The ID of the first waypoint
-    start: int
+    start: int | None
     #: Number of valid Waypoints in the list
-    num_waypoints: int
+    num_waypoints: int | None
     #: Database ID
-    database: int
+    database: int | None
     #: List of waypoints to be sent with the route.
     #: Each consisting of an ID, Name, Latitude and Longitude.
     waypoints: list[types.Waypoint]
@@ -3627,9 +3685,9 @@ class WindSpeed:
     """Data for Wind Speed message (PGN 130306)"""
 
     #: Wind Speed in meters per second
-    wind_speed: float
+    wind_speed: float | None
     #: Wind Angle in radians
-    wind_angle: float
+    wind_angle: float | None
     #: Wind Reference. Can be e.g. Theoretical Wind using True North or Magnetic North,
     #: Apparent Wind as measured, ...
     #:
@@ -3637,7 +3695,7 @@ class WindSpeed:
     wind_reference: types.N2kWindReference
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_wind_speed_message(data: WindSpeed) -> Message:
@@ -3671,7 +3729,9 @@ def parse_n2k_wind_speed(msg: Message) -> WindSpeed:
         sid=msg.get_byte_uint(index),
         wind_speed=msg.get_2_byte_udouble(0.01, index),
         wind_angle=msg.get_2_byte_udouble(0.0001, index),
-        wind_reference=types.N2kWindReference(msg.get_byte_uint(index) & 0x07),
+        wind_reference=types.N2kWindReference(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA) & 0x07,
+        ),
     )
 
 
@@ -3681,14 +3741,14 @@ class OutsideEnvironmentalParameters:
     """Data for Outside Environmental Parameters message (PGN 130310) - DEPRECATED"""
 
     #: Water temperature in Kelvin, precision 0.01K
-    water_temperature: float
+    water_temperature: float | None
     #: Outside ambient air temperature in Kelvin, precision 0.01K
-    outside_ambient_air_temperature: float
+    outside_ambient_air_temperature: float | None
     #: Atmospheric pressure in Pascals, precision 100Pa
-    atmospheric_pressure: float
+    atmospheric_pressure: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_outside_environmental_parameters_message(
@@ -3743,16 +3803,16 @@ class EnvironmentalParameters:
     #: See :py:class:`n2k.types.N2kTempSource`
     temp_source: types.N2kTempSource
     #: Temperature in Kelvin, precision 0.01K
-    temperature: float
+    temperature: float | None
     #: See :py:class:`n2k.types.N2kHumiditySource`
     humidity_source: types.N2kHumiditySource
     #: Humidity in percent, precision 0.004%
-    humidity: float
+    humidity: float | None
     #: Atmospheric pressure in Pascals, precision 100Pa
-    atmospheric_pressure: float
+    atmospheric_pressure: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_environmental_parameters_message(
@@ -3790,7 +3850,7 @@ def parse_n2k_environmental_parameters(
     """
     index = IntRef(0)
     sid = msg.get_byte_uint(index)
-    vb = msg.get_byte_uint(index)
+    vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     humidity_source = types.N2kHumiditySource((vb >> 6) & 0x03)
     temp_source = types.N2kTempSource(vb & 0x3F)
     return EnvironmentalParameters(
@@ -3809,18 +3869,18 @@ class Temperature:
     """Data for Temperature message (PGN 130312) - DEPRECATED"""
 
     #: This should be unique at least on one device. May be best to have it unique over all devices sending this PGN.
-    temp_instance: int
+    temp_instance: int | None
     #: Source of measurement. See :py:class:`n2k.types.N2kTempSource`
     temp_source: types.N2kTempSource
     #: Temperature in Kelvin, precision 0.01K
-    actual_temperature: float
+    actual_temperature: float | None
     #: Temperature set point in Kelvin, precision 0.01K
     #:
     #: This is meaningful for temperatures, which can be controlled like cabin, freezer, refrigeration temperature.
-    set_temperature: float
+    set_temperature: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_temperature_message(
@@ -3873,16 +3933,16 @@ class Humidity:
     """Data for Humidity message (PGN 130313)"""
 
     #: This should be unique at least on one device. May be best to have it unique over all devices sending this PGN.
-    humidity_instance: int
+    humidity_instance: int | None
     #: Source of measurement. See :py:class:`n2k.types.N2kHumiditySource`
     humidity_source: types.N2kHumiditySource
     #: Humidity in percent, precision 0.004%
-    actual_humidity: float
+    actual_humidity: float | None
     #: Set value of Humidity in percent, precision 0.004%
-    set_humidity: float
+    set_humidity: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_humidity_message(
@@ -3921,7 +3981,9 @@ def parse_n2k_humidity(
     return Humidity(
         sid=msg.get_byte_uint(index),
         humidity_instance=msg.get_byte_uint(index),
-        humidity_source=types.N2kHumiditySource(msg.get_byte_uint(index)),
+        humidity_source=types.N2kHumiditySource(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA),
+        ),
         actual_humidity=msg.get_2_byte_udouble(0.004, index),
         set_humidity=msg.get_2_byte_udouble(0.004, index),
     )
@@ -3933,14 +3995,14 @@ class ActualPressure:
     """Data for Actual Pressure message (PGN 130314)"""
 
     #: This should be unique at least on one device. May be best to have it unique over all devices sending this PGN.
-    pressure_instance: int
+    pressure_instance: int | None
     #: Source of measurement. See :py:class:`n2k.types.N2kPressureSource`
     pressure_source: types.N2kPressureSource
     #: Actual pressure in Pascals, precision 0.1Pa
-    actual_pressure: float
+    actual_pressure: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_actual_pressure_message(
@@ -3978,7 +4040,9 @@ def parse_n2k_actual_pressure(
     return ActualPressure(
         sid=msg.get_byte_uint(index),
         pressure_instance=msg.get_byte_uint(index),
-        pressure_source=types.N2kPressureSource(msg.get_byte_uint(index)),
+        pressure_source=types.N2kPressureSource(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA),
+        ),
         actual_pressure=msg.get_4_byte_double(0.1, index),
     )
 
@@ -3989,14 +4053,14 @@ class SetPressure:
     """Data for Set Pressure message (PGN 130315)"""
 
     #: This should be unique at least on one device. May be best to have it unique over all devices sending this PGN.
-    pressure_instance: int
+    pressure_instance: int | None
     #: Source of measurement. See :py:class:`n2k.types.N2kPressureSource`
     pressure_source: types.N2kPressureSource
     #: Set pressure in Pascals, precision 0.1Pa
-    set_pressure: float
+    set_pressure: float | None
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
     #: for different messages to indicate that they are measured at same time.
-    sid: int = 0xFF
+    sid: int | None = None
 
 
 def create_n2k_set_pressure_message(
@@ -4036,7 +4100,9 @@ def parse_n2k_set_pressure(
     return SetPressure(
         sid=msg.get_byte_uint(index),
         pressure_instance=msg.get_byte_uint(index),
-        pressure_source=types.N2kPressureSource(msg.get_byte_uint(index)),
+        pressure_source=types.N2kPressureSource(
+            msg.get_byte_uint(index, constants.N2K_UINT8_NA),
+        ),
         set_pressure=msg.get_4_byte_double(0.1, index),
     )
 

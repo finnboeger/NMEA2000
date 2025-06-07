@@ -6,14 +6,14 @@ import n2k.nmea2000_std_types
 
 @dataclass(frozen=True, kw_only=True)
 class ProductInformation:
-    n2k_version: int  # unsigned short
-    product_code: int  # unsigned short
+    n2k_version: int | None  # unsigned short
+    product_code: int | None  # unsigned short
     n2k_model_id: str
     n2k_sw_code: str
     n2k_model_version: str
     n2k_model_serial_code: str
-    certification_level: int  # unsigned char
-    load_equivalency: int  # unsigned char
+    certification_level: int | None  # unsigned char
+    load_equivalency: int | None  # unsigned char
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -120,7 +120,6 @@ class N2kTempSource(IntEnum):
 class N2kHumiditySource(IntEnum):
     InsideHumidity = 0
     OutsideHumidity = 1
-    Undef = 0xFF
 
 
 class N2kPressureSource(IntEnum):
@@ -530,17 +529,17 @@ N2kSpeedType = n2k.nmea2000_std_types.N2kDD488
 
 @dataclass(frozen=True, kw_only=True)
 class Waypoint:
-    id: int
+    id: int | None
     name: str
-    latitude: float
-    longitude: float
+    latitude: float | None
+    longitude: float | None
 
 
 @dataclass(frozen=True, kw_only=True)
 class SatelliteInfo:
-    prn: int
-    elevation: float
-    azimuth: float
-    snr: float
-    range_residuals: float
+    prn: int | None
+    elevation: float | None
+    azimuth: float | None
+    snr: float | None
+    range_residuals: float | None
     usage_status: N2kPRNUsageStatus

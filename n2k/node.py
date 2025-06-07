@@ -632,7 +632,7 @@ class Node(can.Listener):
             return
 
         index = IntRef(0)
-        caller_name = msg.get_uint_64(index)
+        caller_name = msg.get_uint_64(index, constants.N2K_UINT64_NA)
 
         if self.device_information.name < caller_name:
             # We can keep our information, so reclaim it.
@@ -668,7 +668,7 @@ class Node(can.Listener):
             return
         index = IntRef(0)
         commanded_name = msg.get_uint_64(index)
-        new_address = msg.get_byte_uint(index)
+        new_address = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
         if new_address > constants.N2K_MAX_CAN_BUS_ADDRESS:
             return
         if (
