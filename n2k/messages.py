@@ -48,7 +48,7 @@ def create_n2k_system_time_message(
     msg.add_byte_uint(data.sid)
     msg.add_byte_uint((data.time_source & 0x0F) | 0xF0)
     msg.add_2_byte_uint(data.system_date)
-    msg.add_4_byte_double(data.system_time, 1e-4)
+    msg.add_4_byte_udouble(data.system_time, 1e-4)
     return msg
 
 
