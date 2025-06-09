@@ -148,8 +148,10 @@ class MOBNotification:
     #: Time of day of MOB position (UTC) in seconds
     position_time: float
     #: Latitude in degrees
+    #: Positive values indicate north, negative indicate south.
     latitude: float
     #: Longitude in degrees
+    #: Negative values indicate west, positive indicate east.
     longitude: float
     #: True or Magnetic
     cog_reference: types.N2kHeadingReference
@@ -2001,8 +2003,10 @@ class LatLonRapid:
     """Data for Lat/Lon Rapid Message (PGN 129025)"""
 
     #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
+    #: Positive values indicate north, negative indicate south.
     latitude: float
     #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
+    #: Negative values indicate west, positive indicate east.
     longitude: float
 
 
@@ -2099,7 +2103,7 @@ class GNSSPositionData:
     #: Seconds since midnight, stored at a precision of 0.0001s
     seconds_since_midnight: float
     #: Latitude in degrees, precision approx 11 pico metre  (a fifth of the diameter of a helium atom, 1e-16 deg).
-    #: Negative values indicate south, positive indicate north.
+    #: Positive values indicate north, negative indicate south.
     latitude: float
     #: Longitude in degrees, precision approx 11 pico metre at the equator (1e-16 deg)
     #: Negative values indicate west, positive indicate east.
@@ -2299,8 +2303,10 @@ class AISClassAPositionReport:
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
     user_id: int
     #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
+    #: Positive values indicate north, negative indicate south.
     latitude: float
     #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
+    #: Negative values indicate west, positive indicate east.
     longitude: float
     #: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
     accuracy: bool
@@ -2426,8 +2432,10 @@ class AISClassBPositionReport:
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
     user_id: int
     #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
+    #: Positive values indicate north, negative indicate south.
     latitude: float
     #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
+    #: Negative values indicate west, positive indicate east.
     longitude: float
     #: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
     accuracy: bool
@@ -2581,8 +2589,10 @@ class AISAtoNReportData:
     #: MMSI Number (Maritime Mobile Service Identity, 9 digits)
     user_id: int
     #: Latitude in degrees, precision approx 1.1cm (1e-7 deg)
+    #: Positive values indicate north, negative indicate south.
     latitude: float
     #: Longitude in degrees, precision approx 1.1cm at the equator (1e-7 deg)
+    #: Negative values indicate west, positive indicate east.
     longitude: float
     #: Position accuracy, 0 = low (> 10m), 1 = high (≤ 10m)
     accuracy: bool
@@ -2823,8 +2833,10 @@ class NavigationInfo:
     #: Destination Waypoint Number
     destination_waypoint_number: int
     #: Destination Waypoint Latitude
+    #: Positive values indicate north, negative indicate south.
     destination_latitude: float
     #: Destination Waypoint Longitude
+    #: Negative values indicate west, positive indicate east.
     destination_longitude: float
     #: Waypoint Closing Velocity
     waypoint_closing_velocity: float
