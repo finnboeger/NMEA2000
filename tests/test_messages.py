@@ -43,7 +43,7 @@ def test_empty_ais_safety_related_broadcast_message() -> None:
         repeat=types.N2kAISRepeat.Initial,
         source_id=None,
         ais_transceiver_information=types.N2kAISTransceiverInformation.Channel_A_VDL_reception,
-        safety_related_text="",
+        safety_related_text=None,
     )
     msg = messages.create_n2k_ais_related_broadcast_msg_message(ais_safety)
     assert messages.parse_n2k_ais_related_broadcast_msg(msg) == ais_safety
@@ -1120,7 +1120,7 @@ def test_empty_ais_aids_to_navigation_report_message() -> None:
         gnss_type=types.N2kGNSSType.GPS,
         a_to_n_status=None,
         n2k_ais_transceiver_information=types.N2kAISTransceiverInformation.Reserved,
-        a_to_n_name="",
+        a_to_n_name=None,
     )
     msg = messages.create_n2k_ais_aids_to_navigation_report_message(
         aids_to_navigation_report,
@@ -1246,12 +1246,12 @@ def test_empty_route_waypoint_information_message() -> None:
         database=None,
         route=None,
         nav_direction=types.N2kNavigationDirection.unknown,
-        route_name="",
+        route_name=None,
         supplementary_data=types.N2kGenericStatusPair.Unavailable,
         waypoints=[
             types.Waypoint(
                 id=None,
-                name="",
+                name=None,
                 latitude=None,
                 longitude=None,
             ),
@@ -1379,8 +1379,8 @@ def test_empty_ais_class_a_static_data_message() -> None:
         repeat=types.N2kAISRepeat.Initial,
         user_id=None,
         imo_number=None,
-        callsign="",
-        name="",
+        callsign=None,
+        name=None,
         vessel_type=None,
         length=None,
         beam=None,
@@ -1389,7 +1389,7 @@ def test_empty_ais_class_a_static_data_message() -> None:
         eta_date=None,
         eta_time=None,
         draught=None,
-        destination="",
+        destination=None,
         ais_version=types.N2kAISVersion.ITU_R_M_1371_3,
         gnss_type=types.N2kGNSSType.Galileo,
         dte=types.N2kAISDTE.NotReady,
@@ -1425,7 +1425,7 @@ def test_empty_ais_class_b_static_data_part_a_message() -> None:
         message_id=types.N2kAISMessageID.Standard_Class_B_position_report,
         repeat=types.N2kAISRepeat.Final,
         user_id=None,
-        name="",
+        name=None,
         ais_info=types.N2kAISTransceiverInformation.Channel_A_VDL_transmission,
         sid=None,
     )
@@ -1469,9 +1469,9 @@ def test_empty_ais_class_b_static_data_part_b_message() -> None:
         message_id=types.N2kAISMessageID.Extended_Class_B_position_report,
         repeat=types.N2kAISRepeat.Initial,
         user_id=None,
-        callsign="",
+        callsign=None,
         vessel_type=None,
-        vendor="",
+        vendor=None,
         length=None,
         beam=None,
         pos_ref_stbd=None,
@@ -1534,7 +1534,7 @@ def test_empty_waypoint_list_message() -> None:
         waypoints=[
             types.Waypoint(
                 id=None,
-                name="",
+                name=None,
                 latitude=None,
                 longitude=None,
             ),
@@ -1739,10 +1739,10 @@ def test_empty_product_information_message() -> None:
     product_information = types.ProductInformation(
         n2k_version=None,
         product_code=None,
-        n2k_model_id="",
-        n2k_sw_code="",
-        n2k_model_version="",
-        n2k_model_serial_code="",
+        n2k_model_id=None,
+        n2k_sw_code=None,
+        n2k_model_version=None,
+        n2k_model_serial_code=None,
         certification_level=None,
         load_equivalency=None,
     )

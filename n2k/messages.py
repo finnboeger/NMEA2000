@@ -106,7 +106,7 @@ def create_n2k_ais_related_broadcast_msg_message(
         0xC0000000 | (with_fallback(data.source_id, 0x3FFFFFFF) & 0x3FFFFFFF),
     )
     msg.add_byte_uint(0xE0 | (0x1F & data.ais_transceiver_information))
-    msg.add_var_str(data.safety_related_text or "")
+    msg.add_var_str(data.safety_related_text)
     return msg
 
 
@@ -2733,11 +2733,10 @@ def create_n2k_ais_aids_to_navigation_report_message(
     msg.add_byte_uint(0xE0 | (data.gnss_type & 0x0F) << 1)
     msg.add_byte_uint(data.a_to_n_status)
     msg.add_byte_uint(0xE0 | (data.n2k_ais_transceiver_information & 0x1F))
-    a_to_n_name = with_fallback(data.a_to_n_name, "")
     name_max_length = 34
-    if len(a_to_n_name) > name_max_length:
+    if data.a_to_n_name is not None and len(data.a_to_n_name) > name_max_length:
         raise ValueError
-    msg.add_var_str(a_to_n_name)
+    msg.add_var_str(data.a_to_n_name)
 
     return msg
 
@@ -2979,7 +2978,7 @@ class RouteWaypointInformation:
     #: Navigation Direction in Route, see type
     nav_direction: types.N2kNavigationDirection
     #: The name of the current route
-    route_name: str
+    route_name: str | None
     #: Supplementary Route/WP data available
     supplementary_data: types.N2kGenericStatusPair
     #: List of waypoints to be sent with the route.
@@ -3001,13 +3000,18 @@ def create_n2k_route_waypoint_information_message(
     msg.priority = 6
 
     available_data_len = (
-        msg.max_data_len - 10 - len(data.route_name) - 2
+        msg.max_data_len
+        - 10
+        - (0 if data.route_name is None else len(data.route_name))
+        - 2
     )  # Length of space not taken up by list metadata
     base_waypoint_len = (
         2 + 4 + 4 + 2
     )  # ID, Latitude, Longitude, 2 bytes per varchar string
     for i, waypoint in enumerate(data.waypoints):
-        available_data_len -= base_waypoint_len + len(waypoint.name)
+        available_data_len -= base_waypoint_len + (
+            0 if waypoint.name is None else len(waypoint.name)
+        )
         if available_data_len < 0:
             error = f"Buffer size exceeded, only the first {i:d} waypoints fit in the data buffer"
             raise ValueError(error)
@@ -3047,20 +3051,20 @@ def parse_n2k_route_waypoint_information(msg: Message) -> RouteWaypointInformati
     vb = msg.get_byte_uint(index, constants.N2K_UINT8_NA)
     supplementary_data = types.N2kGenericStatusPair((vb >> 3) & 0x03)
     nav_direction = types.N2kNavigationDirection(vb & 0x07)
-    route_name = with_fallback(msg.get_var_str(index), "")
+    route_name = msg.get_var_str(index)
     msg.get_byte_uint(index)  # Reserved
     waypoints = []
     while index.value < msg.data_len:
         waypoints.append(
             types.Waypoint(
                 id=msg.get_2_byte_uint(index),
-                name=with_fallback(msg.get_var_str(index), ""),
+                name=msg.get_var_str(index),
                 latitude=msg.get_4_byte_double(1e-7, index),
                 longitude=msg.get_4_byte_double(1e-7, index),
             ),
         )
     if len(waypoints) != waypoints_len:
-        raise AssertionError
+        raise AssertionError(waypoints, waypoints_len)
 
     return RouteWaypointInformation(
         start=start,
@@ -3242,7 +3246,7 @@ class AISClassAStaticData:
     #: Ship identification number by IMO. [1 .. 999999999]; 0: not available = default
     imo_number: int | None
     #: Call Sign. Max. 7 chars will be used. Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    callsign: str
+    callsign: str | None
     #: Name of the vessel
     #:
     #: Maximum 20 * 6bit ASCII characters.
@@ -3250,7 +3254,7 @@ class AISClassAStaticData:
     #: For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.
     #:
     #: Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    name: str
+    name: str | None
     #: Vessel Type.
     #:
     #: 0: not available or no ship = default
@@ -3280,7 +3284,7 @@ class AISClassAStaticData:
     #: Destination. Maximum of 20 6bit ASCII Characters.
     #:
     #: Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    destination: str
+    destination: str | None
     #: AIS Version, see type
     ais_version: types.N2kAISVersion
     #: Type of GNSS, see type
@@ -3410,7 +3414,7 @@ class AISClassBStaticDataPartA:
     #: For SAR aircraft it should be set to "SAR AIRCRAFT NNNNNNN" where NNNNNNN" equals the aircraft registration number.
     #:
     #: Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    name: str
+    name: str | None
     #: AIS Transceiver Information, see type
     ais_info: types.N2kAISTransceiverInformation
     #: Sequence ID. If your device provides e.g. boat speed and heading at same time, you can set the same SID
@@ -3494,9 +3498,9 @@ class AISClassBStaticDataPartB:
     #: Unique identification of the Unit by a number as defined by the manufacturer.
     #:
     #: Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    vendor: str
+    vendor: str | None
     #: Call Sign. Max. 7 chars will be used. Input string will be converted to contain only SixBit ASCII character set (see. ITU-R M.1371-1)
-    callsign: str
+    callsign: str | None
     #: Length/Diameter in meters
     length: float | None
     #: Beam/Diameter in meters
@@ -3663,7 +3667,7 @@ def parse_n2k_waypoint_list(msg: Message) -> WaypointList:
         waypoints.append(
             types.Waypoint(
                 id=msg.get_2_byte_uint(index),
-                name=with_fallback(msg.get_var_str(index), ""),
+                name=msg.get_var_str(index),
                 latitude=msg.get_4_byte_double(1e-7, index),
                 longitude=msg.get_4_byte_double(1e-7, index),
             ),

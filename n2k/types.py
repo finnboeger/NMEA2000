@@ -8,10 +8,10 @@ import n2k.nmea2000_std_types
 class ProductInformation:
     n2k_version: int | None  # unsigned short
     product_code: int | None  # unsigned short
-    n2k_model_id: str
-    n2k_sw_code: str
-    n2k_model_version: str
-    n2k_model_serial_code: str
+    n2k_model_id: str | None
+    n2k_sw_code: str | None
+    n2k_model_version: str | None
+    n2k_model_serial_code: str | None
     certification_level: int | None  # unsigned char
     load_equivalency: int | None  # unsigned char
 
@@ -530,7 +530,7 @@ N2kSpeedType = n2k.nmea2000_std_types.N2kDD488
 @dataclass(frozen=True, kw_only=True)
 class Waypoint:
     id: int | None
-    name: str
+    name: str | None
     latitude: float | None
     longitude: float | None
 

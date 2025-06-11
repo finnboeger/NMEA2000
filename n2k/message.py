@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 from n2k import constants
 from n2k.n2k import PGN
-from n2k.utils import IntRef, clamp_int, millis
+from n2k.utils import IntRef, clamp_int, millis, with_fallback
 
 if TYPE_CHECKING:
     from n2k.stream import Stream
@@ -372,7 +372,8 @@ class Message:
         self.data.extend(struct.pack("<Q", v))
         self.data_len += 8
 
-    def add_str(self, v: str, length: int) -> None:
+    def add_str(self, v: str | None, length: int) -> None:
+        v = with_fallback(v, "")
         encoded = v.encode("utf-8")[:length]
         for b in encoded:
             self.add_byte_uint(b)
@@ -380,14 +381,16 @@ class Message:
         for _b in range(length - len(encoded)):
             self.add_byte_uint(constants.STR_NULL_CHAR)
 
-    def add_var_str(self, v: str) -> None:
+    def add_var_str(self, v: str | None) -> None:
+        v = with_fallback(v, "")
         self.add_byte_uint(len(v) + 2)
         self.add_byte_uint(1)
         self.add_str(v, len(v))
 
     # make sure characters fall into range defined in table 14: 32-95 in ASCII
     # https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1371-1-200108-S!!PDF-E.pdf (Page 42)
-    def add_ais_str(self, v: str, length: int) -> None:
+    def add_ais_str(self, v: str | None, length: int) -> None:
+        v = with_fallback(v, "")
         encoded = v.upper().encode("ascii")[:length]
         ascii_min = 32
         ascii_max = 95
@@ -654,12 +657,12 @@ class Message:
             return default
         return v
 
-    def get_str(self, length: int, index: IntRef, nul_char: bytes = b"@") -> str:
+    def get_str(self, length: int, index: IntRef, nul_char: bytes = b"@") -> str | None:
         # TODO: original function fills the end of the buffer (that the string is copied to) with zeros
         #  or at least with 2 zeros, depending on version
         ret = bytearray()
         if index.value + length > self.data_len:
-            return ret.decode("utf-8")
+            return None
         i = -1
         for i in range(length):
             b = self.get_byte_uint(index)
@@ -672,7 +675,7 @@ class Message:
             ret.append(b)
         # ensure that the index gets advanced to correct amount, even if we find the null byte early
         index.value += length - (i + 1)
-        return ret.decode("utf-8")
+        return ret.decode("utf-8") if len(ret) > 0 else None
 
     def get_var_str(self, index: IntRef) -> str | None:
         v = self.get_byte_uint(index)
@@ -680,6 +683,9 @@ class Message:
             return None  # invalid length
         str_type = self.get_byte_uint(index)
         if str_type != 0x01:
+            return None
+        # checking for an empty string after getting str_type, to ensure the index is advanced correctly
+        if length == 0:
             return None
         return self.get_str(length, index, b"\xff")
 
