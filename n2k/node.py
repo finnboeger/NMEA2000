@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import struct
+import threading
 import time
 import traceback
 from binascii import hexlify
@@ -151,6 +152,7 @@ class Node(can.Listener):
     ### End Internal Device ###
 
     bus: can.BusABC
+    sending_lock: threading.Lock
     device_list: DeviceList
     can_msg_buffer: N2kCANMessageBuffer
 
@@ -162,6 +164,7 @@ class Node(can.Listener):
     ) -> None:
         super().__init__()
         self.bus = bus
+        self.sending_lock = threading.Lock()
         self.device_list = DeviceList(self)
         self.message_handlers = set()
         self.message_handlers.add(self.device_list)
@@ -923,73 +926,76 @@ class Node(can.Listener):
 
     # Send message to the bus
     def send_msg(self, msg: Message) -> bool:
-        result = False
+        # acquire lock to ensure we send all message frames grouped together,
+        # even if the Node is shared between multiple threads which attempt to send messages
+        with self.sending_lock:
+            result = False
 
-        n2k.log.debug("Sending Message: " + str(msg))
+            n2k.log.debug("Sending Message: " + str(msg))
 
-        msg.check_destination()
-        msg.source = self.n2k_source
+            msg.check_destination()
+            msg.source = self.n2k_source
 
-        if (
-            msg.source > constants.N2K_MAX_CAN_BUS_ADDRESS
-            and msg.pgn != PGN.IsoAddressClaim
-        ):
-            # CAN bus address range is 0-251. Allow ISO Address claim messages nevertheless. TODO: why?
-            return False
+            if (
+                msg.source > constants.N2K_MAX_CAN_BUS_ADDRESS
+                and msg.pgn != PGN.IsoAddressClaim
+            ):
+                # CAN bus address range is 0-251. Allow ISO Address claim messages nevertheless. TODO: why?
+                return False
 
-        can_id = n2k_id_to_can(
-            MsgHeader(
-                priority=msg.priority,
-                pgn=msg.pgn,
-                source=msg.source,
-                destination=msg.destination,
-            ),
-        )
+            can_id = n2k_id_to_can(
+                MsgHeader(
+                    priority=msg.priority,
+                    pgn=msg.pgn,
+                    source=msg.source,
+                    destination=msg.destination,
+                ),
+            )
 
-        if can_id is None or msg.pgn == 0:
-            return False
+            if can_id is None or msg.pgn == 0:
+                return False
 
-        if self._is_address_claim_started() and msg.pgn != PGN.IsoAddressClaim:
-            return False
+            if self._is_address_claim_started() and msg.pgn != PGN.IsoAddressClaim:
+                return False
 
-        if (
-            msg.data_len <= constants.MAX_CAN_FRAME_DATA_LEN
-            and not self._is_fast_packet(msg)
-        ):
-            # Can be sent as a single packet
-            return self._send_frame(can_id, msg.data_len, msg.data)
+            if (
+                msg.data_len <= constants.MAX_CAN_FRAME_DATA_LEN
+                and not self._is_fast_packet(msg)
+            ):
+                # Can be sent as a single packet
+                return self._send_frame(can_id, msg.data_len, msg.data)
 
-        # Has to be sent as fast packet in multiple frames
-        # if msg.tp_message:  # TODO: iso multi packet support
-        #     result = self.start_send_tp_message(msg)
-        # else:
-        first_frame_max_data_len = 6
-        frames: int = (
-            int((msg.data_len - 6 - 1) // 7) + 1 + 1
-            if msg.data_len > first_frame_max_data_len
-            else 1
-        )
-        order = (
-            self._get_sequence_counter(msg.pgn) << 5
-        )  # TODO: what is this good for?? gives us 3 bit for the front
-        result = True
-        cur = 0
-        for i in range(frames):
-            buf = bytearray([i | order])
-            if i == 0:
-                buf.extend(struct.pack("<B", msg.data_len))
-                buf.extend(msg.data[cur : cur + 6])
-                cur += 6
-            else:
-                buf.extend(msg.data[cur : cur + 7])
-                cur += 7
-                while len(buf) < constants.MAX_CAN_FRAME_DATA_LEN:
-                    buf.append(0xFF)
-            result = self._send_frame(can_id, constants.MAX_CAN_FRAME_DATA_LEN, buf)
-            if result is False:
-                return result
+            # Has to be sent as fast packet in multiple frames
+            # if msg.tp_message:  # TODO: iso multi packet support
+            #     result = self.start_send_tp_message(msg)
+            # else:
+            first_frame_max_data_len = 6
+            frames: int = (
+                int((msg.data_len - 6 - 1) // 7) + 1 + 1
+                if msg.data_len > first_frame_max_data_len
+                else 1
+            )
+            order = (
+                self._get_sequence_counter(msg.pgn) << 5
+            )  # TODO: what is this good for?? gives us 3 bit for the front
+            result = True
+            cur = 0
+            for i in range(frames):
+                buf = bytearray([i | order])
+                if i == 0:
+                    buf.extend(struct.pack("<B", msg.data_len))
+                    buf.extend(msg.data[cur : cur + 6])
+                    cur += 6
+                else:
+                    buf.extend(msg.data[cur : cur + 7])
+                    cur += 7
+                    while len(buf) < constants.MAX_CAN_FRAME_DATA_LEN:
+                        buf.append(0xFF)
+                result = self._send_frame(can_id, constants.MAX_CAN_FRAME_DATA_LEN, buf)
+                if result is False:
+                    return result
 
-        return result
+            return result
 
     def attach_msg_handler(self, msg_handler: MessageHandler) -> None:
         self.message_handlers.add(msg_handler)
